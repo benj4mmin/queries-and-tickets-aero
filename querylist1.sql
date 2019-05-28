@@ -11539,3 +11539,50 @@ ________________________________________________________________________________
  christy
 user 5134593913@as.voip.fuse.net
 pw 9FtC7A
+184291redS
+
+										
+_________________________________________________________________________________________________________
+
+												WEEK OF 5/28
+												GOALS AND EXPECTATIONS
+#BSY goals 
+
+fix times in jira
+
+#PGOC update allotment manager
+-- need to make changes outlined by james and josh to fulfill Erin's request to be able to
+more easily update and import the excel sheets with mass allotments in them
+
+#sftp migration
+-- need to start some of the converting work this week - due by EOW next week
+
+#asset management 
+-- follow up where possible. no wade today so likely no meeting between him and john this week
+-- make sure laptops are viable options as replacements for us pros vs cons list
+
+#pgboston
+-- new site almost mirroring div days. 
+-- im supposed to log 60h to this myself i believe
+-- am i creating using magento? where to start
+
+#sequence
+-- deploy sequence change for old nav ticket - should be easy and small
+
+#cory
+-- cory will be leaving in 2 weeks.
+-- find out whatever we can for him and try to have another lunch and learn.
+-- try to log in confluence in lunch and learn section
+
+#
+
+
+										
+_________________________________________________________________________________________________________
+
+                                    NEW MSI LAPTOPS
+_________________________________________________________________________________________________________
+
+PROS                                        CONS
+much bigger screen                          not usb-c chargeable
+                                            much larger and bulkier to carry
