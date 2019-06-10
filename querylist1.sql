@@ -6399,6 +6399,12 @@ and m.manifestkey is null
 -- intl order dig deeper in staging process
 print empty blank label then go back and reprint after staging
 
+-- notes from wade 
+how did you do what you need to
+communication biz to IT
+think through whole bigger picture
+not just code code code
+
 
 _________________________________________________________________________________________________________
 /*							ATP-14110
@@ -8088,6 +8094,59 @@ price
 03537755 - flush manifold
 2 port add on
 
+#estore
+5/31
+make sure to set PO roles allowed in payment setup
+
+find why tracy is seeing wrong price for pump part 03536427
+shows 1272.58 but they were quoted 848.39
+
+is actually jeff not tracy, thats why
+
+jeffs cust id 1390351
+where are my notes on fixing tracis issue?
+
+
+
+begin tran
+ update ce
+set role_id = (select role_id from mason.dbo.CustomerEdit where customer_id = 1017476)
+--select *
+from mason.dbo.CustomerEdit ce(nolock)
+where fulfillment_id = 521
+and customer_id = 1390351
+select * from mason.dbo.CustomerEdit ce(nolock)
+where fulfillment_id = 521
+and customer_id = 1390351
+rollback
+
+
+select (select role_id from mason.dbo.CustomerEdit where customer_id = 1017476), *
+from mason.dbo.CustomerEdit ce(nolock)
+where fulfillment_id = 521
+and customer_id = 1390351
+
+CANNOT UPDATE VIEWS
+
+correct version here
+vvvvvvvvvvvv
+update ce
+set role_id = 1603
+from enterprise.dbo.Customer_Fulfillment ce
+where fulfillment_id = 521
+and customer_id = 1390351
+
+begin tran
+ update ce
+set role_id = (select role_id from enterprise.dbo.Customer_Fulfillment where customer_id = 1017476)
+--select *
+from enterprise.dbo.Customer_Fulfillment ce(nolock)
+where fulfillment_id = 521
+and customer_id = 1390351
+select * from enterprise.dbo.Customer_Fulfillment ce(nolock)
+where fulfillment_id = 521
+and customer_id = 1390351
+rollback
 
 
 -- notes for filipe from mason planning about dottys tickets
@@ -9978,10 +10037,44 @@ submitimport
 checkallotment
 createnewallotment
 add item
-c is hard coded
+c is hard coded string line 913
 
 can add ID to grid on exportallotment_click
 allotmentexport.writecsvtoresponse
+allotmentexport line 1090 allotman
+
+--Grid_HtmlRowPrepared
+ Dim customer As String = e.GetValue("MemberID").ToString()
+            Dim customerType As String = e.GetValue("MemberType").ToString()
+
+
+
+
+5/28 - 5/29 
+spot to add column and change name is prot sub Grid_HtmlRowPrepared 953
+
+change cust to custId
+add dim for custType or member type
+does this connect directly to a table? do i update table with another column?
+
+#allotment
+5/31
+committed changes
+of adding a dim of custtype to grid_htmlrowprepared also changed string name of customer to memberID
+and updating the excel file to have another row as customer type
+added grid.getdatarow item 7 and removed hard coded type of c
+
+testing locally looks like i didnt truly find where the export will add or display the ID in excel
+
+PWR1012	Role	458	10	5/31/2019	5/31/2020	1	A
+
+#allotment
+6/3
+still need to change allotmentGrid for AllotmentExport
+add the memberID to show whos name is whos ID
+also may need to change to show the name as the team name or role name
+
+
 
 										
 _________________________________________________________________________________________________________
@@ -11060,6 +11153,9 @@ WMS0015456669
 0015279591
 WH21BBUS01
 
+-- test order WMS0015519906
+-- test 2 WMS0015536695 WMS0015536855
+
 0015279593
 
 
@@ -11070,6 +11166,37 @@ server afsinfor01 holds RF gun tasks for all wc-rf users
 
 Mark.Schaible@infor.com
 
+#2d barcode
+5/30
+on 5/28 marv sent new ini for Aero_Custom
+this goes in the RF folder on each respective infor server path
+C:\RF\handheld for prod
+
+C:\rf\desktop for UAT
+
+ALWAYS - make a backup of the current aero_custom.ini file and rename backup or old with a year maybe
+ - copy new ini into folder
+ - test
+
+not sure the patches are the same and marv stated it wasnt in a version that can
+test the 2d barcode. so i myself have to test in prod to see where the data goes
+then be able to make test scenarios and train tomorrow
+
+test 1
+order with WH21BBUS01 only 
+
+test 2
+order with WH21BBUS01 but several picks
+
+test 3 order with WH21BBUS01 and another sku (does this sku take serial or not? can try both ways)
+
+scan case id normally
+when prompted hit f2 then scan 2d barcode
+1scan should get every EACH in that CASE or etc
+as long as outbound capture data is turned on for that sku
+
+follow up with marv sent email on 5/31
+doesnt seem its going to barcode 2d menu properly when using f2
 
 
 
@@ -11081,15 +11208,64 @@ ________________________________________________________________________________
 
 PDP - pg pro
 data entry
+	-- tables and etc connected
+	Data forms
+		- DE install error log
+			install error log search
+			install tracking
+			install tracking search
+			points management
+			point management search
+			priorityshipping
+			prio shipping search
+			site survey update
+			tsr training
+			tsr training search
+			tsr update
 
+		- web promo
+			search
+			edit
+		- fulfill acc cust lookup
+		- allot man
+			search
+		- web suspended orders?	
+	time to move to ESTORE - est 12 hrs
+	 - adding in their allotment system with tables views, admin scripts, etc.
+	 - fixing CSS to fit catalogs appropriately to also blend with other screens
+	 - any extra logic implementations from order rules or admin script
+	 - layouts/styles/JS
 
 ESTORE
 catalogs - new catalogs - web mods tabs panels need to be updated to parent when merging
 			- may need to update
+	
+
+select *
+from ENTERPRISE.dbo.Web_fulfillment_settings (nolock)
+where fulfillment_id in (73,521,724)
+299 rows
 
 
 CPG
+-- webkit build
 
+	time to move to estore?
+		- turning off old catalog system replace with new catalog system - 3-5 h
+		- changing tables, procs, boomi jobs to point to estore 521 as parent possibly with 73 and
+			724 as children?
+		- changing reports to use 521 as parent?
+		boomi
+		- prodorder notifications - 2h
+		- quickbooks to work entirely through estore - 2h
+		- TCD dropship setup - 5h
+		- kroger 810 inv and 850 PO - 2h
+		- intouch order export - SELECT * FROM vw_CPG_Intouch_Unconfirmed_Orders - still in use 2h
+		- prod autowave retry -
+
+
+merge or add records to tables for CPG/PDP
+for catalogs, Allotments
 
 
 
@@ -11414,27 +11590,6 @@ adding role allotments in UI
 
 
 
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-erin.jones@aerofulfillment.COM
-Michigan99
-
-
-
-
 _________________________________________________________________________________________________________
 
 												WEEK OF 5/20
@@ -11524,7 +11679,7 @@ fit in
 _________________________________________________________________________________________________________
 
 _________________________________________________________________________________________________________
- fairfield daily planning
+ fairfield daily planning 5/25
 
  7 orders usb-c 
 
@@ -11586,3 +11741,542 @@ ________________________________________________________________________________
 PROS                                        CONS
 much bigger screen                          not usb-c chargeable
                                             much larger and bulkier to carry
+
+
+
+
+_________________________________________________________________________________________________________
+/*									ATP-15185
+									user ids for receptionist like gloria is set up
+									aero
+									5/24/19 - 5/28/19
+at first filipe showed how to create password and etc to have their login
+for URL for receptionist software / service gloria uses
+
+however he didnt test logging in as them and i did
+it wasnt working due to no license
+not able to configure as instructions show so called support and they set up
+a license for carrie and christy
+25/month so need to trim that later
+
+
+_________________________________________________________________________________________________________
+
+_________________________________________________________________________________________________________
+ fairfield daily planning 5/25
+
+dims continual issue
+
+files sent to kelly
+
+vayyar orders not getting through system
+b2b orders missing notifications
+large issue
+no atp for orders, open ticket for notifications
+
+VAR packing slip
+
+VAR fedex login
+
+
+
+_________________________________________________________________________________________________________
+/*									ATP-15214
+									barcode issues at ship station in shipping.
+									aero
+									5/29/19 - 5//19
+
+looks like print head issue. can see scratches or worn down parts. this 
+specific print head has no replacement from IT
+
+probably need to overnight one
+
+
+_________________________________________________________________________________________________________
+/*									ATP-13979
+									PG BOSTON build site like divdays is built
+									PG
+									5/29/19 - 5//19
+
+building a new site for pg BOSTON
+needs to be modeled like a microsite like divdays?
+
+notes from SOW
+similar to pg divdays and annual gift programs
+web portal for emps to manage their reg info
+as part of annual pg employee celebration
+contain admin tools to enable aero cx team to manage changes of reg info
+ability to import and export data
+
+interact with IVR interactive voice response system where emps call and
+provide their info. this info auto feeds to microsite
+also include call center and mail processing services
+
+3 domains related to scope
+tech domain describes specific bis software apps
+product domain describes specific types of prodcts
+services domain describes specific and associated business processes
+
+TD
+    main page
+        sign in with emp ID and home zip
+        after sign in see current enrollment status
+            cant request more than once
+        
+        allows user to validate following
+            home addy
+            max ticket count
+            request more tickets
+            require transportation y/n
+            retiree y/n
+            verify emp email addy
+            select date. retirees only have one date
+            confirm button that saves data
+                •	Popup message: “By clicking submit,
+                 you confirm all information on this page is accurate and ready to submit your ticket registration.”
+                email conf
+    admin
+        top right corner link to main site
+            users with admin allowed to acces management page
+            manage page allows users to do following
+                import users
+                edit pg emp info
+                export pg emp info
+                set up two event dates and identify which retirees can attend
+                ability to add delete update emp info
+                ability to create a new admin user
+                manage site assets
+                    upload annual logo
+                    change site colors
+    reports
+        scheduled report to be emailed to aero admins
+            calls out any emp record that has been changed in which fields
+                change in addy
+                request for more tickets
+                emp requires transportation status change
+                retiree status change
+                comment on emp record (who sees this?)
+                emp email addy
+        setup email box for emp to contact call center
+    
+    IVR
+        set up feed from IVR to database
+
+    vanity URL Gillettepicnic.com lev for microsite? pg will redirect url to aeros
+    all emails sent to the employess should be sent (xxx)
+ as users are familiar with it pg will provide aeros all information in order to send emails from that account
+
+ use UAT environment to test
+
+ provide 1800 number for customers to call with issues and request changes
+    take calls to handle employee request to change/update registration data
+    take calls to assist with employee questions on registration process
+    hours 8am 5pm est m-f
+    daily monitoring of email box
+
+aero fulfill mailing services
+    process initial mailing to retirees with info required for online redemption of the picnic tickets
+        mailing qty of 3k letters single page 2sided
+        aero to source #10 window envelope and inkjet return address
+        letters to be mailed USPS first class mail presort
+
+    will mail all the tickets to emp addy each will include
+        # of tickets requested
+        same number of food vouchers as tickets req
+        one picture voucher
+        aero to source #10 non window envelope and inkjet return address
+        price assumes 561 active emp @ 5 tickets per and 687 retirees @ 2 tickets per
+
+    Client exp
+        manage site updates of txt and imgs
+        site reporting import exp
+        conduct weekly status calls
+
+
+assumptions
+    tech
+        site will be turned off one week prior to first event
+        site will be utilized year after year with txt and img updates from pg
+        domain provided by pg
+    products
+        n/a
+    services
+        800 number acquired and utilized for future events
+        approximately 3k retirees and 1300 emp
+
+
+communication
+    team members will report implementation progress and weekly status updates.
+        important problems/actions taken
+        progress summary
+        accomplishments
+        planned accomplishments
+        issues log
+
+approach for dealing with issues
+    identify
+    document
+    assign responsibility for resolving
+    monitor and control progress
+    report progress on issue
+    communicate issue resolution
+
+
+
+takeaways
+-- doesnt look to be much time alloted to ensure the IVR will communicate with db
+
+actual exploration of divdays
+takeaways
+very small site
+where are the connection strings to db?
+    --
+
+
+layout of divdays file structure
+
+divdays folder
+    divdays.sln
+    App_Data
+        publish profiles
+            divdays.pubxml
+    images
+        logo_big.jpg
+        logo_sm.gif
+        Thumbs.db
+    includes
+        DivDays.inc
+        DivDaysaddnew.inc 
+        DivDaysaddnewcall.inc
+        util.inc
+        utiladdnew.inc
+        utiladdnewcall.inc
+    AddNew.asp
+    AddNewcall.asp
+    default.asp
+    error.asp
+    global.asp
+    style.CSS
+    Web.config
+    website.publishproj
+
+
+How do i create the webapp through visual studio to ensure it connects to our DB?
+looks pretty straighforward
+
+create new web app
+-- make necessary matches to divdays
+-- make callouts from SOW
+    -- admin page for cx to control data
+    -- initial registration
+    -- signed in - verify and see status and how to use their info
+    -- integrate IVR with db that has data flow
+    -- call center
+    -- emails and mailing
+
+
+keepass has credentials for divdays
+and other databases to see how its modeled to use for BOSTON
+
+use strongly-typed views like ViewPage<ViewModel>
+not ViewData["key"] or else you wont see misspelling errors
+
+use an IoC container? to help manage all external dependencies
+
+#pgboston 6/4
+is the login page different page entirely from landing page?
+
+admin has dropdown to select user name or id to update or add info for
+
+DevExpress JS files and styles
+
+@Html.DevExpress().GetStyleSheets(
+        new StyleSheet { ExtensionSuite = ExtensionSuite.NavigationAndLayout },
+        new StyleSheet { ExtensionSuite = ExtensionSuite.Editors }
+    )
+    @Html.DevExpress().GetScripts( 
+        new Script { ExtensionSuite = ExtensionSuite.NavigationAndLayout },
+        new Script { ExtensionSuite = ExtensionSuite.Editors }
+    )
+
+
+third-party JS files?
+
+<resources>
+        <add type="ThirdParty" />
+    </resources>
+
+do i need above for adding devexpress button or other items?
+
+
+probably use controller for admin use
+customer use
+and possibly mail? probably need to use for service to auto mail out tickets?
+
+need to create login page.
+
+divdays uses .asp or language = vbscript to define global variables and constants
+for addnew page?
+
+divdaysaddnewcall.inc shows line 58 of sub ShowInformation(conn,rs,query,ID)
+handles the display of existing divdays records
+
+^ should try to replicate above to most closely match divdays if this can be accomplished easily
+using c#
+
+
+creating PGBOSTON database.. 
+use right click of existing similar db
+select script to then drop to and create to
+immediately delete or comment out the drop database line **** DANGEROUS *****
+make sure drives and names match up
+for UAT vs prod the MSSQL\LOGS path is prod
+UAT is MSSQL\LOG
+switch up drive names
+data drive is F: and logs drive is J: for UAT
+data drive is E: and logs drive is L: for prod
+
+
+
+
+_________________________________________________________________________________________________________
+/*									ATP-15282
+									Orders stuck in released status from 5/6 and 5/25
+									ZEVO
+									6/5/19 - 6/5/19
+
+check boomi for documents for order numbers
+
+1 needed address updated because it showed 5 st,,,,,
+
+others failed from disk space issue
+need to reset fulfill tran trans_status to 0
+
+_________________________________________________________________________________________________________
+/*									ATP-15283
+									Please ship without manifest for vendor orders listed
+									aero
+									6/5/19 - 6/5/19
+
+FI0000233304
+FI0000232902
+FI0000232277
+FI0000233322
+FI0000233851
+FI0000233320
+
+use cory's manifest script
+
+_________________________________________________________________________________________________________
+/*									ATP-15289
+									scott kelly needs RF access like egner
+									aero
+									6/5/19 - 6/5/19
+
+gave him the 4 or 5 permissions that egner has
+
+
+_________________________________________________________________________________________________________
+/*									ATP-15284
+									imagen brands (discover)looking for alternatives to sftp
+									for sending ship confirms of custom check presenters
+									DFS
+									6/6/19 - 6/6/19
+
+call with kelly and discover FS
+see what their process specifically is
+see pain points then try to solve
+-- likely dont have an automated process in place and want us to do manual effort instead
+
+69.85.253.122
+
+_________________________________________________________________________________________________________
+/*									ATP-15286
+									Following orders have an exceed error but i dont see anything
+									exceeding RA48797 RA48784
+									RAS
+									6/6/19 - 6/6/19
+
+not sure where to start but its stuck in allocated
+event notes from joan at infor 
+
+Event Log Notes: Ok...it should be corrected...please try to complete the pick.
+
+Basically you check the data with the following queries. If there is a useractivity record still not at status 9, update that record to status 9 and then try to complete the pick. The user activity records are used for voice picking or assignment picking and are not needed when you are picking from other methods.
+
+select * from pickdetail where orderkey='0015478124' and status<'5' order by orderlinenumber
+
+select * from taskdetail where orderkey='0015478124' and status<'9' order by orderlinenumber
+
+select * from USERACTIVITY where taskdetailkey in (select taskdetailkey from taskdetail where orderkey='0015478124') and status<'9'
+
+statusmsg of user canceled/rejected
+
+jennetta explained that as long as there arent records in useractivity should be fine to try and pick
+
+
+_________________________________________________________________________________________________________
+/*									ATP-15287
+									AOS order stuck in packed status
+									AOS
+									6/6/19 - 6/6/19
+
+stuck in packed
+look at order lifecycle notification tables
+indicates no manifest and was force shipped
+use script to create fake manifest and then it should ship
+#manifest
+
+select *
+from lebanon.dbo.orders o
+where primary_reference = 'AS0000363832'
+
+select *
+from LEBANON.dbo.manifest (nolock)
+where order_primary_reference = 'AS0000363832'
+
+select *
+from lebanon.dbo.Orders_ErrorCodes (nolock)
+where errorCode = 34
+
+select *
+from lebanon.dbo.Orders_IncidentLog (nolock)
+where orders_id = 39786532
+
+
+____________________________________________________________________________________________
+
+		aeroorders@aerofulfillment.com
+		reset password through AD to admin pw of address
+		cpgorders --- same thing
+____________________________________________________________________________________________		
+
+
+
+_________________________________________________________________________________________________________
+/*									ATP-15292
+									Vayyar 2 orders shipped but didnt send 856
+									VAY
+									6/6/19 - 6/6/19
+
+
+select *
+from lebanon.dbo.wms_orders wo
+right join lebanon.dbo.orders o (nolock) on o.primary_reference = wo.EXTERNORDERKEY
+where EXTERNORDERKEY in
+(
+'VA0000079815',
+'VA0000079816'
+)
+
+
+trying to find logic in ltlmanager to why itd go to 5 status
+and why dont we use 5 in 856 or other queries for GETs
+
+from ltlmanager code
+Private Sub Form1_Load(ByVal sender As System.Object, ByVal e As System.EventArgs) Handles MyBase.Load
+        'Version 2.0 (2/02/2008) uses LTLShipmentPallet table vs LTLShipmentDetail
+        'Version 3.0 (3/14/2008) added new LTLShipment fields: storerkey, custom1, custom2.
+        'Version 4.0 (5/15/2009) added support for both Mason and WC via entry in config file (Whse shows in Form title bar).
+        '                        Re-coded all Crystal calls to be able to switch default login stored in the reports.
+        '                        Added path to reports in the new config file. Default storer set to "PGOC" for Mason, "FW" for WC.
+        '                        Consignee combo disabled for Mason. (consigneekey is only populated for F&W ASN customers)
+        'Version 4.1 (7/20/2009) ShipFrom combo populated with AERO FULFILLMENT SERVICES, and then whatever Storer has been entered.
+        'Version 4.2 (5/02/2012) Version to use with Infor 10.1 WMS upgrade and SCQA1 or SCPRD database. (compile with VS2008 due to Crystal) 
+        'Version 4.3 (8/29/2012) Updated mainly for Mason, although applies to all. Fixed a few holes, added some checks for row.count>0.
+        '
+        '
+        'DataSet List:
+        'DataSet1 - LTLShipment, main form header data
+        'DataSet2 - LTLShipmentPallet, datagrid item data
+        'DataSet3 - LTLShipment, ShipmentKey combo data
+        'DataSet4 - LTLShipment, used to retrieve last inserted key
+        'DataSet5 - LTLShipment, pr_LTLAvailablePallets for Treeview
+        'DataSet6 - LTLShipment, mbol for current pronumber
+        'DataSet9 - Fulfillment, list of long names for Ship From.
+
+        'EDIStatus
+        ' 0 = Not Required
+        ' 1 = Not Sent
+        ' 5 = Ready
+        ' 9 = Sent
+
+
+then lines 2135 in Form1.vb in ltlmanager states
+
+sent the ship confirm but estimating on new ticket the solution
+
+
+
+_________________________________________________________________________________________________________
+/*									ATP-15299
+									yesterday conf file dumped and unable to apply them correct
+									file and resubmit.
+									ATK
+									6/6/19 - 6//19
+
+not sure what the issue is. nothing on ticket tells us and looking at files isnt obvious
+per karen on client response there are gaps in some fields that are supposed to represent the date
+the only thing that appears wrong is the ship address 1 having no address but a building or company name.
+
+per client in email 
+"There are blanks in the date field, this will cause a data decimal error due to an alpha character in a numeric field."
+
+update -- looks like all the orders missing date were somehow effected by phone number?
+every order without date created by the shipconfirm proc dont have valid phone numbers just
+all show 0.
+
+
+
+_________________________________________________________________________________________________________
+/*									ATP-15309
+									ship confirm running too slow
+									SK2 / 3pl
+									6/6/19 - 6//19
+
+running 20 minutes for 0 data
+
+looking through procs and boomi jobs to see what could be slowing it down so much. i dont think any
+ of the procs have changed much recently but it has to be related to that or database? boomi jobs i 
+ believe are 100% untouched since 2017 and this is a recent thing maybe
+
+
+_________________________________________________________________________________________________________
+
+_________________________________________________________________________________________________________
+
+						FF daily planning
+ Lsk 11884 - atp-15327
+ also 15226
+
+CMG dropid manual update
+
+-- TK000140260 stuck?
+
+crtl ? comments line?
+
+atp-15287
+5 or less we will fix. rest need to use fix manifest tool
+
+
+
+_________________________________________________________________________________________________________
+/*									ATP-15323
+									ZO0000026172 this is stuck due to no drop id please create manifest
+									Zevo
+									6/10/19 - 6/10/19
+
+https://secure.aerofulfillment.com/eFulfillment/help/Filling_in_Missing_DropIDs.pdf
+
+OPS: PickDetail records are missing the dropID value, which links each caseID to the LTL shipment.
+
+
+_________________________________________________________________________________________________________
+/*									ATP-15321
+									ship order lc%811707 in system	
+									lux
+									6/10/19 - 6/10/19
+had lpn and loc messed up in pickdetail so it needed allocation fixed.
+ used --update to pickdetail for loc = fromloc
+
+ 
