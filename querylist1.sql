@@ -9428,6 +9428,7 @@ consistency with legend in import tool
 once file is uploaded using button the
 submit and export button show back up - unintended for sure
 -template looks good however
+allotmentteammanager link to other page
 
 
 _________________________________________________________________________________________________________
@@ -10074,6 +10075,18 @@ still need to change allotmentGrid for AllotmentExport
 add the memberID to show whos name is whos ID
 also may need to change to show the name as the team name or role name
 
+rebuild after changing a function or private sub
+-- may need to stop local iis efulfill app pool then start it again after rebuild
+
+use breakpoints on the private sub with function in it
+stepover pieces of private sub
+step into function of check or createallotment
+there you can see values given while testing import
+order needed to be fixed of columns imported
+
+have to make sure the id import can handle multiple ids
+can creating a role allotment or using role id then allow use of 
+transferring between ppl with that role
 
 
 										
@@ -11236,6 +11249,15 @@ data entry
 	 - any extra logic implementations from order rules or admin script
 	 - layouts/styles/JS
 
+	admin scripts
+		- allotment management aftersavedata
+		- beforesavecustomer
+		- several same as CPG
+		- dataentry - 6 dif scripts
+		- PDPstartcart
+		- webselectproductload
+		- webselectproductsubmit
+
 ESTORE
 catalogs - new catalogs - web mods tabs panels need to be updated to parent when merging
 			- may need to update
@@ -11262,6 +11284,29 @@ CPG
 		- kroger 810 inv and 850 PO - 2h
 		- intouch order export - SELECT * FROM vw_CPG_Intouch_Unconfirmed_Orders - still in use 2h
 		- prod autowave retry -
+	admin scripts
+		- webkitbuildformload
+		- webkitquickaddload
+		- webkitquickaddsubmit
+		- getkititems
+		- webbatchCOEupdatesubmit
+		- approveordermultiple
+		- aftersubmitinventoryrequest
+		- returnsmultientryload
+		- fillformclick
+		- emailreturns - adddetailsload, adddetailssubmit, afterload, load, submit, _deletereturn
+		- login
+		- approve order
+		- cancel order
+		- kitbuildload, kitbuildsubmit, kitbuildafterload
+		- approveimage, cancel image, approveimageemail, declineimage email
+		- aftersavewebrequest
+		- top5suspendedprders, suspendeditems, suspendeditemscart
+		- assignPO
+		- reorderaddnewafterload, closereorders, reorderaddnewvalidatesubmit, reordereditsubmit,
+			approvereordermultiple, reorderaddnewsubmit
+		- vendorordereditsubmit
+
 
 
 merge or add records to tables for CPG/PDP
@@ -12279,4 +12324,3 @@ ________________________________________________________________________________
 had lpn and loc messed up in pickdetail so it needed allocation fixed.
  used --update to pickdetail for loc = fromloc
 
- 
