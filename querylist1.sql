@@ -9704,6 +9704,29 @@ An alternate less automatic options which would decrease the scope significantly
 
 A package is shipped that requires a return delivery label. The user clicks a toolbar button indicating a label is needed for return. The user would then rescan the shipment/package, generating a return shipment.  This assume that #4 above is true. 
 
+5/16
+Good afternoon and thank you for your patience!
+
+Josh and I had to review the options CLS gave us and then present our solution to Filipe to hear what he thought.
+
+So we will start from there:
+•	CLS has a solution to fully automate a process for us to get an order and set a flag that it needs a return address and then it will generate once the standard label is printed. This method is a fairly good solution and aero also has one of our own.
+•	We could implement a similar logic but leveraging our smart connect system to use a flag or a field value that DSL will pass to us on their orders. Then our system reads that and generates an extra label using a system we created(better value).
+
+The biggest question actually needs to go back to the client at this point in that we don’t know what drives or determines which orders need a return label or not? Where do we currently get this information from the client, and if we don’t how can we ask that they send it in a field on an order level?
+
+We need to understand this because we need to be as automated as possible. We shouldn’t need to ask more from our wavers, pickers or cx team to go and identify these orders manually as this would be considered more work than just an extra pick, which will already be part of this request as 2 labels with different uses is a separate pick.
+
+If the client would like to get on a call with Josh, Filipe and I we can discuss this further.
+
+
+6/12
+somehow got lost in translation that they are using conference orders to determine what gets
+the label or not.
+need to validate with customer that all skus in this catalog will need return labels
+then we should be able to finish qouting and that should give us the 2 options we need to send to
+DSL as solutions
+
 
 										
 _________________________________________________________________________________________________________
@@ -10087,6 +10110,82 @@ order needed to be fixed of columns imported
 have to make sure the id import can handle multiple ids
 can creating a role allotment or using role id then allow use of 
 transferring between ppl with that role
+
+
+6/12
+fix import? to make sure import role type creates customer allotments
+
+fix link
+
+fix error red to appear in a legend
+-- currently in a control container of devexpress
+
+sample of what to recreate
+Protected Sub SaveAllotment_Click(sender As Object, e As EventArgs)
+        allotmentGrid.Visible = True
+        legend.Visible = True
+        Cancel.Visible = False
+        CreateAllotment.Visible = True
+        newAllotmentForm.Visible = False
+        SaveAllotment.Visible = False
+        Transfer.Visible = True
+        ImportAllotment.Visible = True
+        ExportAllotment.Visible = True
+        If newType.Text = "Customer" Then
+            If Not (checkAllotment(SKUdropdown.Value.ToString, newCustomer.Value.ToString, newStartDate.Value.ToString, newEndDate.Value.ToString)) Then
+                CreateNewAllotment(newCustomer.Value.ToString, newType.Value.ToString, newallotted.Value.ToString, SKUdropdown.Value.ToString, newStartDate.Value.ToString, newEndDate.Value.ToString, resetvalue.Value, resetInterval.Value)
+            Else
+                allotmentError.InnerText = "There is an allotment already."
+                allotmentError.Visible = True
+            End If
+        ElseIf newType.Text = "Role" Then
+            If Not (checkAllotment(SKUdropdown.Value.ToString, newMember.Value.ToString, newStartDate.Value.ToString, newEndDate.Value.ToString)) Then
+                CreateNewAllotment(newMember.Value.ToString, newType.Value.ToString, newallotted.Value.ToString, SKUdropdown.Value.ToString, newStartDate.Value.ToString, newEndDate.Value.ToString, resetvalue.Value, resetInterval.Value)
+                CreateNewAllotmentxRole(newMember.Value.ToString, "CR", newallotted.Value.ToString, SKUdropdown.Value.ToString, newStartDate.Value.ToString, newEndDate.Value.ToString, resetvalue.Value, resetInterval.Value)
+            Else
+                allotmentError.InnerText = "There is an allotment already."
+                allotmentError.Visible = True
+            End If
+        Else
+            If Not (checkAllotment(SKUdropdown.Value.ToString, newMember.Value.ToString, newStartDate.Value.ToString, newEndDate.Value.ToString)) Then
+                CreateNewAllotment(newMember.Value.ToString, newType.Value.ToString, newallotted.Value.ToString, SKUdropdown.Value.ToString, newStartDate.Value.ToString, newEndDate.Value.ToString, resetvalue.Value, resetInterval.Value)
+            Else
+                allotmentError.InnerText = "There is an allotment already."
+                allotmentError.Visible = True
+            End If
+        End If
+        allotmentGrid.DataSource = getAllotment(SKUdropdown.Value.ToString)
+        allotmentGrid.DataBind()
+
+    End Sub
+
+protected Sub submitImport_Click(sender As Object, e As EventArgs)
+    Grid.DataSource = Session("ImportGrid")
+    Grid.DataBind()
+    Dim SKU As String
+    Dim rowcount As Integer = Grid.VisibleRowCount
+    Dim count As Integer = 0
+    While count < rowcount
+        SKU = getItem_id(Grid.GetDataRow(count).Item(0).ToString)
+            If Not (checkAllotment(SKU, Grid.GetDataRow(count).Item(2), Grid.GetDataRow(count).Item(4), Grid.GetDataRow(count).Item(5))) Then
+                If Grid.GetDataRow(count).Item(2) = "c" Then
+                    CreateNewAllotment(Grid.GetDataRow(count).Item(1), Grid.GetDataRow(count).Item(2), SKU, Grid.GetDataRow(count).Item(3), Grid.GetDataRow(count).Item(4), Grid.GetDataRow(count).Item(5), Grid.GetDataRow(count).Item(6), Grid.GetDataRow(count).Item(7))
+                ElseIf Grid.GetDataRow(count).Item(2) = "r" Then
+                    CreateNewAllotment(Grid.GetDataRow(count).Item(1), Grid.GetDataRow(count).Item(2), SKU, Grid.GetDataRow(count).Item(3), Grid.GetDataRow(count).Item(4), Grid.GetDataRow(count).Item(5), Grid.GetDataRow(count).Item(6), Grid.GetDataRow(count).Item(7))
+                    CreateNewAllotmentxRole(Grid.GetDataRow(count).Item(1), Grid.GetDataRow(count).Item(2), SKU, Grid.GetDataRow(count).Item(3), Grid.GetDataRow(count).Item(4), Grid.GetDataRow(count).Item(5), Grid.GetDataRow(count).Item(6), Grid.GetDataRow(count).Item(7))
+                Else
+                    CreateNewAllotment(Grid.GetDataRow(count).Item(1), Grid.GetDataRow(count).Item(2), SKU, Grid.GetDataRow(count).Item(3), Grid.GetDataRow(count).Item(4), Grid.GetDataRow(count).Item(5), Grid.GetDataRow(count).Item(6), Grid.GetDataRow(count).Item(7))
+                End If
+            Else
+                allotmentError.InnerText = "There is an allotment already."
+                allotmentError.Visible = True
+            End If
+            count = count + 1	
+    End While
+End Sub
+
+cannot call the same function inside the calling of that function. can however keep using
+the grid.GetDataRow that was inside function parameters outside since it is a diff fn
 
 
 										
@@ -12081,6 +12180,9 @@ switch up drive names
 data drive is F: and logs drive is J: for UAT
 data drive is E: and logs drive is L: for prod
 
+"Views must be dumb (and Controllers skinny and Models fat). If you find yourself 
+writing an “if”, then consider writing an HtmlHelper to hide the conditional statement."
+
 
 
 
@@ -12324,3 +12426,15 @@ ________________________________________________________________________________
 had lpn and loc messed up in pickdetail so it needed allocation fixed.
  used --update to pickdetail for loc = fromloc
 
+
+
+
+---- 
+-- notes from max could be port blocked from 20 or 21? 
+-- 22 ssh
+
+-- 80
+-- 443
+
+-- need to use JS or jquery to use a function where
+-- using on_change()
