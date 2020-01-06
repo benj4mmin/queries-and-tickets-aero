@@ -242,7 +242,7 @@ where report_id = 2964
 
 -- steps for creating new storproc
 create new stored PROC
-in SQL using 
+in SQL using m
 Create Procedure [dbo].[pr_Report_InventoryReturnedOrder_WithArchive]
 after creating a report (at least one to test with)
 go to afsweb204 content wwwroot eReports and find old version to replace
@@ -515,7 +515,8 @@ SELECT ls.*
 	INNER JOIN SCPRD.wmwhse1.Orders wo with (nolock)
 		ON pd.orderkey = wo.orderkey
 where wo.EXTERNORDERKEY in ('VA0000027883','VA0000027884','VA0000028709','VA0000028710') 
-
+-- #vay query
+-- atp-17666
 -- taken from google search
 -- select max usage 
 select *
@@ -672,7 +673,7 @@ SELECT TOP (1000) [report_id]
       ,[rpt_Pwd]
       ,[description]
   FROM [ENTERPRISE].[dbo].[Report]
-  where report id -- like all the ids i have
+  where report_id -- like all the ids i have
 
 insert into report
 select
@@ -6433,9 +6434,9 @@ process reporting > documents -- instead of PR > executions
 
 -- NOTES FOR CLS STAGING FOR INTL ORDERS - PGOC UPDATE
 -- shipper not configged to do staging. designed around requirements from Aero.
--- intl shmt should be processed as single trans. need clear as single expense and expediancy
+-- intl shmt should be processed as single trans. need to clear as single expense and expediancy
 -- 5 sep custom clearance fees instead of 1 big one multi piece shipment
--- box scanned chk to see intl then write to holding table and set aside
+-- box scanned check to see intl then write to holding table and set aside
 -- temp label staged order indiv stored in tmp table
 -- stored proc saying last order from stage
 -- will require outage to make config change to add shipper to stage
@@ -7961,6 +7962,9 @@ HOSP - 1M24 ------ 1M24PGPD0FBT1T3
 LIM res - B123
 rest - 52L3
 
+NSO
+5S3TSERT0FBH4J5
+
 meeting notes:
 
 
@@ -8033,10 +8037,6 @@ CI project for P4 changes
 
 #ESTORE 5/3/19
 use flexfield59 for new field
-
-
-
-
 
 
 
@@ -8147,6 +8147,278 @@ select * from enterprise.dbo.Customer_Fulfillment ce(nolock)
 where fulfillment_id = 521
 and customer_id = 1390351
 rollback
+
+
+
+
+#estore 6/24/19
+add logic for discounts of shipping charge
+make sure item discount works - may need to change where the logic sits in admin scripts
+importing many items takes 1 import per catalog.
+
+only need to focus on NSO for now. will need to go through with abby to truly get items
+into catalogs unless im missing something - just not enough clear descriptions to match
+flexfield12 on invedit has the sku groups
+
+select *
+from mason.dbo.inventoryedit i(noloCK)
+left join mason.dbo.inventoryedit ie (nolock) on ie.shared@fulfillment_id = 521 and ie.item_id = i.item_id
+where i.shared@fulfillment_id = 73
+and i.item_status = 'ACTIVE'
+and i.flexfield12 like '%,375,%'
+
+filter on 
+flexfield1 = subcatalog
+and ff12 = role
+
+PM
+	wallcharts - chart - check
+	training mat - no
+	stickers - check
+	labels - no
+	offers - no
+	tube flags - no
+
+Sales M
+	sellsheets - check
+	trade show - no
+	demo tools - no
+	broch - check
+
+Mech WW
+	dish mach parts - no?
+	dish mach guides - no
+
+Tools
+	tools - field usage?
+	batt - no
+	safet sup - no
+	clothing - no
+
+Parts
+	plumb fit - no
+	tubing - 
+	HW - no
+	dish mach parts - no
+
+Dispenser eq
+	pumps
+	install kits - no
+	tips
+	elec pump
+	proportioner - proprt
+
+Bottles
+	bottles
+	bottle lab
+	bottle sets
+	racks
+Disp
+Titra supp
+	test chem
+	test strips
+
+Dilution cp
+	mating caps
+	throat plugs
+	tips
+
+Dispenser Equipment -
+	 pumps,
+	  installation kits,
+	   tips, 
+	   electronic pump parts, 
+	   proportioner accessories, 
+	   handsoap dispensers and 
+	   air freshener base units
+
+
+--1585 tide 1586 nso 1587 dtr 1588 consum 1561 end user 602 EQ SUPER
+	--1603 tide 1605 nso 1604 dtr 1606 consum 1593 end user 602 EQ SUPER
+
+Sink items
+',3600100,3568029,3568302,3568303,3568324,3568304,3568305,3568428,3568429,'
+
+insert into mason.dbo.inventory_share 
+select 521 as fulfillment_id, i.item_id, ''
+	from mason.dbo.inventoryedit i(noloCK)
+	left join mason.dbo.inventoryedit ie (nolock) on ie.shared@fulfillment_id = 521 and ie.item_id = i.item_id
+	where i.shared@fulfillment_id = 73
+	and i.item_status = 'ACTIVE'
+	and i.flexfield12 like '%,375,%'
+	--and i.flexfield1 not like '%proprt%'
+	--and i.flexfield1 not like '%chart%'
+	--and i.flexfield1 not like '%broch%'
+	--and i.flexfield1 not like '%stick%'
+	--and i.flexfield1 not like '%cap%'
+	--and i.flexfield1 not like '%sell%'
+	--and i.flexfield1 like '%cap%'
+	and ie.item_id is null
+
+new checkbox - car stock
+update qty shipped = qty ordered
+update qty submitted = 0
+update qty open = 0
+line status = shipped
+
+-- #bug list 
+
+-************ major bug
+--test dilution control parts on page 2 or 3 go into catalog then sub cat mating caps 
+and it puts you on same page as the first cat pagination
+
+-- need ids on catalog to be able to import and deal with redundancies while importing
+
+
+
+7/8/19 #estore
+
+fixed bug in UAT admin script. left a 'next' in from copying
+
+-- need to add payment option to select as no charge since the admin script happens after the order
+is placed. so logic for not needing payment option doesnt occur since its built into that 
+order review page. how do we use admin script or code change to add an option for no charge that
+also recognizes the discounted ammount but still needs user to select?
+
+-- hide class searchContainer to hide search bar for estore if still an issue
+
+
+#estore
+7/11
+
+cannot add css to style select option values in dropdown
+
+
+#estore #testuser
+
+tide dry - UAT - by@gmail.com - 123456
+tide dry - prod - 
+
+fst nso - prod - besterten@gmail.com - 123456
+fst nso - uat - besterten@gmail.com - 123456
+
+end user - 
+
+-- in uat they arent using same flexfields so we dont have all filter data in test
+
+#registration code
+
+5S3TSERT0FBH4J5 - nso
+
+
+#estore 7/19
+
+hid discounts on shipping review
+hid sub catalogs filter in catalog using
+
+/* catalog filters
+
+li#_ctl0_MainContent__ctl0__ctl0__ctl0_filterbox_GR0 {
+	display: none;
+}
+
+chris testing team manager with updated ff for estore but on cpg
+
+updated 435 users to estore fst/nso reg code
+
+
+7/21 #estore
+still need to fix expression discount
+
+tickets of importance:
+fix no charge asap
+move cancel order button
+
+
+7/23 #estore
+found case statements to add specific payment type of no charge so it doesnt ask for PO #
+paymentandaddress info code behind line 648 or below in CASE
+
+7/29 #estore
+from james
+using JS to do the prepopulating of account number when choosing no charge
+he put in fix
+but also when hiding and not hiding the DISCOUNTS make sure to change admin script because it expects values
+
+
+
+8/14 #estore
+updating catalogs with a new import for about 80 items and fixing other parts
+also random pieces like below css and also 
+
+div#_ctl0_MainContent__ctl0_tcContentBottom.contentBottom {
+	padding-left: 220px !important;
+}
+
+chris changed line approve to line warning and fixed new orders
+
+old orders need to update line status to active
+NEVER UPDATE ORDER STATUS
+or line status through line item
+
+the trigger is based on lineitem_transaction
+
+update mason.dbo.lineitem
+	set line_status = 'ACTIVE'
+--select * from mason.dbo.lineitem (nolock)
+where order_primary_reference in
+(
+'RE0000002620',
+'RE0000002625')
+and line_status in ('PENDING', 'SUBMITTED')
+
+
+root cause of unable to approve orders
+-- 2 had lines with a cancelled line that had qty backordered
+-- had to update db to set qty backordered to 0 and then approve to 0 ship
+
+/*
+_________________________________________________________________________________________________________
+/*								ATP-15341
+								#estore ability for nso to change discount for items and shipping on checkout
+								cpg
+								6/22/19 - 7//19
+still not getting discount to calculate correctly i believe.
+worked with james on it a bit and it keeps cutting in half because any action on the page causes the 
+script to run
+
+
+_________________________________________________________________________________________________________
+/*								ATP-15627
+								#estore error when using PO to check out
+								cpg
+								7/8/19 - 7//19
+-- need to see why abby is getting error in picture saying
+error conversion from string "" to type decimal is not valid
+
+
+
+_________________________________________________________________________________________________________
+/*								ATP-15626
+								Aero needs to add a "No Charge" option when the customer is discounted 100% for checkout
+								#estore
+								7/8/19 - 7//19
+added using payment method
+only set up for NSO
+
+7/18
+added users admin and superuser
+still need to look at code to see why it wouldnt let nso use it
+\\pdweb01\E$
+use aeroadmin
+and pw
+_________________________________________________________________________________________________________
+/*								ATP-15627
+								SC portal not working shipment request error
+								7/8/19 - 7//19
+
+
+
+_________________________________________________________________________________________________________
+/*								ATP-15627
+								SC portal not working shipment request error
+								7/8/19 - 7//19
+
 
 
 -- notes for filipe from mason planning about dottys tickets
@@ -10010,10 +10282,13 @@ hoping cleaning up E: drive will allow change to test with
 Inventory_Image_Approval table
 \\aeroshare03\Departments\IMAGES-NEW 2016\CPG\
 
+the data forms handle this through 4 different admin scripts for approve and deny
+
 so someone drops image into this folder and then itll be viewed for approval
 
-theres also a boomi job for image approvals
+theres also a boomi job for image approvals - Aero Image Approval
 C:\utils\ImageApproval\ImageApprovalConsole.exe
+
 
 app and boomi move image from aeroshare03 to afsweb204.
 afsweb204 was full so it didnt have room for image
@@ -10188,7 +10463,71 @@ cannot call the same function inside the calling of that function. can however k
 the grid.GetDataRow that was inside function parameters outside since it is a diff fn
 
 
-										
+#allotment
+
+6/24
+fix multi line import before meeting at 330
+
+add if to wrap my sku = then if
+to handle empty or blank row
+if Grid.GetDataRow(count).Item(0).ToString <> "" Then
+end if
+
+change the items and order of get
+also change the createnewallotementxrole to hard code type CR instead of getting imported type
+
+
+james helped fix
+appears as pink as if a role allotment in system as CR and allows transferring as if customer
+works as intended which i tested before going to meeting
+
+#admin scripts
+enterprise.dbo.web_events
+
+
+#allotment man
+8/6
+
+fixed views and tables with james so that log would work correctly
+
+had to add more joins for issue of not being able to see customers from team you control
+also need to fix transferring allotments of customers of team you control
+
+line 659 in ctrl_AllotmentManager.ascx.vb
+add new method
+add data to method to adjust call
+change query?
+
+change highlighted box to not be on log button which misleads when not all log boxes will show
+data. only the allotment id of the one sending some allotment during transfer shows log other is blank
+but still highlighted
+
+add search bar or dropdown possibly to choose what allotment types or etc to show?
+
+
+
+#allotment man
+8/16/2019
+ACTIVE skus only
+fix sku ( as before requested )
+add sku description or search box using desc or just use sku description
+
+add error msg to not allow xfer of more than available
+
+unit of measure added based on sku
+
+add verifcation of allotment xfer successful
+probably use pop up of success
+
+customer to transfer from to be consistent with transfer to
+
+add the team manager / dm to list of customer to xfer to / from
+
+change cancel in xfer to back
+
+
+
+
 _________________________________________________________________________________________________________
 /*									ATP-14673
 										E drive full on AFSWEB204 - FW:Incident
@@ -11238,8 +11577,14 @@ these files in server help go from screen to screen
 CSN:WH1UCC0U838S1726|CSN:WH1UCC0U838S1726
 pipe after delim
 will change to enter /carriage return
+CSN:WH1UCC0U838S1726
+CSN:WH1UCC0U838S1726
+CSN:WH1UCC0U838S1726
+CSN:WH1UCC0U838S1726
+CSN:WH1UCC0U838S1726
+CSN:WH1UCC0U838S1726
 
-
+WH1UCC0U838S1726,WH1UCC0U838S1726,WH1UCC0U838S1726
 
 train users so when scanning they must hit fn after pick and
 then scan 2d barcode i believe
@@ -11277,7 +11622,7 @@ WH21BBUS01
 server afsinfor01 holds RF gun tasks for all wc-rf users
 
 Mark.Schaible@infor.com
-
+a3r03900
 #2d barcode
 5/30
 on 5/28 marv sent new ini for Aero_Custom
@@ -11309,8 +11654,38 @@ as long as outbound capture data is turned on for that sku
 
 follow up with marv sent email on 5/31
 doesnt seem its going to barcode 2d menu properly when using f2
+Fall#9375
+doing more testing with 2 other guns for vayyar, probably sending v rf1 back
+2 orders, 1 for each gun
+1st for gun 2
+WMS0015591066 - set to release - test scan
+caseid 0072431689
+lot 0000266692
+loc 501085050
+
+unallocate then delete after test
+
+2nd for gun 3
+WMS0015591069
+0072431690
+0072431691
+same lot and loc
+
+WMS0015591066 OR WMS0015591069
 
 
+#2d 
+7/10 after call with aaron
+test in notepad
+get raw outputs from infor of one ignoring symbols and ours to compare
+send aaron pic of barcode and try to change settings in app to choose dif types
+
+#2D 7/18
+WMS0015663537 - order
+testing with honeywell RF attached to computer
+error of incorrect barcode config
+only way this system works is whoever scans all VAY cases is with a computer using emulator
+still puts the data into system
 
 _________________________________________________________________________________________________________
 /*									ATP-14972
@@ -11326,7 +11701,7 @@ data entry
 			install error log search
 			install tracking
 			install tracking search
-			points management
+			points management - 12h
 			point management search
 			priorityshipping
 			prio shipping search
@@ -11342,13 +11717,13 @@ data entry
 		- allot man
 			search
 		- web suspended orders?	
-	time to move to ESTORE - est 12 hrs
-	 - adding in their allotment system with tables views, admin scripts, etc.
+	time to move to ESTORE - est 24 hrs
+	 - adding in their allotment system with tables, views, etc.
 	 - fixing CSS to fit catalogs appropriately to also blend with other screens
 	 - any extra logic implementations from order rules or admin script
 	 - layouts/styles/JS
 
-	admin scripts
+	admin scripts - total admin scripts for CPG, PDP and estore - 12h
 		- allotment management aftersavedata
 		- beforesavecustomer
 		- several same as CPG
@@ -11360,7 +11735,7 @@ data entry
 ESTORE
 catalogs - new catalogs - web mods tabs panels need to be updated to parent when merging
 			- may need to update
-	
+	-- ask CPG about PGP first page about type of customer? - or add logic - 3h
 
 select *
 from ENTERPRISE.dbo.Web_fulfillment_settings (nolock)
@@ -11382,8 +11757,9 @@ CPG
 		- TCD dropship setup - 5h
 		- kroger 810 inv and 850 PO - 2h
 		- intouch order export - SELECT * FROM vw_CPG_Intouch_Unconfirmed_Orders - still in use 2h
-		- prod autowave retry -
-	admin scripts
+		- prod autowave retry - ?
+		- reorder tool - 8h
+	admin scripts - covered above
 		- webkitbuildformload
 		- webkitquickaddload
 		- webkitquickaddsubmit
@@ -11406,7 +11782,16 @@ CPG
 			approvereordermultiple, reorderaddnewsubmit
 		- vendorordereditsubmit
 
+		- update sql job - 8h
 
+-- clsinventory - create tcd item, create tcd catalog, 
+ - 1h
+
+-- reports
+	- CPG 12h
+		- lots of reports changing to different fulfillment id - may need to slightly change logic to
+			handle hierarchy issues as CPG is parent
+	- PDP 3h
 
 merge or add records to tables for CPG/PDP
 for catalogs, Allotments
@@ -11709,6 +12094,9 @@ above match must not be labeled as PGOC
 #query jira by company
 type = 'Help Desk'  AND status != "done" AND status != "Waiting for customer" AND status != "Cancel" 
 AND Company ~"P & G PROFESSIONAL ORAL CARE" ORDER BY created ASC
+
+#jira sprint
+assignee = ben.yurchison AND status != Done AND status != Cancel AND Sprint = "ATP Sprint 2019-08-12" ORDER BY priority DESC
 
 login through manager and through erin
 walk through the process 
@@ -12168,6 +12556,8 @@ handles the display of existing divdays records
 ^ should try to replicate above to most closely match divdays if this can be accomplished easily
 using c#
 
+to log in to site use database data 
+login empid and pw zip
 
 creating PGBOSTON database.. 
 use right click of existing similar db
@@ -12183,6 +12573,172 @@ data drive is E: and logs drive is L: for prod
 "Views must be dumb (and Controllers skinny and Models fat). If you find yourself 
 writing an “if”, then consider writing an HtmlHelper to hide the conditional statement."
 
+
+use existing db tables to help create the db connection using data class ADO.NET Entity data model
+
+admin - link to page most be top right corner of page
+	import / export employee data
+	edit emp data - add new delete or update
+	set up 2 event dates and identify which retiree can attend
+	create new admin
+	manage site assets
+		image / logos
+		site theme colors
+
+#pgboston
+6/25
+fix login	
+fix log for users
+
+when creating pages
+create database connection WITH password stored in connection string
+
+create controller using mvc entity framework based on db based model
+include views and also base it on empty layout.
+then in original layout change path to
+<li class="moveAdmin">@Html.ActionLink("Admin", "Index", "UserTicketForms")</li>
+userticketforms is folder index is name of view and admin is display name
+
+now new controller for admin points to userticketforms index but displayed as admin
+
+
+dont need orders
+add who edit who
+full logging
+based on triggers
+
+reach out to ivf trigger based log rdx
+
+the admin gridview
+
+make sure views call models or structures properly to fix html.___ issues
+
+add log as its own view and or partial view
+AdminEnrollmentLog
+
+simple changes - try to get form to always need typing in employee id and zip
+admin always needs to search by those 2 but isnt limited to viewing like employees
+
+
+#pgboston 6/26
+new model and view for log
+log has to take every transaction of change of item and create a record in a table
+(can be similar to pgoc log but in C#)
+
+new view and controller for user/employee id login
+
+ID 
+emp id - static
+full name
+- old name new name
+email
+- old email new email
+phone?
+address 1
+- old address new addy
+address 2
+- old address new addy
+city
+- old city new city
+state
+-- old state new state
+zip
+- old zip new zip -- needs to update userlogin
+country
+- old country new country
+max tickets
+- old new
+tickets 
+- old new
+request tickets
+- old new
+request date
+- old new
+retiree
+- old new
+request transportation
+- old new
+
+update database
+
+refresh
+release rebuild
+
+go to designer check if its there may need to scroll down
+if not right click designer and update from DB
+
+then should be on designer
+uses model browser
+
+if i redirect on login to ticketform index or change the userlogin edit to redirect to ticketform edit?
+need to set after login to set login lockoutenabled and used their one login
+uat.pgboston.COM
+pgboston.com 
+in godaddy cart
+created something in UATweb02 IIS app pool but needs to be reconfigged
+
+need to tie views and controllers together properly still
+make sure to have login in keep you from using nav bar until after logged in. and only admin creds get or see admin tab?
+controller logic for ivf?
+
+#pgboston 6/27
+
+
+#pgboston 7/9
+banner from james
+
+get DNS name?
+
+get adjusted list from client for employee ids
+ - dupes should not have the retiree instead just regular emp
+
+VPN Tunnel - divdays RDI sheet - will need to change IP after move this weekend
+
+test plan - how do they want to test
+
+we will create sql user for them and give them table name to use
+cannot test until we have 800 number
+vpn tunnel same as divdays set up next week.
+DID to point the 800 number to
+
+#pgb 7/18
+test with julie user
+
+need peak 10 to turn on
+add users into DB
+get admin working so VPN tunnel works
+weekend plan for bringing site back up and putting in new handshake info testing and go live 
+
+
+#pgb
+7/21 few users didnt make it into pgb for some fail on the data import
+need to query and get rest in
+
+
+#pgb 
+7/26
+per client
+make it so time of date isnt there or that time is 10 am
+make sure admin needs credentials
+make sure actives get dates of 7th or 15th
+switch sides of certain pics?
+change phones and addresses
+keep admin index form from having buttons so far to right side
+IVR IVR IVR how is this going to work?
+
+LEARNING / UNDERSTANDING BOOTSTRAP!!!!!!!!
+
+
+ insert into [PGBOSTON].[dbo].[Userlogin]([UserId]
+      ,[Password]
+      ,[UserName]
+      ,[Email]
+      ,[EmailConfirmed]
+      ,[LockoutStartDate]
+      ,[LockoutEndDate]
+      ,[LockoutEnabled])
+select UserId, Zip, UserId,'', 1, getdate(), getdate(), 0
+from pgboston.dbo.UserTicketForm
 
 
 
@@ -12290,7 +12846,8 @@ select *
 from lebanon.dbo.Orders_IncidentLog (nolock)
 where orders_id = 39786532
 
-
+PHC
+-239090
 ____________________________________________________________________________________________
 
 		aeroorders@aerofulfillment.com
@@ -12298,7 +12855,11 @@ ________________________________________________________________________________
 		cpgorders --- same thing
 ____________________________________________________________________________________________		
 
+#ult #up
 
+AERO005040
+
+np4
 
 _________________________________________________________________________________________________________
 /*									ATP-15292
@@ -12438,3 +12999,3753 @@ had lpn and loc messed up in pickdetail so it needed allocation fixed.
 
 -- need to use JS or jquery to use a function where
 -- using on_change()
+
+6/18/19
+-- notes from PGBOSTON
+-- need to contact becky to give her a test
+-- james said to use devexpress grid? look in SC and nav code for examples
+-- add the page using notes from email and resources in our code
+-- dont forget to add the pages or start planning logic for the email and phone portions
+
+-- in sc reference _shipmentviewpartial
+
+need to have orders...
+order table
+-- does it handle several requests in one order? should be able to give a response based on the requests
+-- order id, emp id, request date, ticket request, transportation request, reqdate approved,
+ ticket approved, trans approved, 
+
+-- adjust or create or rename employee table to be userticketform?
+-- fix Model to match eployees to orders and not catalogs or customers
+--
+
+systemID
+no SA account
+IVC has its own sql account
+
+
+_________________________________________________________________________________________________________
+/*									ATP-15281
+									Update images in banner for domtar?	
+									DOM
+									6/18/19 - 6/18/19
+1) Update images for Vitality, Bold, Revolution banners on main page.
+2) Update header images on product pages.
+3) Set tabs to read Vitality® - Bold™ - Revolution® instead of Bold-Revolution-Vitality 
+4) Update footer to read: For more information about Xerox® Paper and Specialty Media,
+ visit us at xeroxpaperUSA.com. Contact us: 1-800-458-4640, Prompt #1 or email us at xerox@domtar.com.
+
+ images in ticket? i think i also got an email with something in it
+
+
+ _______________________________________________________________________________________________________
+
+ sc troubleshooting
+
+ get query from james
+ use sc sln and then use order number for query
+ then query to get key
+ then put key and order call into swagger to test the call again with visibility
+
+https://sc-api.aerofulfillment.com/swagger/ui/index#!/
+
+use ENTERPRISE
+SELECT t.token, ft.*, a.*
+FROM [AspNetTokens] t
+INNER JOIN [client_Token] ft
+    ON t.id = ft.token_id
+JOIN ApiClient a on a.id = ft.client_id
+where  a.fulfillment_id = 73
+
+debug 
+
+_________________________________________________________________________________________________________
+
+******************************************** web extensions *******************************************
+_________________________________________________________________________________________________________
+
+
+site spider - spidering to find broken links 
+
+wappalyzer - see what content management and apps a site uses
+
+ie tab - test using diff versions of internet explorer within chrome
+
+usersnap - easy to use annotation and screen shotting
+
+ghostery - like wapp
+
+cssviewer - easy to view css breakdown
+
+lorem ipsum - generates quick and easy text for placeholders
+
+web dev - extra tools
+
+f19n live test - live site testing to see scores of how your site performs
+
+window resizer - resize to specific or preset sizes
+
+color picker - grab specific colors from a site
+
+JSONview - easy to view JSON in browser
+
+_________________________________________________________________________________________________________
+
+_________________________________________________________________________________________________________
+
+If by "won't be executed" you mean "will do nothing when called more than once", you can create a closure:
+
+var something = (function() {
+    var executed = false;
+    return function() {
+        if (!executed) {
+            executed = true;
+            // do something
+        }
+    };
+})();
+
+something(); // "do something" happens
+something(); // nothing happens
+In answer to a comment by @Vladloffe (now deleted): With a global variable, other code could reset the 
+value of the "executed" flag (whatever name you pick for it). With a closure, other code has no way to do that, either accidentally or deliberately.
+
+As other answers here point out, several libraries (such as Underscore and Ramda) have a little utility function (typically named once()[*]) 
+that accepts a function as an argument and returns another function that calls the supplied function exactly once, regardless of how many times 
+the returned function is called. The returned function also caches the value first returned by the supplied function and returns that on subsequent calls.
+
+However, if you aren't using such a third-party library, but still want such a utility function (rather than the nonce solution I offered above), it's
+ easy enough to implement. The nicest version I've seen is this one posted by David Walsh:
+
+function once(fn, context) { 
+    var result;
+    return function() { 
+        if (fn) {
+            result = fn.apply(context || this, arguments);
+            fn = null;
+        }
+        return result;
+    };
+}
+I would be inclined to change fn = null; to fn = context = null;. There's no reason for the closure to maintain a reference to context once fn has been called.
+
+
+______________________________________________________________________________________________________________________
+
+3% raise as of july 1 2019
+47500 * .03 = 1425
+1450 + 47500 = 48925
+48950 * .8 = 39140
+39140 / 26 = 1505 = my new bi weekly pay aka $21 increase bi weekly or 10.5 a week or $2.1 a day more than before
+
+
+select c.salary, e.lastname, e.firstname, e.department
+from MailShop2KSQL.dbo.tblEmployee e (nolock)
+join MailShop2KSQL.dbo.tblJobCostEmployee c (nolock) on c.EmployeeID = e.EmployeeID
+where e.LastName like '%yur%'
+
+
+notes from hamid
+
+in ctrl F use find ... in root dir of repo to search all files for what you need
+use of dev tools and scraping via tools?
+
+
+
+
+___________________________________________________________________________________________________________________________
+
+issue for christy
+distinguished name - OU use this to make sure user in correct group
+can right click to move to correct path
+
+18007824263 scan
+18778412840
+
+
+
+_________________________________________________________________________________________________________
+
+******************************************* Lunch N Learn July ******************************************
+_________________________________________________________________________________________________________
+
+Clean up conf lunch and learn page to feel relevant and easy to go through
+
+1) web dev 
+	- Hamid
+		- tips tricks, extensions, cyber security, and more
+		- quick WP site from scratch
+		- demonstrate changes to magento with tricks he used to debug and fix
+	- James and I
+		- whatever feels relevant to discuss more of for web nav and SC and potential other sites like divdays and pgboston
+2) RF devices
+	- Me 
+		- demo set up hands on with everyone RF - wipe guns for them to help set up
+		- Potato quick walk through
+
+3) Boomi
+ - james
+	- quick base level set up for Hamid
+	- deep dive into complex process to reverse engineer/ debug
+	m
+___________________________________________________________________________________________________________________________
+
+
+
+_________________________________________________________________________________________________________
+/*									ATP-15727
+									Make sure chrome updated for 
+									VAY
+									7/12/19 - 7/15/19
+updated browsers or made sure are most up to date
+for terry and johnna. still need to do this for nathan and angie
+
+need to make sure we get credentials for angie's admin right to walmart portal
+
+
+_________________________________________________________________________________________________________
+/*									ATP-15727
+									fix no charge
+									CPG ESTORE
+									7/18/19 - 7/18/19
+
+
+
+_________________________________________________________________________________________________________
+/*									ATP-15527
+									divdays refresh
+									DIV 
+									7/18/19 - 7/18/19
+follow steves how to doc
+
+promo wouldnt build
+dotnet restore c:\project\aero-promo
+
+create template of data import/insert
+
+admin site
+http://secure.aerofulfillment.com/divdays/
+
+use windows creds
+
+dave barker
+5136005323
+
+cant get log in to work for some reason login form is talking to database?
+
+makes it out to 22.103
+probably need to fix admin script
+
+http://secure.aerofulfillment.com/divdays/
+
+in the end had to properly clear cache
+and hard code it to use afsweb201.aerofulfillment.COM
+afssql01
+this bypasses its route out of http to https which was messing up the call to db through http form context
+
+
+another issue with registration admin script because new divdaytickets table didnt have ticketID set to unique identifier
+
+fixed overmax report to show gid
+
+fixed calldet report because calldet table didnt have ID identity set
+(same issue as yesterday with divdaytickets)
+
+tested issue with call center tickets not saving. could be because of code but also could be working just not showing 
+easily because its next to max tickets
+
+report isnt working because of dates txtdate var conversion?
+
+
+
+_________________________________________________________________________________________________________
+/*									ATP-15973
+									in transit -  moves not completing
+									aero 
+									8/5/19 -  8/13/19
+
+apparently some moves arent completing and they are sayin intransit
+not sure what this means in the slightest but i believe its related to replen moves?
+
+
+dates of adds in lli
+2019-07-13 10:02:28.000
+2019-07-19 10:02:28.000
+2019-07-22 10:02:28.000
+every few days or so but edits are recent
+big gaps between june - may - april and earlier
+lot more recently june and after
+
+ATKAPRONR - correctly being moved from intransit to FP to pickto
+
+checked several other skus across different fulfillments and all seem to be leaving intransit status
+to go to a forward pick
+
+using infor UI to view this as well
+
+according to jennetta regardless of issue it is up to
+OPS to manage and move them out of this location.
+
+zwaap came back saying that there isnt more training needed and
+that we need to go out there to find root cause
+
+likely not going to happen because whatever the issue is its not in IT to move them out
+
+
+_________________________________________________________________________________________________________
+/*									ATP-15966
+									New order lifecycle notification for missing arn info
+									Aero 
+									8/6/19 - /19
+Packed Orders Validation - boomi
+create new OLC for missing ARN on amazon orders
+needs to be built for both facilities
+
+needs new error msg
+add specific corrective actions
+
+make UBER modular
+	modify?
+	make my pieces be called from this query as executables
+
+
+
+
+dont piss archana off with #sequence table issues for fulfillment_rule
+
+_________________________________________________________________________________________________________
+/
+
+est								 dont est
+
+ATP-15342						15344	
+15352							15336
+15353							15345
+15628							15339
+15812							15340 - bug ticket
+
+addemail via data form editcontrolname multiple select?
+
+
+_________________________________________________________________________________________________________
+/
+
+townsend.bs@pg.com welcome
+prettejohn.jl@pg.com prette11
+miller.kj.4@pg.com welcome
+
+get test teams logins to jarrod
+add DM sku allotments also
+add 2 more skus
+remove option to change filter
+only active
+sku dropdown based on active under role only
+transferring over allotment - goes negative must error and then change amount
+
+
+_________________________________________________________________________________________________________
+/
+_________________________________________________________________________________________________________
+/
+
+@status
+@accnum
+@weight
+@ratedweight
+@numpieces
+@bundlenum
+@multiweightunits
+@multoweighttotmww
+all of these are set to number in invoice header import
+
+
+adjust out or cycle count
+alert?
+
+
+
+_________________________________________________________________________________________________________
+/*									ATP-15391
+									UPDATE OLC
+									aero 
+									8/13/19 -  /19
+Packed Orders Validation
+1. Create trigger to update order type based on ship method for SCRAP and PRODUCTION
+2. Create new order type for PRODUCTION orders that do not require manifest records. (I.E. ProductionBuild, InternalProduction, etc...)
+3. Update OLC to handle SCRAP and PRODUCTION order types appropriately. (meaning do not hold orders open if they are not expecting manifest records.)
+4. Update Ship pick detail process to automatically ship orders appropriately. (meaning do not hold orders open if they are not expecting manifest records.)
+
+This must be changed for both facilities.
+
+when should i be updating an order type?
+
+OLC cannot hold orders open if they dont need a manifest
+so basically on line
+
+notes from josh we want this to slowly set new standard to move away from needing both order type and other piece
+
+from james just update current order ins/ trigger 
+
+
+_________________________________________________________________________________________________________
+/*									ATP-16235
+									est for sub sku / backorders for estore
+									CPGR 
+									8/26/19 -  /19
+
+vw_CPG_newsubskus
+
+vw_CPG_updatesubskus
+both filter in where clause on ff_id 73 and 781? may just need to add estore and some other pieces
+just unsure what they may be
+however only 75 records in table
+inventory_substition
+
+cool where clause nesting though
+SELECT i.fulfillment_id, i.item_id, '' AS lottable, CONVERT(int, pd.Units) AS units, pd.UOM, x.item_id AS sub_item_id, '' AS sub_lottable, CONVERT(int, xpd.Units) AS sub_qty, xpd.UOM AS sub_uom
+FROM   dbo.Inventory AS i WITH (nolock) INNER JOIN
+             dbo.Inventory_FlexFields AS f WITH (nolock) ON i.item_id = f.item_id INNER JOIN
+             dbo.Inventory_PackDetail AS pd WITH (nolock) ON i.packkey = pd.Packkey AND i.default_uom = pd.UOM INNER JOIN
+             dbo.Inventory AS x WITH (nolock) ON i.fulfillment_short_name = x.fulfillment_short_name AND f.flexfield11 = x.primary_reference INNER JOIN
+             dbo.Inventory_PackDetail AS xpd WITH (nolock) ON x.packkey = xpd.Packkey AND x.default_uom = xpd.UOM
+WHERE (i.fulfillment_id IN (73, 781)) AND EXISTS
+                 (SELECT item_id
+                 FROM    dbo.Inventory_Substitution
+                 WHERE (item_id = i.item_id)) AND (NOT EXISTS
+                 (SELECT item_id
+                 FROM    dbo.Inventory_Substitution
+                 WHERE (item_id = i.item_id) AND (sub_item_id = x.item_id)))
+
+
+Order RE000003440 and SKU 00000371 should have gone to a sub-sku (03537790)
+
+[pr_Report_CPG_ReplacedBySKU]
+
+so both sub sku and replaced by need to have estore added
+
+at least for replaced by we can import data into table fulfillment_dataEntry
+make excel sheet match data exactly but change ff id to 521 and it should be golden
+may be able to do something similar with sub sku but not entirely sure yet
+
+
+
+new news for dropship?
+dropship orders edit dataform found
+has dropshipid
+orders id
+item number
+
+table name dropshipinboundsearch
+
+anything vendor based that gets moved over needs the vendor list also replicated from CPG
+also possibly skipped vendors list
+vendor line status
+cpg vendor types?
+ALSO TCD PART NEEDED ---- admin script beforesubmit inventory request
+
+SKU APPROVE also has a list tied to it
+
+BEFORE SAVE ORDER admin script has logic for approve order 1353 and 0353
+vendor order edit submit
+
+_________________________________________________________________________________________________________
+/*									CI- 444
+									TLE Perper werts
+									perpper 
+									8/28/19 -  /19
+turn of import at 1pm today then let ship confirm run - for WonderWoman only?
+then we cut over after?
+
+
+8/29
+verify these get sent on ship confirm then cutover to new fulfillment
+TL0000421796 - shipped today ship conf sent around 10:08
+TL0000421624 - shipped yesterday ship conf sent around 5:08
+check manifest data to match
+
+for order import process it looks like a lot of pieces include this in select
+where fulfillment_id = 901
+and isnumeric(customer_reference) = 1
+and cost_center = 'Pepper&Wits'
+order by convert(decimal,customer_reference) desc
+
+so am i just needing to change fulfillment id from 901 and cost center perpper wits
+can remove cost center?
+this is is set properties in process properties
+remove dynam process prop.
+
+check resource paths
+maybe look at some of the json?
+check connector shapes process properties etc for old ff id
+not sure what else goes into order import
+
+
+-- ship confirm
+easy to update get orders SQL query in GET
+check process props and connector shapes
+check resource paths
+
+
+
+_________________________________________________________________________________________________________
+/*									new atp for boston
+									site ticket period ending
+									PGB 
+									8/28/19 -  /19
+
+We are coming to the end of the program.  The following will need to happen over the next couple of days.
+
+•	Site shut down for Employee / Retiree ticket request by 5pm 8/28/19
+•	A message added to the site-
+o	Registration for this years outing to Canobie Lakes has ended.  Please call 1-866-6492 if you have not received your tickets 9/4/19.
+•	The Admin and Contact Tabs must remain active until 9/4.
+•	A final ticket request log must be sent by 9am on Thursday 8/29.  We will need this list ASAP for Production to mail tickets to the 9/7 event.
+•	Additional ticket request logs may be needed for any request Boston makes after the cutoff for the 9/15 event.
+
+
+
+_________________________________________________________________________________________________________
+/*									atp - 15498 invoice # in xml doc to blackbox
+									VAR 
+									8/28/19 -  /19
+
+
+shipmentservice extension
+
+shipments
+get and request?
+
+model is SHIP_REQUEST
+navcontroller is holding the functions for below createshipments
+go to blackbox section line 1208
+
+go to imple of function processmanifestshipment(request)
+
+create shipment for order
+ship
+getshipmentrequestfororder in SHIP_REQUEST
+
+example of configurable through properties
+DUTY_TAX_PAYMENT = (wo.C_COUNTRY == "US") ? "" : shipmentService.FulfillmentPropertyService.GetFulfillmentPropertyValue(wo.STORERKEY, sm.service_name, "DUTY_TAX_PAYMENT", navOrder.cost_center),
+
+add logic in fulfillment_properties table to make sure this only shows for VARTA
+
+need to do the same for invoice_number
+
+
+INVOICE_NUMBER = 
+(shipmentService.FulfillmentPropertyService.GetFulfillmentPropertyValue(wo.STORERKEY, sm.service_name, "INVOICE_NUMBER") == "EXTERNALORDERKEY2") 
+? wo.EXTERNALORDERKEY2 : "",
+
+above uses function of if statement to validate the ff prop table so if the shipment has a record with 
+storer key it will check if other params have inv number and service name. if thats true it assigns the field we chose
+the value we get in wo.ext orderkey 2
+else "" (nothing)
+for now this will work since this is a blackbox feature and wont effect afi which needs prim ref in inv_number
+
+to test it looks like its pointing at DEVSQL101
+not sure what ineed to do to cfg for uat testing or if this already does it
+
+but essentially i create an order in uat, release pick and then ship 
+
+test local API get tokens via query
+
+use ENTERPRISE
+SELECT t.token, ft., a.
+FROM [AspNetTokens] t
+INNER JOIN [client_Token] ft
+  ON t.id = ft.token_id
+JOIN ApiClient a on a.id = ft.client_id
+where  a.fulfillment_id = 1162
+
+old OK 0015456870
+old exOK VR0000000692
+
+854f48b1-7289-46aa-ae84-c417faf6f7d2
+
+{
+ "transmitlogkey": "0332065215",
+ "orderkey": "0015458371",
+ "externorderkey": "VR0000000696"
+}
+
+0015456871
+VR0000000693
+has correct qty
+
+VR0000000696
+
+current response
+
+No carrier information found for shipper 
+
+might not be registering new ship method in UAT?
+
+
+
+
+
+ path for deployment 
+ \\afsutil01\C$\inetpub\wwwroot\SC.Api\bin
+
+ my backup is local
+
+
+current issue:
+on ShipmentServiceExtensions.cs (C:\Project\SC\sc-solution\SC.Services\Tms\ShipmentServiceExtensions.cs)
+
+wrong number showing up because after it is set to inv number in shipments that isnt
+what is being displayed in fedex that is called "invoice number"
+what is actually displayed is the pld package ref 3 from package table in dms server
+can change this
+PLD_PACKAGE_REFERENCE3 = osr.ship_reference_3,
+to
+
+PLD_PACKAGE_REFERENCE3 = (shipmentService.FulfillmentPropertyService.GetFulfillmentPropertyValue(wo.STORERKEY, "SHIPMENTS", "INVOICE_NUMBER") == "EXTERNALORDERKEY2") ? wo.EXTERNALORDERKEY2 : osr.ship_reference_3,
+
+in ff table there are manifest cnfg that connect to this part of SC
+in orderserviceextensions.cs
+public static OrderShipmentReference GetOrderShipmentReference(this IOrderService orderService,int fulfillment_id, int orders_id)
+        {
+            Fulfillment f = orderService
+                .FulfillmentService
+                .GetFulfillment(fulfillment_id);
+
+            string fldCmd = "";
+
+            fldCmd = (string.IsNullOrEmpty(f.manifest_cnfg1)) ? "'' AS ship_reference_1" : f.manifest_cnfg1 + " AS ship_reference_1";
+            fldCmd += "," + ((string.IsNullOrEmpty(f.manifest_cnfg2)) ? "'' AS ship_reference_2" : f.manifest_cnfg2 + " AS ship_reference_2");
+            fldCmd += "," + ((string.IsNullOrEmpty(f.manifest_cnfg3)) ? "'' AS ship_reference_3" : f.manifest_cnfg3 + " AS ship_reference_3");
+            fldCmd += "," + ((string.IsNullOrEmpty(f.manifest_cnfg4)) ? "'' AS ship_reference_4" : f.manifest_cnfg4 + " AS ship_reference_4");
+            fldCmd += "," + ((string.IsNullOrEmpty(f.manifest_cnfg5)) ? "'' AS ship_reference_5" : f.manifest_cnfg5 + " AS ship_reference_5");
+
+            string sqlCmd = "SELECT orders_id, primary_reference, " + fldCmd + " FROM OrdersSearch with (nolock) WHERE orders_id = @orders_id";
+
+            var dc = orderService.DbFactory.Navigator as NavigatorDataContext;
+
+            SqlParameter oid = new SqlParameter("@orders_id", orders_id);
+            OrderShipmentReference sr = dc.Database.SqlQuery<OrderShipmentReference>(sqlCmd, oid).AsEnumerable().FirstOrDefault();
+
+            return sr;
+        }
+
+so per fulfillment you can change what is their standard cnfg 1 that will go to the fedex package invoice
+
+
+blackbox calls every hour to update the reference and possibly other fields with more data
+so its not instant to create the shipment and package data
+
+
+blackbox doesnt currently allow us to count the shipment requests total vs processed correctly.
+
+this is why we cannot process print requests right after with an automated function
+
+
+ ARCHANA IS RESPONSIBLE FOR ALL TRACKING INFORMATION  GETTING INTO FEDEX EVEN IF SHE HAS TO WALK OVER AND
+ VERIFY
+_________________________________________________________________________________________________________
+/*									ATP-15654
+									serial numbers on 
+									vay 
+									8/13/19 -  10/4/19
+
+believe this is working. just need to see on an actual order.
+
+cant do so without using prod data
+
+
+48	ORDER SHIPPED CONFIRM EMAIL	Send an email when an order ships	
+Event_OrderTracking	[trans_submodule] = 'SHIPPED' AND [fulfillment_id] = @fulfillment_id AND [trans_date] BETWEEN @last_run AND @run_date AND (ISNULL([email],'') <> '' OR @fulfillment_id = 840)	
+0	
+orders_id	email	2007-05-30 14:53:54.557	2016-02-18 13:35:00.083
+
+was using old event which cant be changed via mailevents table
+
+created new event in mailevents using new view
+cnfg to vayyar
+should be good to go
+
+
+select *
+from lebanon.dbo.fulfillment_event_log (nolock)
+where fulfillment_id = 1162 and event_id = 172
+and [file_name] <> ''
+and email like '%nick@assistedlivingct.com%'
+order by add_date desc
+
+select *
+from lebanon.dbo.fulfillment_events (nolock)  
+where fulfillment_id = 1162 and event_id = 172
+
+select top 1000 *
+from lebanon.dbo.mailevents (nolock)
+where event_name like '%shipped%'
+and event_id = 172
+
+select *
+from lebanon.dbo.fulfillment_subscriptions (nolock)
+where fulfillment_id = 1162 and event_id = 172
+order by last_run desc
+
+only kim and vayyar finance getting old shipped conf email event
+
+_________________________________________________________________________________________________________
+/*									atp - 16122 new fully functional search bar for estore
+									estore 
+									9/4/19 -  /19
+
+#estore
+
+ Add a text box to the front end.
+2. Add ClientSideEvents-KeyPress event to the text box on the front end.
+3. Add the javascript function for the event on the front end.
+
+	-- do function similar to james at top of page
+
+a. The javascript will look for the “Enter” key before doing the postback.
+4. Do something similar to FilterClick() function. The new function will trigger a postback with the data in the textbox.
+5. Update Page_Load function on the backend.
+a. You will see a big if statement. You will need to add in another for the new postback.
+
+	-- has to keep same prot sub Page_Load
+	-- add if statement near bottom with mostly copied logic and change name of function
+
+b. The new if statement will call a new function in step 6.
+6. You will need to create a new function similar to GetData_CardxFilterAll (line 496)
+ but you will be passing in the data from the text box.
+a.  In the query, you will need to figure out what fields to search by.
+i.  You will want to do something similar to line 157 and create the where clause dynamically.
+                    ii.     The function will need to figure out which fields are searchable.
+b.  We need to create a new table for searchable fields.
+
+-- search activated 
+
+getdata cardxsearch all
+
+get data list x search all
+
+get data card x id x search
+
+get data list x id x search
+
+get data list x catalog x search
+
+get data card x search
+
+get data list x search
+
+update other functions that make sense to include search
+
+?does my search activated need to also hold filter session?
+? do i use filterpostback also since my search should contain whats filtered or not
+search needs to have filtered session data
+search needs to take that dataset and shouldnt ignore under any circumstance i believe
+
+how do i get my new if statement for search to only find my text against the description of sku
+
+james said to use lists to query the database in specific way
+created list in nav?
+
+i think now that im looking around more that he means a function list like this one hes already using
+Private Function CreateList(list As System.Collections.Generic.List(Of Filter)) As String
+        Dim filterwhere As String = ""
+        For Each element As Filter In list
+            If filterwhere = "" Then
+                filterwhere = "((attribute_label = '" + element.Group + "' and value_name = '" + element.Value + "')"
+            Else
+                filterwhere = filterwhere + " OR (attribute_label = '" + element.Group + "' and value_name = '" + element.Value + "')"
+            End If
+
+        Next
+
+        If filterwhere = "" Then
+            filterwhere = "1=1"
+        Else
+            filterwhere = filterwhere + ")"
+        End If
+        Return filterwhere
+    End Function
+
+and possibly need to create another function for getdata_list
+
+already have my correct other function
+need to also have the nav list as originally thought to query it
+also use piece of if statement to use elseif(y = SearchAndFilterPostBack)
+
+estoresearch nav of list in nav 762 in prod vs 761 uat?
+
+changed itemonly in ELSEIF to searchonly as name for session name otherwise is keeping incorrect value
+from other session
+also clearing session on gchrome not working well had to switch to private
+
+
+this is now able to search with button
+
+9/23
+
+need to start adding in logic and new function and new else if for both search and filter
+can be some copy pasting and comparing
+
+
+for ex
+ Dim filterwhere As String = ""
+                For Each element As Filter In list
+                    If filterwhere = "" Then
+                        filterwhere = "(attribute_label = '" + element.Group + "' and value_name = '" + element.Value + "')"
+                    Else
+                        filterwhere = filterwhere + " AND (attribute_label = '" + element.Group + "' and value_name = '" + element.Value + "')"
+                    End If
+
+                Next
+
+do we add in search where into same? not sure
+thinking more likely we add section where two are separate then after we need a 3rd to manage
+combining
+
+its either that or one big complex one
+
+but speed would probably warrant 3 different ones.
+
+or possibly an even longer elseif???? only have x and y but x needs value of filters and also value of search
+how can i use this by possibly putting into session data?
+
+_________________________________________________________________________________________________________
+
+_________________________________________________________________________________________________________
+
+-*-*-*-*-*-*-*-*-*-*-*-*-*-*-*-*-*-*-*-*- LOGS LIST -*-*-*-*-*-*-*-*-*-*-*-*-*-*-*-*-*-*-*-*-
+fulfillment_transactions log
+fulfillment_event_log
+loghistory
+triggers
+	inv_translog_del
+	inv_translog_upd
+	inv_translog_ins
+	li_translog_del
+	li_translog_upd
+	li_translog_ins
+	fulfill_paymt_translog
+	fulfill_translog
+	fulfill_rules_tl
+	fulfill_role_tl
+	LOC_INS_LOG
+	LOC_UPD_LOG
+	PACK_INS_LOG
+	PACK_UPD_LOG
+	SKU_INS_LOG
+	SKU_UPD_LOG
+
+mail_log_all
+vw_allotments_log
+web_log
+process_log
+temperature_log
+eventlog
+wms_loghistory or scprd loghistory
+transmitlog or wms_transmitlog
+
+vw_CCLOG_New
+vALLOCTRACELOGSUM
+wms_ORDERSTATUSHISTORY
+wms_RECEIPTDETAILSTATUSHISTORY
+wms_PODETAILSTATUSHISTORY
+wms_CCRELEASEHISTORY
+wms_APPT_DOOR_HISTORY
+
+_________________________________________________________________________________________________________
+
+_________________________________________________________________________________________________________
+/*									atp - 16124 new out of scope changes for pgoc allot manager
+									PGOC 
+									8/29/19 -  8/30/19
+
+
+use JS to warn about ammount xferring and prevent xfer.
+
+fix 'from' to 'From'
+
+didnt make xfer complete in team xfer also but may fix when adding img
+
+********************** this section notes for img in devexpress only - other resources bookmarked in web dev ****************************
+1) You can use the ContextImageOptions property to set the context image for the cell editor. Also, this approach allows you to display both an image and the editable text within a single cell.
+
+[C#]
+ RepositoryItemTextEdit textEdit = new RepositoryItemTextEdit();  
+ textEdit.ContextImageOptions.Image = Image.FromFile("..\\..\\img.bmp");  
+ gridView1.Columns["ContextImage"].ColumnEdit = textEdit;  
+ gridControl1.RepositoryItems.Add(textEdit);
+[VB.NET]
+ Dim textEdit As New RepositoryItemTextEdit()  
+ textEdit.ContextImageOptions.Image = GetImageFromResource("img.bmp")  
+ gridView1.Columns("ContextImage").ColumnEdit = textEdit  
+ gridControl1.RepositoryItems.Add(textEdit)
+2) The easiest solution to put an icon in a cell is to use the Check or the ImageComboBox editor.
+The Check editor allows you to specify images via the PictureChecked, PictureUnchecked, and PictureGrayed properties; the CheckStyle property must be set to UserDefined.
+
+[C#]
+using DevExpress.XtraEditors.Repository;  
+  
+// CheckEdit  
+  
+RepositoryItemCheckEdit checkEdit = gridControl1.RepositoryItems.Add("CheckEdit") as RepositoryItemCheckEdit;  
+checkEdit.PictureChecked = Image.FromFile("..\\..\\read.bmp");  
+checkEdit.PictureUnchecked = Image.FromFile("..\\..\\unread.bmp");  
+checkEdit.CheckStyle = DevExpress.XtraEditors.Controls.CheckStyles.UserDefined;  
+gridView1.Columns["IsRead"].ColumnEdit = checkEdit;  
+gridControl1.RepositoryItems.Add(checkEdit);
+[VB.NET]
+' CheckEdit  
+  
+Dim checkEdit As RepositoryItemCheckEdit = TryCast(gridControl1.RepositoryItems.Add("CheckEdit"), RepositoryItemCheckEdit)  
+checkEdit.PictureChecked = GetImageFromResource("read.bmp")  
+checkEdit.PictureUnchecked = GetImageFromResource("unread.bmp")  
+checkEdit.CheckStyle = DevExpress.XtraEditors.Controls.CheckStyles.UserDefined  
+column = gridView1.Columns("IsRead")  
+column.ColumnEdit = checkEdit  
+gridControl1.RepositoryItems.Add(checkEdit)
+3) The ImageComboBox editor is linked with an ImageList or ImageCollection. It substitutes cell values with images according to the Items property.
+
+[C#]
+// ImageComboBox  
+  
+RepositoryItemImageComboBox imageCombo = gridControl1.RepositoryItems.Add("ImageComboBoxEdit") as RepositoryItemImageComboBox;  
+DevExpress.Utils.ImageCollection images = new DevExpress.Utils.ImageCollection();  
+images.AddImage(Image.FromFile("..\\..\\Minor.png"));  
+images.AddImage(Image.FromFile("..\\..\\Moderate.png"));  
+images.AddImage(Image.FromFile("..\\..\\Severe.png"));  
+imageCombo.SmallImages = images;  
+imageCombo.Items.Add(new ImageComboBoxItem("Minor", (short)1, 0));  
+imageCombo.Items.Add(new ImageComboBoxItem("Moderate", (short)2, 1));  
+imageCombo.Items.Add(new ImageComboBoxItem("Severe", (short)3, 2));  
+imageCombo.GlyphAlignment = DevExpress.Utils.HorzAlignment.Center;  
+gridView1.Columns["Severity"].ColumnEdit = imageCombo;  
+gridControl1.RepositoryItems.Add(imageCombo);
+
+************************************** end img notes section ********************************
+
+
+
+
+_________________________________________________________________________________________________________
+/*									ATP-16234
+									cant access FTP for imagen brands 
+									 
+									9/4/19 -  /19
+
+may just be ftp configuration?
+
+2089557533
+
+
+add to estore admin script
+
+if ordRow.item("order_type").tostring.tolower <> "savedcart" then
+For Each linRow In linTbl.DefaultView
+	'RT new Skipped process by list            
+If aero.BusinessRules.CommonProvider.checkNull(linRow.Item("flexfield1"),"N") = "Y" Then
+		linRow.Item("line_Status") = "SKIPPED"
+	End If
+Next
+
+
+If has0353 = True and ordRow.item("ship_country").tostring.tolower = "us" _
+		And (CheckNull(ordRow.Item("flexfield10"),"") = "" _
+		OrElse CheckNull(ordRow.Item("flexfield12"),"") = "" _
+		OrElse CheckNull(ordRow.Item("flexfield14"),"") = "" _
+		OrElse CheckNull(ordRow.Item("flexfield15"),"") = "" _
+		OrElse CheckNull(ordRow.Item("flexfield16"),"") = "" _
+		OrElse CheckNull(ordRow.Item("flexfield17"),"") = "") Then
+
+	Throw New Exception("You are required to complete the 'Charge To' section of the order.")
+elseif has0353 = True _
+		And (CheckNull(ordRow.Item("flexfield10"),"") = "" _
+		OrElse CheckNull(ordRow.Item("flexfield12"),"") = "" _
+		OrElse CheckNull(ordRow.Item("flexfield14"),"") = "" _
+		OrElse CheckNull(ordRow.Item("flexfield16"),"") = "" _
+		OrElse CheckNull(ordRow.Item("flexfield17"),"") = "") Then
+
+	Throw New Exception("You are required to complete the 'Charge To' section of the order.")
+End If
+
+end if
+
+
+
+
+
+_________________________________________________________________________________________________________
+/*									atp - 15984 verify backorders for OTC
+									OTC 
+									9/10/19 -  /19
+
+from ticket "
+Is there any way to validate that the backorders meet the following criteria?
+ I have attached the email from the client
+
+We will just want to make sure that our backorders are within our 
+order restrictions (i.e. 1 order/physician; 2/gastro) and no pharmacists."
+
+
+
+
+
+_________________________________________________________________________________________________________
+/*									PGOC ALLOTMENT MANAGER DEPLOYMENT
+									PGOC
+									9/10/19 -  /19
+these must be changed sunday night
+getallotval
+getallot
+
+LI UPD
+LI INS
+
+rest is in conf of what tables and views need to be put into prod beforehand
+
+created folder where we put backups of above scripts 
+then also staging the new ones in sep folders to be ready for sunday night
+in 
+C:\Users\ben.yurchison\OneDrive - Aero Fulfillment Services Inc\Documents\My docs\Backups for dev\NAV Allotment Manager Deployment
+
+
+-- to move allotments from old system to new
+
+ insert into [MASON].[dbo].[Allotments]
+  select 311, ia.item_id, ia.customer_id, 'CR', ia.QtyAllotted, ia.QtyAllocated, ia.StartDate, ia.EndDate, 1, iab.add_date, iab.edit_who, iab.edit_date, iab.edit_who, ia.ResetValue, ia.ResetInterval, null
+  from [MASON].[dbo].[Inventory_Allotment] ia with (nolock)
+  inner join Inventory_AllotmentBuild iab with (nolock)
+    on ia.BuilderID = iab.ID
+  where ia.StartDate < getdate() and ia.EndDate > getdate()
+  and designerType = 'ROLE'
+  and ia.fulfillment_id = 311
+
+    insert into [MASON].[dbo].[Allotments]
+  select 311, ia.item_id, ia.customer_id, 'C', ia.QtyAllotted, ia.QtyAllocated, ia.StartDate, ia.EndDate, 1, iab.add_date, iab.edit_who, iab.edit_date, iab.edit_who, ia.ResetValue, ia.ResetInterval, null
+  from [MASON].[dbo].[Inventory_Allotment] ia with (nolock)
+  inner join Inventory_AllotmentBuild iab with (nolock)
+    on ia.BuilderID = iab.ID
+  where ia.StartDate < getdate() and ia.EndDate > getdate()
+  and designerType = 'Customer'
+  and ia.fulfillment_id = 311
+
+
+also a boomi job to move over
+MAS - RESET ALLOTMENT
+
+copy paste template file into
+prod
+css for filter 
+
+
+update / change data in windows nav settings for users and roles
+
+
+
+
+
+
+
+zones not set to correct assignments and check digits
+
+also apparrently a missing zone
+caseid pickdetail wms outbound pickdetail
+drill into caseid
+
+
+hyperlink clink on loc
+loc detail zone is ft aisle 640
+area 14 a640 not part of zone
+
+
+
+C:\Windows\system32\odbctrac.dll
+
+_________________________________________________________________________________________________________
+/*									ATP-16243
+									Client would like to be notified of only the orders with an error and
+									the reason for error without fail
+									VAY
+									9/17/19 -  /19
+
+ Client would like to have error message sent for orders with error and the reason for the error 
+ as opposed to the entire batch failing as long as the file matches XML rules.
+
+
+
+_________________________________________________________________________________________________________
+/*									ATP-16459
+									partial refunds not going through for crest white smile
+									LW
+									9/17/19 -  /19
+not matching line item and order data to the cybersource data
+
+this is Big commerce
+likely need cheri to talk to matt wehrman
+
+going to need filipes help
+
+
+
+
+_________________________________________________________________________________________________________
+/*									ATP-
+									Boston finishing admin page changes - import/export and other features
+									PGB
+									9/27/19 -  /19
+
+
+Here are the incomplete items:
+• Admin management page does not allow for client / CX to import data or exporting data - 8hrs
+• Reporting – does not contain call outs for changed information. - 2 hrs
+	o Scheduled report only displayed change in ticket request.
+	o No place to enter comment on the employee record - 2hrs
+	• Auto open / close site based on start and stop dates
+• Registration page updates (i.e. text, graphics, etc.)
+o Admin users need to be able to manage site assets (upload logos, change text, site colors) - 8hrs
+-- admin config table 
+-- drop down for event type
+ -- create each type on this page dif page displays them
+ -- rewrite other code to be dynamic 13 hrs
+
+
+This was supposed to be a self-serve site and it is far from that currently. This must be completed by EOM so we can close this out and can be ready to go next year.
+
+#PGB
+need to finish admin page
+import export highest priority
+
+using admin page that exists
+current ticket form edit page will redirect here
+this will handle the admin tools like import export and etc.
+
+added admin controller
+
+found open source from devexpress ticket for code to clone
+copying over.
+
+needs new model - can i use more than one or do i add to current somehow?
+its using gridview to upload and then display in the gridview
+- upload control extension?
+
+put pieces together to make sure new controller and view data can talk
+and also configure to model
+
+make sure the data uploaded can save to DB
+this is a paid extension apparently... so probably have to start again
+
+working off of navigator
+converting a bunch of vb.net
+
+
+C:\Users\ben.yurchison\AppData\Local\Temp\MetadataAsSource\d7ae4bc385be46a5ad9719403a5b5fe2\e7dc0b37f14646a199fd5faba52c9d81\WebViewPage.cs
+
+ System.Exception: To work properly, DevExpress components require ASPxHttpHandlerModule registered in the web.config file. For details, see: http://documentation.devexpress.com/#AspNet/CustomDocument7540
+
+System.Exception: The ASPxUploadProgressHandlerPage.ashx handler is not registered in the web.config (section: system.webServer/handlers). To disable web.config validation, use the ValidationSettings.DisableHttpHandlerValidation property
+
+System.Exception: Incorrect route to ASPxUploadProgressHandlerPage.ashx. Please use the IgnoreRoute method to ignore this handler's route when processing requests
+
+
+still wont see view but goes to partial view
+need to remove reference that keeps popping up of devexpress.aspnetcore.core
+
+
+<script>
+        $(document).ready(function () {
+            // hide all
+            $(".allToggle").hide();
+
+            // first img section dd1
+            $("#dd1.showHide").click(function () {
+                $("#dropDown1").toggle();
+            });
+
+            // second img section dd2
+            $("#dd2.showHide").click(function () {
+                $("#dropDown2").toggle();
+            });
+
+            // third img section dd3
+            $("#dd3.showHide").click(function () {
+                $("#dropDown3").toggle();
+            });
+
+            // first form section dd4
+            $("#dd4.showHide").click(function () {
+                $("#dropDown4").toggle();
+            });
+
+            // expand all
+            $("#allBtn.showHide").click(function () {
+                $(".allToggle").toggle();
+            });
+
+        });
+    </script>
+
+ for grid formatting always follow something like this
+  div container
+	div row
+	 div col
+	 div col  - md auto
+	 div col  - lg-1
+
+
+#PGB 10/10
+may need to create another function that backs up old table data into arc table
+could be dangerous
+
+anyways currently we are only trying to import the uploaded file and save that data to database table
+
+_________________________________________________________________________________________________________
+
+_________________________________________________________________________________________________________
+
+-- not sure what this is maybe for hamid?
+RA0000048532
+
+854f48b1-7289-46aa-ae84-c417faf6f7d2
+
+{
+ "transmitlogkey": "0332065215",
+ "orderkey": "0015456882",
+ "externorderkey": "RA000004853"
+}
+
+_________________________________________________________________________________________________________
+
+
+vayserials1
+2Dbarcode
+
+
+VR0000006457
+
+
+
+_________________________________________________________________________________________________________
+/*									ATP-16640
+									fix allotment active dropdown
+									PGOC
+									10/4/19 -  10/15/19
+
+
+can possibly unhide
+then use js or jquery to lockdown the dropdown if user role isnt admin
+
+make inactive like for transfer button.
+
+FulfillmentID=311&u=&p=&l=&521RoleID=35&StylePath=BLUE&311RoleID=459
+
+has new role id at end in cookie aero9
+
+need to use JS to extract and set as variable
+
+cant be in role id 448 at end (may need to add 35 if this is a possible result for new role id)
+
+so first we find the session with this id not at end
+then we disable inside function
+
+--- josh reassigned to james
+
+_________________________________________________________________________________________________________
+
+meeting with josh h on 10/15/19
+"we are going to meet our commitments to clients and cx 100%."
+"i dont care if we have to live here for a week, we are going to meet our commitments."
+
+_________________________________________________________________________________________________________
+
+
+
+
+
+
+
+
+_________________________________________________________________________________________________________
+
+
+
+_________________________________________________________________________________________________________
+/*									ATP-16640
+									fix allotment active dropdown
+									PGOC
+									10/4/19 -  /19
+assigned to james
+
+_________________________________________________________________________________________________________
+/*									ATP-16852
+									Cold seal ship station reprogram rf gun
+									AERO
+									10/21/19 -  /19
+
+rf gun for cold seal ship station used to not require f3 or f12 keystrokes but then broke and someone
+possibly reset gun somehow
+
+need to find how to reprogram this.
+found whole pdf online
+
+section 4-13 and 5-11 both possibly useful 6-11
+
+or substitutions using 5-15
+
+GUI keys to match 5003 & 5012
+may be required to scan above number sequence in order to add into scan barcode
+
+_________________________________________________________________________________________________________
+/*									ATP-16569
+									please add updated verbiage to site
+									PGHS
+									10/21/19 -  /19
+adding updated verbiage from doc on ticket.
+
+jami called saying this isnt correct data
+meaning jami added it without it being fully corrected version from client
+A3roAdm!n1
+
+
+
+_________________________________________________________________________________________________________
+/*									ATP-16856
+									estore add document to resource box how to charge customer
+									estore
+									10/22/19 -  10/22/19
+add file to images cpgr
+html from web admin under admin
+role options
+
+
+<div class="SysMessages"><div class="SysMessagesTitleNews">Resources</div><div class="SysMessagesContentNews"><ul><li><a href="http://secure.aerofulfillment.com/eFulfillment/images/cpg/UPSshippingmap.gif" target="_blank"><font color="white"><span style="a:hover {background-color:black;}">UPS Ground Shipping Map</span></font></a> </li></ul>
+<ul><li><a href="images/pgoc/Navigator Order Status Terminology2.doc" target="_blank"><font color="white">Navigator Order Status Terminology</font></a></li></ul><ul><li><a href="http://secure.aerofulfillment.com/eFulfillment/images/CPGR/E-Store_Training_Guide.docx" target="_blank"><font color="white">E-Store Training Guide</font></a></li></ul>
+ <ul><li><a href="http://secure.aerofulfillment.com/eFulfillment/images/CPGR/catalog_and_sub_catalog.xlsx" target="_blank"><font color="white">Catalog and Sub Catalog</font></a></li></ul>  <ul><li><a href="/efulfillment/images/cpg/NSOCoveragAreaMap.ppt" target="_blank"><font color="white">NSO Coverage Area Map</font></a></li></ul><ul><li><a href="images/cpg/TeamLeaderNSOcoverage10-2012.ppt" target="_blank"><font color="white">Team Leader NSO Coverage</font></a></li></ul>
+ <ul><li><a href="/efulfillment/images/cpg/NTRTerritoryMap.ppt"><font color="white">NTR Territory Map</font></a></li></ul><a href="/efulfillment/images/cpg/NTRTerritoryMap.ppt"></a><ul><li><a href="/efulfillment/images/cpg/SparePartsOrderForm.xlsx" target="_blank"><font color="white">Spare Parts Order Form</font></a></li></ul><ul><li><a href="images/cpg/Aero Navigator Field Manager Updates 020614.doc" target="_blank"><font color="white">System Upgrade Notification</font></a></li></ul> 
+ <ul><li> <a href="https://pg.webex.com/pg/lsr.php?RCID=6eb9affd85124f878099742bffcb31e8" target="_blank"><font color="white">E-store Login Training Video </a></li> </ul></ul> <ul><li> <a href="https://pg.webex.com/pg/lsr.php?RCID=40cc6e2efce941d88d8cba21445f0541" target="_blank"><font color="white">E-store Password Recovery Training Video </a></li> </ul><ul><li> <a href="/efulfillment/images/cpg/How_to_Charge_Cust.pdf" target="_blank"><font color="white">How to Charge Customer </a></li> </ul></div>
+ <div class="SysMessagesFooterNews"><br>&nbsp;</div></div></div>  <div class="SysMessagesFooterNews"><br>&nbsp;</div>  </div><br/><br/>  <p align="center" style="text-align: center;" class="SysMsgMove">   <span style='font-family: "Arial", "sans-serif"; font-size: 18pt;'>Welcome to the&nbsp;P&G Professional Ecommerce Order Fulfillment Website</span><span style='font-family: "Arial", "sans-serif"; font-size: 12pt;'><br></span>  <span style='font-family: "Arial", "sans-serif"; font-size: 12pt;'><br></span>  </p> 
+  <p align="center"></p>  <div class="EditButtonsWrapper"  id="homepageEditButtons"><a class="EditButtons" style="color: white;" href="http://secure.aerofulfillment.com/eFulfillment/qc/qc.aspx" <span=""><span>Leave Order Feedback</span> </a></div>  <div class="EditButtonsWrapper" id="homepageEditButtons"><a class="EditButtons" style="color: white;" onclick="ShowPop(window.top.popup,'frm_opencontrol.aspx?cname=ctrl_form&amp;n=web_feedback', 'defpop', 600, 300, 'Feedback');return false;" href="#1"><span>Leave Website Feedback</span></a></div> 
+   <br/><br/><p></p><br><div></div>  <p align="center" class="SysMsgMove">   <font size="3">Please call 1-888-633-4771 to report any problems that you experience with your order.</font><br>  <span style='font-family: "Arial", "sans-serif"; font-size: 12pt;'>    If you experience any issues with the site, please contact Dotty Sawyers (<a href="mailto:dotty.sawyers@aerofulfillment.com">dotty.sawyers@aerofulfillment.com</a>).
+<br><br>Thank you for your patience and support in advance.   </span>  </p>
+
+
+
+
+<ul><li> <a href="/efulfillment/images/cpg/How_to_Charge_Cust.pdf" target="_blank"><font color="white">How to Charge Customer </a></li> </ul>
+
+
+<div class="SysMessages"><div class="SysMessagesTitleNews">Resources</div><div class="SysMessagesContentNews"><ul><li><a href="http://secure.aerofulfillment.com/eFulfillment/images/cpg/UPSshippingmap.gif" target="_blank"><font color="white"><span style="a:hover {background-color:black;}">UPS Ground Shipping Map</span></font></a> </li></ul>
+<ul><li><a href="images/pgoc/Navigator Order Status Terminology2.doc" target="_blank"><font color="white">Navigator Order Status Terminology</font></a></li></ul>
+<ul><li><a href="http://secure.aerofulfillment.com/eFulfillment/images/CPGR/E-Store_Training_Guide.docx" target="_blank"><font color="white">E-Store Training Guide</font></a></li></ul> <ul><li><a href="http://secure.aerofulfillment.com/eFulfillment/images/CPGR/catalog_and_sub_catalog.xlsx" target="_blank"><font color="white">Catalog and Sub Catalog</font></a></li></ul> 
+ <ul><li><a href="/efulfillment/images/cpg/NSOCoveragAreaMap.ppt" target="_blank"><font color="white">NSO Coverage Area Map</font></a></li></ul><ul><li><a href="images/cpg/TeamLeaderNSOcoverage10-2012.ppt" target="_blank"><font color="white">Team Leader NSO Coverage</font></a></li></ul><ul><li><a href="/efulfillment/images/cpg/NTRTerritoryMap.ppt"><font color="white">NTR Territory Map</font></a></li></ul>
+ <a href="/efulfillment/images/cpg/NTRTerritoryMap.ppt"></a><ul><li><a href="/efulfillment/images/cpg/SparePartsOrderForm.xlsx" target="_blank"><font color="white">Spare Parts Order Form</font></a></li></ul><ul><li><a href="images/cpg/Aero Navigator Field Manager Updates 020614.doc" target="_blank"><font color="white">System Upgrade Notification</font></a></li></ul> 
+ <ul><li> <a href="https://pg.webex.com/pg/lsr.php?RCID=6eb9affd85124f878099742bffcb31e8" target="_blank"><font color="white">E-store Login Training Video </a></li> </ul><ul><li> <a href="/efulfillment/images/cpg/How_to_Charge_Cust.pdf" target="_blank"><font color="white">How to Charge Customer </a></li> </ul></ul> 
+ <ul><li> <a href="https://pg.webex.com/pg/lsr.php?RCID=40cc6e2efce941d88d8cba21445f0541" target="_blank"><font color="white">E-store Password Recovery Training Video </a></li> </ul></div><div class="SysMessagesFooterNews"><br>&nbsp;</div></div></div>  <div class="SysMessagesFooterNews"><br>&nbsp;</div>  </div><br/><br/> 
+  <p align="center" style="text-align: center;" class="SysMsgMove">   <span style='font-family: "Arial", "sans-serif"; font-size: 18pt;'>Welcome to the&nbsp;P&G Professional Ecommerce Order Fulfillment Website</span><span style='font-family: "Arial", "sans-serif"; font-size: 12pt;'><br></span>  <span style='font-family: "Arial", "sans-serif"; font-size: 12pt;'><br></span>  </p>  <p align="center"></p>
+    <div class="EditButtonsWrapper"  id="homepageEditButtons"><a class="EditButtons" style="color: white;" href="http://secure.aerofulfillment.com/eFulfillment/qc/qc.aspx" <span=""><span>Leave Order Feedback</span> </a></div> 
+   <div class="EditButtonsWrapper" id="homepageEditButtons"><a class="EditButtons" style="color: white;" onclick="ShowPop(window.top.popup,'frm_opencontrol.aspx?cname=ctrl_form&amp;n=web_feedback', 'defpop', 600, 300, 'Feedback');return false;" href="#1"><span>Leave Website Feedback</span></a></div>  <br/><br/><p></p><br><div></div>  <p align="center" class="SysMsgMove">  
+    <font size="3">Please call 1-888-633-4771 to report any problems that you experience with your order.</font><br>  <span style='font-family: "Arial", "sans-serif"; font-size: 12pt;'>    If you experience any issues with the site, please contact Dotty Sawyers (<a href="mailto:dotty.sawyers@aerofulfillment.com">dotty.sawyers@aerofulfillment.com</a>).<br><br>Thank you for your patience and support in advance.   </span>  </p>
+
+
+
+
+16786 varta report
+
+
+_________________________________________________________________________________________________________
+/*									ATP-16892
+									phc image / thumbnail issue
+									PGHS OTC
+									10/24/19 -  /19
+
+shadow under box in clipped image on ticket
+not sure where this is coming from though
+
+need jami to schedule a start meeting with client to see where this occurs
+
+\\pdweb01\e$\projects\phc
+\\pdweb01\e$\projects\phc\pub\media\catalog\product\p\r - prilosec prod path
+\\uatweb02\e$\projects\phc-uat-new\pub\media\catalog\product\p\r - prilosec UAT path
+
+\\pdweb01\e$\projects\phc\pub\static\frontend\Aero\phc\en_US\css
+
+can navigate around here to find the images
+
+_________________________________________________________________________________________________________
+/*									ATP-15995
+									order confirmations for johnna and katie filter on DIB ama walmart
+									VAY
+									10/24/19 -  /19
+order confirmations for johnna and katie
+filter on dib ama and walmart
+
+should be done through events/ subs
+
+
+_________________________________________________________________________________________________________
+/*									ATP-16965, 16911, 16964
+									AOS order issues
+									AOS
+									10/29/19 -  /19
+AS0000403292  - shelf life
+
+AS0000404490  -unsure
+
+select *
+from lebanon.dbo.Orders_ErrorCodes oe (nolock)
+join LEBANON.dbo.Orders_IncidentLog oi (nolock) on oi.errorCode = oe.errorCode
+join LEBANON.dbo.orders o (nolock) on o.orders_id = oi.orders_id
+where o.primary_reference = 'AS0000404490'
+
+neither showing up in orders incident log
+
+--- #procs from archana / james for tracking caseid dock confirming issue ----------
+ 
+select  tl.* from scprd.wmwhse1.TRANSMITLOG tl (nolock)
+INNER JOIN scprd.wmwhse1.ORDERS o with (nolock)
+ON o.ORDERKEY = tl.KEY1
+join DMSServer.dbo.shipments s (nolock)
+on s.SHIPPER_SHIPMENT_REFERENCE=o.EXTERNORDERKEY
+join DMSServer.dbo.fa_shipment f on f.SUID=s.SUID    
+WHERE
+tl.TABLENAME = 'shipmentdockconfirm'
+and tl.TRANSMITFLAG =9
+and f.ARO_DOCK_CONFIRM_FLAG=1
+and f.ARO_VOID_FLAG is null
+--and o.storerkey = 'onn' --for testing
+AND ( o.[status] >= 68
+          or
+          (o.[status] >= 55 and o.orderkey in (select key1 from scprd.wmwhse1.TRANSMITLOG t (nolock) where t.tablename = 'autodockconfirm') )
+         )
+update  f
+set f.ARO_DOCK_CONFIRM_FLAG=0
+from scprd.wmwhse1.TRANSMITLOG tl (nolock)
+INNER JOIN scprd.wmwhse1.ORDERS o with (nolock)
+ON o.ORDERKEY = tl.KEY1
+join DMSServer.dbo.shipments s (nolock)
+on s.SHIPPER_SHIPMENT_REFERENCE=o.EXTERNORDERKEY
+join DMSServer.dbo.fa_shipment f on f.SUID=s.SUID    
+WHERE
+tl.TABLENAME = 'shipmentdockconfirm'
+and tl.TRANSMITFLAG =9
+and f.ARO_DOCK_CONFIRM_FLAG=1
+and f.ARO_VOID_FLAG is null
+---and o.storerkey = 'onn' --for testing
+AND ( o.[status] >= 68
+          or
+          (o.[status] >= 55 and o.orderkey in (select key1 from scprd.wmwhse1.TRANSMITLOG t (nolock) where t.tablename = 'autodockconfirm') )
+         )
+
+_________________________________________________________________________________________________________
+/*									ATP-15928 - 16654
+									reporting for CE
+									AOS
+									10/29/19 -  /19
+adding karen and addrienna to ras / aos process reports and summary reports and removing tracy
+
+----------------------this is query to pull emails for atp summary ------------------------------
+SELECT DISTINCT fp.property_value AS email
+    FROM [MailShop2KSQL].[dbo].[tblAtpIssues] ai WITH (NOLOCK)
+        INNER JOIN MailShop2KSQL.dbo.tblCustomers c WITH (NOLOCK)
+            ON c.Company = ai.company
+        INNER JOIN dbo.Fulfillment f WITH (NOLOCK)
+            ON f.mailshop_code = c.CustCode
+		INNER JOIN [Fulfillment_Properties] fp WITH (NOLOCK)
+			ON fp.fulfillment_id = f.fulfillment_id AND fp.property_group = 'CONTACT' AND fp.property_name = 'PRIMARY_CE'
+    WHERE ai.company <> 'AERO CORPORATE' AND ai.status NOT IN  ('Done', 'Cancel') AND fp.property_value <> '' 
+	UNION
+    SELECT
+           e.email AS email
+    FROM [MailShop2KSQL].[dbo].[tblAtpIssues] ai WITH (NOLOCK)
+        INNER JOIN MailShop2KSQL.dbo.tblCustomers c WITH (NOLOCK)
+            ON c.Company = ai.company
+        --INNER JOIN dbo.Fulfillment f WITH (NOLOCK)
+        --    ON f.mailshop_code = c.CustCode
+		INNER JOIN  [AeroEmployees].[dbo].[employees] e WITH (NOLOCK)
+			ON e.jira_username = ai.reporter
+		--INNER JOIN [Fulfillment_Properties] fp WITH (NOLOCK)
+		--	ON fp.fulfillment_id = f.fulfillment_id AND fp.property_group = 'CONTACT' AND fp.property_name = 'PRIMARY_CE'
+    WHERE ai.status NOT IN  ('Done', 'Cancel') AND e.email <> ''
+
+
+atp summary isnt the same as order incidents. 
+order incidents is JIRA boomi job
+atp summary is ATP?
+
+order incidents ONLY uses fulfill props and boomi
+
+atp summary uses fulfill prop table, boomi and aeroemployees.dbo.employees table 
+
+
+_________________________________________________________________________________________________________
+/*									ATP-16586
+									report error
+									IMS/H?
+									10/29/19 -  /19
+
+imhealth science
+
+reports id 3022 or 3085?
+
+not sure how this isnt working correctly
+using mail_events
+
+fulfillment_subscriptions
+
+fulfillment_events
+
+etc
+
+mis matches the names of events and reports tied to them with what is happening
+in the ticket
+
+
+same as other report, why are there two?
+
+both are duplicates
+
+OG reports are shiplist by part and shipment header with tracking
+
+
+142 ship list by part ------ 3085 is fake version of this
+
+and report
+2123 shipment header with tracking ---- 3022 is fake version of this
+
+
+_________________________________________________________________________________________________________
+/*									ATP-16967
+									nav and infor access for torie
+									aero
+									10/29/19 -  10/29/19
+create nav and infor access based on carla mitchell
+
+copied carlas nav and changed to torie
+
+created login for her on domain
+
+no email
+
+gave access to nav and infor
+
+_________________________________________________________________________________________________________
+/*									ATP-16389
+									S drive access for aly and ben cook and michele boehle
+									aero
+									10/29/19 -  10/29/19
+
+verified that all still need accesss
+
+added via active directory
+
+testing after they reboot
+
+
+
+_________________________________________________________________________________________________________
+/*									ATP-16886 ---- 16928 
+									infor inv admin ---- katie and jami added to group aeroman
+									aero
+									10/30/19 -  10/30/19
+eshak needs access for cycle count request
+
+gave IC role to test
+
+added katie and jami through active directory to group aeromanagers
+_________________________________________________________________________________________________________
+/*									ATP-16592 16690 16211
+									hardware tickets either not needed or done
+									aero
+									10/29/19 -  10/29/19
+
+drew still needs ssd for his laptop
+
+rest are already done
+
+
+
+_________________________________________________________________________________________________________
+/*									ATP-16043
+									add tammy and dontay to all fulfill order incident alerts
+									aero
+									10/29/19 -  10/29/19
+
+
+ --update fp
+set property_value = property_value + '; dontay.shamel@aerofulfillment.com; tammy.faulkner@aerofulfillment.com'
+
+--select *
+from ENTERPRISE.dbo.Fulfillment_Properties fp(nolock)
+where property_name = 'SECONDARY_OPS_MANAGER'
+
+
+select fulfillment_id, property_name, property_value from enterprise.dbo.Fulfillment_Properties (nolock) where property_name = 'SECONDARY_OPS_MANAGER'
+
+
+_________________________________________________________________________________________________________
+/*									ATP-15995
+									add order confirms for dib, ama, walmart for katie and i (johnna)
+									VAY
+									10/31/19 -  10/31/19
+
+
+select *
+from LEBANON.dbo.orders (nolock)
+where fulfillment_id = 1162
+and (consign like ('%dib%') or consign like('%walmart%') or consign like('%amazon%'))
+
+order by add_date desc
+
+
+getting correct info for "DIB" then using above where clause for filter on new event
+
+
+
+-- update ev
+set
+	can_subscribe = 1,
+	email_field = ''
+--select *
+from ENTERPRISE.dbo.MailEvents ev
+where event_id = 174
+
+make subscribeable for katie and johnna
+
+
+select *
+from lebanon.dbo.event_orderstatuschanged 
+where [trans_submodule] = 'SUBMITTED' 
+AND [fulfillment_id] = 1162 
+AND [trans_date] BETWEEN '2019-10-31 11:46:15.733' AND '2019-12-31 11:46:15.733'
+--AND ISNULL([email],'') <> '' 
+and (consign like ('%do it best%') or consign like('%walmart%') or consign like('%amazon%'))
+
+
+select *
+from lebanon.dbo.event_orderstatuschanged 
+where [trans_submodule] = 'SUBMITTED' 
+AND [fulfillment_id] = 1162 
+AND [trans_date] BETWEEN '2019-10-31 11:46:15.733' AND '2019-12-31 11:46:15.733'
+and (consign like ('%do it best%') or consign like('%walmart%') or consign like('%amazon%'))
+
+EMAIL FIELD IS ROOT CAUSE ---- when using a subscribable event that will always have an email
+need to set the filter to not pull when email is null
+
+
+
+_________________________________________________________________________________________________________
+/*									ATP-16302
+									app bpa fieldsolution2 to reports 
+									DF
+									10/31/19 -  10/31/19
+ff id 726
+
+
+DF_internationalreceipts.rpt
+DF_internationalstockreport.rpt
+DF_ReceiptHistoryxUOM.rpt
+DF_ReorderxUOM.rpt
+DF_SKU_Utilization.rpt
+DF_OrdersByDate2.rpt
+DF_ordersbyrole.rpt
+DF_OrdersBySKU2.rpt
+DF_ordervolume.rpt
+DF_ShipListByPart3.rpt
+DF_ShipListByPartByCompany2.rpt
+DF_ShipListByPartByCustomer2.rpt
+DF_OrderHistoryByMonth2.rpt
+DF_AllotmentByCatalog.rpt
+Lebanon_CatalogRoles.rpt
+
+Catalog Roles - Lebanon_CatalogRoles.rpt
+Allotments by Catalog/Role - DF_AllotmentByCatalog.rpt
+(New 2017) Orders by Role - DF_ordersbyrole.rpt
+(New 2017) Order History by Month - DF_OrderHistoryByMonth2.rpt
+(New 2017) Ship List by Part by Entered By - DF_ShipListByPartByCustomer2.rpt
+
+
+select *
+from lebanon.dbo.Allotment_Group (nolock)
+where fulfillment_id = 726
+
+field solutions looks to be a group possibly also a role? table driven dynamic roles?
+just insert and then verify database?
+
+this role was actually created in magento as well via kelly and matt w
+
+API may not be working because it shouldve created it in nav but didnt.
+
+
+
+
+_________________________________________________________________________________________________________
+/*									ATP-17053
+									ship bullpin needs access to terrys account
+									aero
+									11/5/19 -  11/5/19
+
+enabled account
+may need to reset PW
+
+
+
+
+_________________________________________________________________________________________________________
+/*									ATP-16735
+									mike obregon needs infor portal
+									aero
+									10/31/19 -  11/5/19
+
+was able to log in after giving admin
+played with 1 by 1 adding dif roles and none worked
+ this should not be the case
+
+
+
+
+_____________________________________________________________________
+
+#CRON
+CRON job notes
+
+sign in via putty
+schedule it via params
+call the commands and also defined a public key so that it can auto run
+without failing cuz of password
+because it gets file from another server
+
+_____________________________________________________________________
+
+/*									CI-541
+									update all email templates
+									PHC
+									11/5/19 -  11/5/19
+
+have email template data in email from jami
+
+
+these are actually new templates to be made in magento
+
+
+workflow out the email templates for how they are supposed to work 11/8 
+tell jami templates are made already though just need to be configured across site
+
+
+
+_____________________________________________________________________
+
+/*									atp-17055
+									order IR0000038604 was part shipped for item 8050X01. 
+									We only shipped 7000 of the 10000 ordered
+									IRE
+									11/7/19 -  11/7/19
+
+in lot x loc x id
+not seeing any actual qty available
+saw 3k allocated and 3k expected - ran fix alloc stor proc
+changed 3k allocated to 0
+thats the problem there wasnt enough actual inventory
+
+
+
+
+#ssd
+UEFI due to m2 drive
+change bios mode to enable disable instead of dis en or dis dis
+
+
+_________________________________________________________________________________________________________
+/*									ATP-17093
+									ship order complete in nav
+									VAY
+									11/8/19 -  11/8/19
+
+going through standard order incident queries
+
+select *
+from lebanon.dbo.orders (nolock)
+where primary_reference = 'VA0000093868'
+select * from SCPRD.wmwhse1.orders (nolock) where EXTERNORDERKEY  = 'VA0000093868'
+
+select *
+from lebanon.dbo.Lineitem (nolock)
+where orders_id = 40765814
+
+select *
+from LEBANON.dbo.Orders_IncidentLog (nolock)
+where orders_id = 40765814
+
+select *
+from scprd.wmwhse1.PICKDETAIL (nolock)
+where sku in ('8050X01','670535718635','670535724766','670535721109')
+and ORDERKEY = 0015906940
+
+select *
+from lebanon.dbo.Orders_ErrorCodes oe (nolock)
+join LEBANON.dbo.Orders_IncidentLog oi (nolock) on oi.errorCode = oe.errorCode
+join LEBANON.dbo.orders o (nolock) on o.orders_id = oi.orders_id
+where o.primary_reference = 'VA0000093868'
+
+*******************found nothing*********************
+1 line in lineitem table not shipped however
+
+---
+
+look up queries from gets in packed order validation
+
+---
+
+nothing 
+
+---
+
+look up line item trans
+
+finding that there arent 2 records when there ALWAYS should be
+meaning somehow 1 got deleted
+
+and typically only eady button procs would give anyone permission to do something like this
+so check easy button log
+
+select top 10 *
+from enterprise.dbo.EasyButtonLog (nolock)
+where paramval2 = 'VA0000093868'
+
+select * from ENTERPRISE.dbo.EasyButton
+
+---
+
+found that jenny ran a rollback active order proc for this order
+on correct days 1-/31 and 11/1
+
+---
+
+essentially looks like she did this to an order that was shipped in infor and
+she used a proc for ACTIVE orders. shipped in infor means its not active
+to our logic in easy button proc
+
+this deleted data it shouldnt have and caused this line to get stuck in packed
+as our validation needs a line transaction for it to get to shipped
+
+going to need to force this to shipped since there is no trans for this line
+afterwards thisll ship in nav because all the qualifications are met
+
+
+select *
+from scprd.wmwhse1.ORDERSTATUSHISTORY (nolock)
+where ORDERKEY = '0015906940'
+order by ADDDATE
+
+-- update l
+	set line_status = 'SHIPPED',
+		qty_shipped = qty_ordered,
+		qty_open = 0
+--select *
+from lebanon.dbo.Lineitem l (nolock)
+where orders_id = 40765814
+and lineitem_id = 236593409
+
+update this 
+ StoredProcedure [wmwhse1].[pr_DeleteOrder] 
+
+_________________________________________________________________________________________________________
+/*									ATP-17068
+									billing POD report for oct for sykes
+									sykes?
+									11/8/19 -  12/3/19
+report 1758
+
+sykes pg iams 130
+sykes pg cr 131
+sykes pg pur 137
+
+
+12/3
+[pr_Create_Update_POD_PO]?
+[pr_dx_POD_Reorder]?
+dx_POD_reorder is ran by sub boomi process mas POD Reorder
+supposed to reopen pod if open qty goes below reorder point
+
+[vw_pod_open_purchase_orders] - same logic of  qty rec < qty ordered and status < 9
+
+SELECT * FROM mason.dbo.vw_pod_open_purchase_orders
+
+select * from ENTERPRISE.dbo.dpbilling (nolock)
+where short_name = 'PGK'
+and [date] > '2019-09-12 00:00:00.000'
+
+chasity and adam stiverson
+-- updating PO may be at fault for entering in incorrectly
+ordered has to be greater than recvd
+
+looks like (according to james that they arent following the process. if they were it wouldnt be status 9 before Todd
+is needing to print)
+
+replied to becky saying people are receiving against PO and closing before Todd can do his part to bill clicks
+
+12/11
+still waiting on becky to communicate with OPS to fix their procedure
+shouldnt need to be open still but we will see
+
+
+_________________________________________________________________________________________________________
+/*									ATP-17110
+									ras po not closing
+									RAS
+									11/11/19 -  11/12/19
+
+working trying to figure out what tracking numbers are missing
+
+looks like matt may have removed items from conveyor to mass auto dock confirm
+
+one case / pick was edited somehow by user 4742 debbie wood
+this is the only case pick missing drop ID need to find that in process where it couldve missed it
+
+cant prove anything she did is cause just coincidence currently
+
+tried to manual dock confirm this case 0073203797 and i get an error
+
+-- select *
+from scprd.wmwhse1.WAVEDETAIL
+where WAVEKEY in (0000349332,0000349327, 0000349324, 0000349288)
+
+select wo.EXTERNORDERKEY
+from lebanon.dbo.wms_wavedetail wd
+join lebanon.dbo.wms_ORDERs wo  on wo.ORDERKEY = wd.ORDERKEY
+join lebanon.dbo.wms_PICKDETAIL pd on pd.ORDERKEY = wo.ORDERKEY
+join DMSServer.dbo.shipments s(nolock) on s.shipper_shipment_reference = wo.EXTERNORDERKEY
+join DMSServer.dbo.packages p (nolock) on p.SUID = s.suid and p.SHIPPER_PACKAGE_REFERENCE = pd.CASEID
+join DMSServer.dbo.fa_shipment fas (nolock) on fas.suid = s.suid
+--where wo.EXTERNORDERKEY = 'RA0000054424'
+--and isnull(s.CARRIER_SHIPMENT_REFERENCE, '') = ''
+and wd.WAVEKEY in (0000349332,0000349327, 0000349324, 0000349288)
+
+-- select * from LEBANON.dbo.orders wo where primary_reference = 'RA0000054424'
+0015916085
+--select * from LEBANON.dbo.wms_orders wo where EXTERNORDERKEY = 'RA0000054382'
+--select * from LEBANON.dbo.wms_WAVEDETAIL where ORDERKEY = 0015916037
+--select * from lebanon.dbo.Manifest where orders_id = 40817027
+
+-- select trackingnumber, caseid, o.*
+from LEBANON.dbo.orders o(nolock)
+join LEBANON.dbo.Manifest m (nolock) on m.orders_id = o.orders_id
+where primary_reference in ('RA0000054430','RA0000054432','RA0000054433','RA0000054434','RA0000054436','RA0000054438','RA0000054439','RA0000054440','RA0000054441','RA0000054442')
+order by trackingnumber, caseid
+
+select top 2 * from LEBANON.dbo.manifest (nolock)
+
+select *
+from DMSServer.dbo.shipments (nolock)
+where SHIPPER_SHIPMENT_REFERENCE in ('RA0000054391')
+
+select pd.CASEID, p.SHIPPER_PACKAGE_REFERENCE, *
+from DMSServer.dbo.shipments s(nolock)
+join DMSServer.dbo.packages p(nolock) on p.SUID = s.suid
+join LEBANON.dbo.wms_PICKDETAIL pd on pd.CASEID= p.SHIPPER_PACKAGE_REFERENCE
+where SHIPPER_SHIPMENT_REFERENCE in ('RA0000054391')
+
+select *
+from lebanon.dbo.orders (nolock)
+where order_status = 'SUBMITTED'
+
+select *
+from LEBANON.dbo.wms_PICKDETAIL
+where ORDERKEY = 0015916037
+order by CASEID
+
+
+select m.trackingnumber, wo.EXTERNORDERKEY, m.caseid, wo.ORDERKEY
+from --lebanon.dbo.wms_wavedetail wd
+ lebanon.dbo.wms_ORDERs wo -- on wo.ORDERKEY = wd.ORDERKEY
+left join lebanon.dbo.wms_PICKDETAIL pd on pd.ORDERKEY = wo.ORDERKEY
+left join lebanon.dbo.manifest m(nolock) on m.caseid = pd.CASEID and m.orders_id = wo.ORDERSID
+--join DMSServer.dbo.shipments s(nolock) on s.shipper_shipment_reference = o.primary_reference
+where isnull(trackingnumber, '') = ''
+and wo.EXTERNORDERKEY = 'RA0000054424'
+--and wd.WAVEKEY in (0000349332,0000349327, 0000349324, 0000349288)
+
+select caseid, PICKDETAILKEY
+from  lebanon.dbo.wms_PICKDETAIL pd 
+--left join lebanon.dbo.manifest m(nolock) on m.caseid = pd.CASEID
+--join DMSServer.dbo.shipments s(nolock) on s.shipper_shipment_reference = o.primary_reference
+where ORDERKEY = '0015916085'
+
+-- select *
+from LEBANON.dbo.manifest where caseid in ('0073215391','0073215392','0073215393')
+
+select wo.EXTERNORDERKEY, pd.CASEID, m.caseid, m.trackingnumber
+from lebanon.dbo.wms_ORDERs wo -- on wo.ORDERKEY = wd.ORDERKEY
+left join lebanon.dbo.wms_PICKDETAIL pd on pd.ORDERKEY = wo.ORDERKEY
+left join lebanon.dbo.manifest m(nolock) on m.caseid = pd.CASEID
+where isnull(m.trackingnumber, '') = ''
+and wo.EXTERNORDERKEY = 'RA0000054424'
+
+select top 10 *
+from enterprise.dbo.EasyButtonLog (nolock)
+where paramval2 = 'RA0000054424'
+
+
+select wo.EXTERNORDERKEY
+from lebanon.dbo.wms_wavedetail wd
+join lebanon.dbo.wms_ORDERs wo  on wo.ORDERKEY = wd.ORDERKEY
+where wd.WAVEKEY in (0000349332,0000349327, 0000349324, 0000349288)
+
+
+_________________________________________________________________________________________________________
+/*									ATP-17103
+									need laptop finished getting set up
+									need other network login. print in color option
+									AERO
+									11/13/19 -  11/13/19
+
+from tina "i need my laptop finished getting set up. I need the other network login. It is asking for credentials .
+I also need to print in color on the copier up front."
+
+
+_________________________________________________________________________________________________________
+/*									ATP-16774 and 16623
+									visio access for dotty and nick james?
+									AERO
+									11/13/19 -  11/13/19
+
+\\aeroshare03\IT\Installs\Visio2013
+noooo theres an online version they should be able to access
+with their licensed account
+
+apparently we dont have right license for her? 11/26
+
+_________________________________________________________________________________________________________
+/*									ATP-17159
+									issue with genco orders
+									awi
+									11/13/19 -  11/13/19
+
+user placing orders is role ABP CSR
+toni mcgrath 2
+tlm2 welcome
+
+customer_id	fulfillment_id	customer_type	customer_status	primary_reference	reference_2
+1134142		1092			USR				ACTIVE			71739642972			Toni McGrath 2	
+reference_3	reference_4	full_name	email	password	phone		fax		shipper_no	cost_center	
+									tlm2	welcome		717-396-4297					ABP	
+edit_date	edit_who	add_date	add_who	parent_id	allotment_reference	payment_profile_id	login_enabled	login_question	login_answer	last_login	login_attempts	login_total	culture	tax_exempt	allotment_group_id									
+2012-01-24 13:54:15.667	734593	2012-01-24 13:54:15.667	734593	0			1			NULL	0	0		0	NULL
+
+2 example orders 
+WI0000138961 and WI0000138956
+38961 has 5 or 6 lines only 1 aero fulfilled rest look like they were exported to genco properly according to boomi
+and FTP logs
+
+i see vendor status canceled on the lines items going to genco?
+boomi processes involved are order status import and order export to sap
+
+export shows these going out on ftp
+then import SHOULD show them being updated to canceled
+
+checking lineitem trans and fulfilltrans with lineitem id
+
+select * 
+from lebanon.dbo.inventory i (nolock)
+join lebanon.dbo.lineitem l (nolock) on l.item_id = i.item_id
+where l.orders_id = 40860842
+
+1444 admin
+sprusr 1453
+accting 1454
+distbtr 1455
+ABP rep 1456
+abp sm  1457
+abp admin asst 1458
+abp csr 1459
+
+_________________________________________________________________________________________________________
+/*									ATP-17159
+									issue with genco orders
+									awi
+									11/13/19 -  11/13/19
+
+db locking
+
+cant really go beyond that since nothing was consistent with any changes we made
+
+
+_________________________________________________________________________________________________________
+/*									ATP-17239
+									resend ship confirm for 203561
+									KET
+									11/20/19 -  11/21/19
+pulled edi file from 945 get
+resent via ftp
+
+
+11/21 
+
+#resend945
+DO NOT DO ABOVE METHOD.... shouldve been a good indicator when you noticed the formats were different
+
+that was SQL not edi therefore they didnt receive correctly
+
+just use trans submodule and orders id to update trans status to = 0 
+and that will resend the 945
+
+_________________________________________________________________________________________________________
+/*									ATP-17246
+									order not importing	
+									KET
+									11/21/19 -  11/21/19
+re run files that didnt import.
+was due to dblocking
+
+
+
+
+_________________________________________________________________________________________________________
+/*									ATP-15805
+									masrec alert 
+									becky
+									11/21/19 -  11/21/19
+[dx_KET_FixWarehouseReference]
+
+hard coded third value
+
+need to fix somehow by updating and then testing
+
+
+_________________________________________________________________________________________________________
+/*									ATP-16633
+									nav site changes
+									AAS
+									11/25/19 -  11/21/19
+
+maybe be able to copy over working data form for this
+
+test sku 2053-07P-TY20
+me id 1869372
+
+change df width to 120%
+and change #order totals to 110px imp
+
+
+_________________________________________________________________________________________________________
+/*									CI-510
+									child meter setup
+									Teamson
+									11/25/19 -  11/21/19
+
+still waiting on filipes end to approve then theyll send 11/29
+
+
+
+12/13
+believe it is all good ot go in UAT
+
+for prod
+error inc billing address when trying to commission fxws
+
+
+_________________________________________________________________________________________________________
+/*									ATP-17270
+									edi 856 not sending properly or on  time
+									VAY
+									11/21/19 -  11/21/19
+dates on edi 856 11/22 when filipe shipped
+investigate what caused these to not occur on time and go through whole process end to end?
+
+these sent 11/22 and our boomi job ran at 5:27 to send these to truecomm?
+need to follow up with them on what happened on their end
+
+_________________________________________________________________________________________________________
+/*									ATP-17207
+									simpleVMS set up on computer in mason lead station
+									AERO
+									11/21/19 -  11/26/19
+
+had trouble finding how to set up
+explored documentation
+
+still unclear how aero would config on our end.
+
+stephanie said its set up at fairfield and to check that machine but has no idea 
+how its working or what do to to replicate.
+
+simms helped find the google chrome link and copied to aeroshare03 IT so i could pull onto the machine
+
+it worked but its still auto opening ulti pro on restarts. dont know why its getting restarted though.
+
+
+
+#RF gun note. setting up cab file odyssey auto run she used 3rd cab file on application
+
+_________________________________________________________________________________________________________
+/*									ATP-17376
+									set up suzanne shetter comp and accounts
+									AERO
+									12/2/19 -  12/2/19
+
+
+suzanne shetter
+set up pc.
+need to finish setting up accounts
+set up infor
+
+
+
+
+#bat calls today 12/3 about needing to DL more tracking numbers for TAOS - solution: needed to exit properly after DL?
+had to call chuck
+
+
+_________________________________________________________________________________________________________
+/*									ATP-17391
+									second waving zebra
+									AERO
+									12/2/19 -  12/2/19
+
+also for printers for Amy - issue is its same as jennys old printer so only does small waves
+
+
+worked on printers for Amy 17391
+
+
+
+
+also fixing printing issues for ivonne and annika
+
+
+OTC ship conf email is event id 48
+not a subscription
+last ran on 9/30/19
+
+
+wharlan@ncdhp.com
+\\afsweb204\content\Navigator\export\20190927\2c55507e-40c8-4822-be77-a29aa324f092.pdf
+
+josh and archana switched out one from fill and seal area? this is closed
+
+_________________________________________________________________________________________________________
+/*									ATP-17398
+									Autumn uploaded 2 credit memoes on 11/5 neither appear in QB
+									CPG
+									12/4/19 -  12/4/19
+
+looking over logs and documents trying to find issue. filipe helped re run the specific doc that we were missing. 
+failed due to empty rows. edited in notepad++ then reimported and worked perfectly
+
+
+12/6
+still need feeback from client on if its all good now
+
+_________________________________________________________________________________________________________
+/*									ATP-17238
+									big commerce needs to connect to zevo nav
+									ZVO
+									12/4/19 -  12/4/19
+
+waiting on response from cheri
+
+they just need credentials turns out the recent ones created werent for them but for netsuite
+used stored proc to create new creds
+
+need to close if this is all thats needed
+
+_________________________________________________________________________________________________________
+/*									ATP-16985
+									batch pending approval still not working 
+									CPG
+									12/4/19 -  12/4/19
+
+randomly stopped sending me these emails?
+
+12/6
+
+works for all other fulfills
+james suggests making a boomi job to track so IT has visibility of when its happening then we
+can get a chance to troubleshoot root cause
+
+aero nav orders file list import
+download file then upload to aero web 204
+to test
+trim file a bit so only one customer after changing to xml
+paste into this directory \\afsweb204\content\wwwroot\eFulfillment\batchupload
+
+also theres a web admin script for CPG but not NARS
+
+
+_________________________________________________________________________________________________________
+/*									ci-541
+									update email template
+									PHC
+									12/4/19 -  12/4/19
+working on ship conf through crystal for tomorrow
+
+not working as html so trying pdf
+pdf quality doesnt look good overall
+
+need to find alternatives
+josh suggested jeff net - looking around and not sure how to mimic what we want through here
+asking james if we can use boomi over jeff net since jeff net seems less plausible
+james helped work on creating a quick version in boomi
+
+
+https://www.ups.com/track?loc=en_US&requester=ST/
+
+not using that just using logic from formula in crystal
+
+use it like html
+one edi element for the trackinglink
+elements before and after are the body and other logic
+
+
+
+_________________________________________________________________________________________________________
+/*									ATP-17173
+									Estore not showing order
+									CPG
+									12/4/19 -  12/4/19
+
+having issues with orders disappearing after they were edited in approvals
+
+my test order backordered need to back out through windows nav "manage backorders" and cancel/delete it
+
+james said if it was an issue with any specific approval thing the code is same for everyone so it
+wouldnt just be cpg/estore
+
+cant find where this could be occurring just trying to replicate and then diagnose along the way
+
+placing several test orders
+need to recreate scenario where its going to approval then either edited or approved and
+then disappears completely?
+if you dont save by going through checkout again entirely then EDIT doesnt remove items
+
+next test removed items and used purchase order and recd payment error
+cant convert dbnull to BOOL
+
+new ticket entered to totally fix
+
+
+workaround is a column was added to hold the value of false instead of a virtual column
+
+_________________________________________________________________________________________________________
+/*									ATP-17167
+									voicemail keeps resetting
+									AERO
+									12/6/19 -  12/6/19
+
+4528
+dougs voicemail pin
+cbts ticket INC0802970
+5133975675 opt 5 opt 1?
+
+they didnt see anything to raise alarm on the behavior of it resetting randomly or not 
+giving you the pw reset option.
+
+all they can do is ask if this happens again that we contact them before resetting 
+and checking as close to the incident as possible for what may have been the cause
+
+
+_________________________________________________________________________________________________________
+/*									ATP-17410
+									fix timeclocks
+									AERO
+									12/6/19 -  12/6/19
+just needed to be alt tabbed to ultipro timeclock
+
+2 or 3 in leb doing this
+
+also bat call about the RFID computer i believe that someone restarted and it opened ultipro.
+need to disable this but also its not really any issue if leads just do alt tab..
+
+
+_________________________________________________________________________________________________________
+/*									ATP-17413
+									fix ship station label printer
+									AERO
+									12/6/19 -  12/6/19
+
+isabelles ship station it reprints fine so couldve been an issue with how she was scanning?
+
+but it is possible that its a real error just unsure for now
+
+
+_________________________________________________________________________________________________________
+/*									ATP-17314
+									error placing orders for tide
+									TIDE dry
+									12/9/19 -  12/10/19
+\\afsweb201\Cybersource\logs\APFI.txt
+go to bottom
+
+what changes were made last week?
+looks like credentials
+
+
+-- update pm
+set serial_number = '5759159838430177107050'
+-- select top 10 *
+from enterprise.dbo.payment_merchantsecurity pm
+where merchant_id = 'triplefintdc'
+and serial_number = '4791351909420177097427'
+
+
+
+_________________________________________________________________________________________________________
+/*									ATP-17455
+									fix bug in order provider
+									AERO
+									12//19 -  12//19
+fix order provider code
+1974
+function authorize payment
+
+
+_________________________________________________________________________________________________________
+/*									ATP-17460
+									OTC ORDER CONFIRM UPDATE
+									OTC
+									12/10/19 -  12/10/19
+sent to lincoln
+
+
+_________________________________________________________________________________________________________
+/*									ATP-17437
+									abby not rec emails for img approval
+									CPG
+									12/10/19 -  12/11/19
+
+doesnt look like theres anything wrong or any changes to our img approval processes in boomi
+or in the stored procs themselves
+checking with brian H to see if he recvd the img approval emails and that should confirm
+the issue is on CPGs side not ours. since they have been having email issues lately. 
+our boomi job hasnt been failing and if needed i can do email trace via office 365
+to see if it went out at all or just to brian or anything else.
+
+
+
+EXEC msdb.dbo.sp_send_dbmail @profile_name='aerofulfillment.com',
+				@recipients=@approval_emails,
+				@subject='Image Approval',
+				@body=@htmltext,
+				@body_format = 'HTML' ;
+
+querying this shows mail last ran 9-17
+meaning something happened that is keeping it from running
+
+\\afssql01\D$\MSSQL\DATA\MSSQL12.MSSQLSERVER\MSSQL\Log
+#sql #logs
+this is the path for production sql logs
+shows possibly failures for server agent jobs and mail
+
+SQLServer Error: 14607, profile name is not valid [SQLSTATE 42000]
+no profile selected
+
+i looked in the settings/properties for mail alerts and no profile was under the db
+selected profile
+hopefully its running now. will test.
+1:15pm
+still not sending, doesnt appear to be related. thing is its not sending test emails at all
+likely a deeper issue than we can work on.
+
+
+1:45pm checked logs again after seeing a cpg pending approval for batch 
+which i havent recvd since 10/24
+so maybe the profile being selected did work it just had to go through a massive backlog
+
+afssql01>>>management folder>>>sql servers logs>>> most recent log file 
+also works with path above if not in sql
+
+##
+also found bug on site that shows incorrect / error page on reject img. need to also chck out the approve
+and cancels?
+
+
+
+SELECT * 
+FROM msdb.dbo.sysmail_sentitems
+order by send_request_date desc
+
+SELECT * 
+FROM msdb.dbo.sysmail_unsentitems 
+order by send_request_date desc
+ 
+can see that this hasnt correctly ran since 9/17
+trying to see how we can get it to run. riches suggestion was to restart afssql01
+
+
+start going through each
+to see which are being sent through sql to change to boomi
+and evaluate which and how we can convert to boomi
+
+client focus > then aero
+
+
+
+RDX will handle DBA
+
+
+6*8*10
+_________________________________________________________________________________________________________
+/*									ATP-17428
+									2 users in estore as FST when should be DTR
+									ESTORE
+									12/10/19 -  12/11/19
+Robbie Forkum and Dennis Aguirre
+
+change from FST back to DTR
+also check document to make sure none of the listed are set to FST
+
+neither are in estore - dotty said she fixed last week
+people on list dont look like they have estore access but will check
+
+
+** update 
+chris added a bunch of these users not simms
+via emails and excel sheets given him from abby on 10/24
+
+_________________________________________________________________________________________________________
+/*									ATP-17461
+									ship station 2 at mason wont print
+									AERO
+									12/6/19 -  12/6/19
+
+has peter paul printer
+not working due to paper tray - feed
+got it to print a couple times inconsistently
+uninstalled then reinst.
+still nothing - def hardware related
+
+shouldnt be using anyways
+connected to network printed on next desk over
+reconfigged cls - infoship docs to print to this instead of old printer
+
+
+_________________________________________________________________________________________________________
+/*									ATP-17443
+									multiple inv records found for lpn ---
+									AOS
+									12/9/19 -  12/9/19
+
+had to blank out dropid and then move inv to a pickto loc from QC
+because matt admitted moving some of that sku to qc
+happened near the time of the pick
+explains infor not correctly handling this issue
+once inv is moved we ran fix alloc again
+then able to ship i believe once in packed via packed validation - archana helped here
+
+_________________________________________________________________________________________________________
+/*									ATP-17489
+									mason zebra
+									AERO
+									12/13/19 -  12/13/19
+
+use boot TP for zebra setup to set up to DHCP
+ethernet may be an issue
+for Todd Lewis 
+
+
+_________________________________________________________________________________________________________
+/*									SC-399
+									sc portal utilities - add prever logic so users cant ship request
+									without a manifest
+									AERO
+									12/13/19 -  12/13/19
+
+test for james:
+you will need to create orders and wave them
+I would suggest starting with RAS
+Once you have a wave, I would do a mass pick on case, order, and then wave
+same for dock confirm and ship
+RAS should be pretty restricted so you should get error
+especially when you try to dock confirm and ship
+it should not let you ship without a manifest
+it should not let you dock confirm if they are in a conveyable zone
+
+1 - look up orders not on wave and create wave
+looking at infor to see if there are waves and orders already in UAT i can use
+RA0000054933   RA0000054932 	RA0000054913	RA0000054912	RA0000054917
+RA0000054934	RA0000054914
+
+
+wave 0000350297
+		RA0000054935
+		RA0000054913
+
+wave 0000350298
+		RA0000054912
+		RA0000054914	
+
+wave 0000350299
+		RA0000054934
+		RA0000054915			
+
+2 release wave in infor
+
+3 uat sc portal
+		utilities mass pick - select pick then wave and enter wave key
+							- select pick then caseid and enter caseid
+							- select pick then order and enter prime ref
+
+		this confirmed as successful pick
+	0015958567 ordkey picked
+	0000350298 wavekey picked
+	0073252992 caseid picked PART PICKED still got success msg so wave/order part picked cuz only one caseid of
+	many were picked
+
+	0015959359 ord key picked
+	0015940781 ord key picked
+
+4 after picked complete we need to get to packed status using dock confirm?
+	0073252992 caseid dock confirm success?
+	0015958567 ordkey dc success again
+	0000350298 did not dc - log shows "this is a conveyable carton! please put the carton back on the conveyor"
+	0015948130 did not dc - some already dc some not picked some conveyable
+
+	0000350297 wave key didnt dc - all conveyable errors in log
+
+5 can test this part both with packed and non packed status for wave/order
+	0000350298 did not ship and throws both errors no manifest and nonconveyable carton
+	0073252992 caseid no manifest
+	0015958567 ordkey no manifest
+
+#SERIAL CHECK SUMMARY IN ASSET MANAGER
+5CG7515P72
+
+_________________________________________________________________________________________________________
+/*									ATP-17510
+									suz shetter needs s drive access
+									AERO
+									12/16/19 -  12/16/19
+
+jamie wallace is in each of these groups so copy for suzanne
+aero users
+aero WC users
+aerorderconfirm
+dept_RW
+domain users
+print operators
+termservice users
+wc fulfillment
+wc shipping
+
+
+
+_________________________________________________________________________________________________________
+/*									ATP-16990
+									CCPA document for sykes
+									SYKES PGK 'PS'
+									12/18/19 -  12/18/19
+
+
+nav admin manage docs
+
+orders_cost_center = 'CRIUS'  and orders_flexfield1 = 'LNCO_ENGLISH-US' 
+AND orders_flexfield10 > 1 AND item_primary_reference IN ('RLFDXSTOCK')
+
+SUBSTRING(orders_flexfield1,1,2)= 'LO' AND  SUBSTRING(orders_cost_center,1,6) IN ('PAGCAN','NATCAN','NATCAN_col','PAGCAN_col','TEMP1C', 'TEMP1CAN_COL')  AND orders_flexfield10 > 1
+
+test import works after appending with -1 on erroring customer refs
+
+submit
+release
+goes to infor
+wave it
+release
+then go to waves to print
+then itll show up in the docstoprint directory
+updates the logo_map.csv file with the print job data from windows nav
+
+
+\\afsweb204\Content\Navigator\Templates\XMLPrintDocuments\DocToPrint
+
+thatll prove its working as they intend
+
+#update 12/20/2019
+probably has to do with the flexfields not updating properly for multiple page orders
+need to look in to this
+
+#1/3/2020
+still not sure about multiple page piece. but now inserting or updating new cost center
+to the document categories table
+
+
+_________________________________________________________________________________________________________
+/*									ATP-17167
+									darrell cant access S drive
+									AERO
+									12/6/19 -  12/6/19
+darrell cannot access S drive same with 
+
+tried logging in to his acc on my computer and it worked
+also tried another employee logging into his computer and it working
+opening ticket with netgain for help
+
+8663755422
+_________________________________________________________________________________________________________
+/*									ATP-17546
+									Order # WI0000140460 has error code 30 
+									- marked as shipped but is missing shipping data
+									AWI
+									12/19/19 -  12/19/19
+
+error 30
+manually added manifest
+issue being order with vendor and non vendor lines using virtual items
+
+use error code query
+
+ord # tracking and caseid
+
+_________________________________________________________________________________________________________
+/*									ATP-17542
+									close out ras order
+									RAS RA0000056026
+									12/17/19 -  12/19/19
+
+use error code query
+
+need to use error 29 or 30 solution using manual freight update
+under warehouse tab in windows nav
+
+packed validation will pick up afterwards if rest of caseids, etc also have manifest
+
+
+_________________________________________________________________________________________________________
+/*									ATP-17544
+									add drop ids to 2 orders
+									AFI
+									12/17/19 -  12/19/19
+
+these are LTL orders and some may be older and not in infor anymore
+palletkey usually = dropid
+
+OPS needs to provide these to us
+
+_________________________________________________________________________________________________________
+/*									ATP-17532
+									add drop ids to 2 orders
+									AFI
+									12/17/19 -  12/19/19
+these are LTL orders and some may be older and not in infor anymore
+palletkey usually = dropid
+
+OPS needs to provide these to us
+createltlshipment
+cant have any cases with drop id already
+_________________________________________________________________________________________________________
+/*									ATP-17167
+									voicemail keeps resetting
+									AERO
+									12/6/19 -  12/6/19
+
+
+
+
+1 hand on back of chair 1 foot on chair wheel opposite hand and foot at side. didn't touch her. and moved shortly
+after blocking her since i was only there to talk to hamid while she was gone. i moved out of her way
+before the conversation took a serious turn 
+
+conversation with archana:
+
+why are you closing my tickets after asking me and i said no?
+
+arch -josh agreed to close
+
+its not done though there is no reason to close it
+
+arch - she can make a new ticket this is old
+
+you are making us look bad and also disregarding what we said after you asked
+we can close our own tickets
+
+arch - i am doing you a favor because i dont want to work on saturday
+
+we dont want to either but you dont need to close our tickets to do so
+
+arch - this is my job to close them
+
+there are other ticket to work on that dont involve closing our tickets
+theres a whole queue of tickets
+
+arch (whispering while talking to me) - i dont have to listen to you i am just doing my job
+and if you dont like it just complain about me
+
+she tells us to stop talking to her and she puts in headphones
+
+
+
+_________________________________________________________________________________________________________
+/*									PGBOSTON MEETING
+									
+									
+									12/18/19 -  12/18/19
+
+-- PGBOSTON NOTES
+
+add employee ID to index/search field 
+
+sortable retiree and require trans - reformat
+
+fix home link in admin page
+
+add contact page and other parts
+
+fix export doc to not export as check marks for retiree and req trans. make sortable?
+
+link to reports
+_________________________________________________________________________________________________________
+/*									ATP-17464
+									inventory list update for soapbox kibo thatcleanfeeling
+									12/17/19 -  12/19/19
+
+sending reports of inv lvls to companies opting to not use feeds
+they rely on this data to see what we have avail for their orders
+
+its part of a 6am batch or other in jeffnet
+correction in 5am batch for all the inventory list files
+
+3 different files added 3 emails each i believe
+
+
+
+_________________________________________________________________________________________________________
+/*									ATP-17572 & 17573
+									close out PGOC orders that are picked/allocated
+									PGOC
+									12/19/19 -  12/19/19
+
+
+
+
+
+
+_________________________________________________________________________________________________________
+/*									ATP-17562
+									unable to print or install zebra printer on mas-robs pc
+									12/17/19 -  12/19/19
+
+he needs help setting up locally
+
+the zebra is ONLY set up through the term server not office
+so use this path instead \\afsterm01\MAS DP ZEBRA 2
+
+
+
+
+
+_________________________________________________________________________________________________________
+/*									ATP-17547
+									AWI EOM
+									AWI
+									12/19/19 -  12/20/19
+fix one order 2 lines
+
+
+skus 					item id
+BPCS5390				340368
+BPCS6169				427068
+
+
+C00117220BSL601
+
+
+there was a space in front of the C
+fixed and now validation is fine
+checked this was an issue by copy pasting. trying to use the functions in the query but
+they will still pass validation if 2 out of 3 pass
+
+_________________________________________________________________________________________________________
+/*									ATP-17548
+									AFI EOM
+									AFI
+									12/19/19 -  12/20/19
+
+have to redo on friday as i went through whole process on thurs
+
+will have to delete the batch
+
+
+invoice date range function was incorrectly converting date somehow in a bug
+
+datepart used to fix filegroup fn
+
+_________________________________________________________________________________________________________
+/*									ATP-17582
+									sykes client documents not showing up when entering wave
+									PGK
+									12/20/19 -  12/20/19
+
+caused by boomi process failing to store procs werent ran correctly to update ff10 using ff5 on lineitem
+
+
+
+[dbo].[dx_SykesPageCount_BEN]
+
+
+
+select *
+from mason.dbo.wms_WAVE w
+join mason.dbo.wms_WAVEDETAIL wd on wd.WAVEKEY = w.wavekey
+join mason.dbo.wms_orders o on o.ORDERKEY = wd.ORDERKEY
+join mason.dbo.orders oo (nolock) on oo.primary_reference = o.EXTERNORDERKEY
+where w.wavekey = 0000357858 
+
+
+-- select *
+from mason.dbo.ordersedit (nolock)
+where primary_reference = 'PS0010761762'
+
+-- select top 10 *
+from mason.dbo.lineitem l (nolock)
+join mason.dbo.lineitem_flexfields lf(nolock) on lf.lineitem_id = l.lineitem_id
+where l.orders_id = 41268523
+
+-- select *
+from mason.dbo.orders_batch (nolock)
+where orders_id = 41268523
+
+SUBSTRING(orders_flexfield1,1,3)='LCO' AND  orders_cost_center IN ('PAGUS','NATUS','NATUS_col', 'PAGUS_col','TEMP1US', 'TEMP1US_COL') AND orders_flexfield10 <= 1
+
+SELECT l.orders_id, 
+		MAX(ISNULL(lx.flexfield5,'1')) as [Pagecount]
+		FROM Lineitem l with (nolock)
+		INNER JOIN Lineitem_Flexfields lx with (nolock)
+			ON l.lineitem_id = lx.lineitem_id
+where l.add_date = getdate()
+		GROUP BY l.orders_id
+
+
+-- select *
+FROM Orders_Flexfields ox with (nolock)
+INNER JOIN orders_batch ob with (nolock)
+	ON ox.orders_id = ob.orders_id
+INNER JOIN 
+	(SELECT l.orders_id, 
+		MAX(ISNULL(lx.flexfield5,'1')) as [Pagecount]
+		FROM Lineitem l with (nolock)
+		INNER JOIN Lineitem_Flexfields lx with (nolock)
+			ON l.lineitem_id = lx.lineitem_id
+		GROUP BY l.orders_id) li
+	ON ox.orders_id = li.orders_id
+WHERE ob.batch_id = 2144924
+
+find the wave data 
+then find batch using order
+
+then use batch to validate against proc queries
+
+use proc to fix and update as intended
+
+12/23
+
+going back through original doc i dont see anything with multiple pages or pagecounts in that field
+but maybe its pulling 1 page at a time for orders with several pages?
+not entirely sure but more validation looks like it may just have incorrect data
+
+did find one with a pagecount of 2
+
+BUT found a section where it definitely looks like pagecounts werent included at all
+<Product>
+		<CustomerReferenceOrderID>C-0003296364</CustomerReferenceOrderID>
+        <CustomerReferenceLineID>C-0003296364</CustomerReferenceLineID>
+        <LineNumber>1</LineNumber>
+        <ProductReference>PLAINLETTER</ProductReference>
+        <QuantityOrdered>1</QuantityOrdered>
+        <LetterData>
+        </LetterData>
+        <PageCount>1</PageCount>
+        <SpecialInstructions />
+        <ParentProduct>
+        </ParentProduct>
+        <ParentQty>
+        </ParentQty>
+</Product>
+<Product>
+        <CustomerReferenceOrderID>C-0003296364</CustomerReferenceOrderID>
+        <CustomerReferenceLineID>CLI-0004275050</CustomerReferenceLineID>
+        <LineNumber>2</LineNumber>
+        <ProductReference>COUSTOCK</ProductReference>
+        <QuantityOrdered>1</QuantityOrdered>
+        <PageCount />
+        <CouponData>
+ 			<CouponType>76</CouponType>
+            <Brand>Dawn</Brand>
+          <ConsumerCouponDescription>
+          </ConsumerCouponDescription>
+          <ManufacturerId>37000</ManufacturerId>
+          <FamilyCode>156</FamilyCode>
+          <FormId>151074</FormId>
+          <CheckDigit>5</CheckDigit>
+          <MaxValue>4.99</MaxValue>
+          <ContactLanguage>English-US</ContactLanguage>
+          <ExpirationDate>03/31/2020 05:00:00</ExpirationDate>
+          <RSSData>
+            <RSSBarcode>81101003700015107434991101563200331522026215391000</RSSBarcode>
+          </RSSData>
+        </CouponData>
+        <SpecialInstructions />
+        <ParentProduct>
+        </ParentProduct>
+        <ParentQty>
+        </ParentQty>
+</Product>
+
+so this may explain some orders not showing up. going to do more validation
+-- however more data suggests the additional line items beyond 1 never show a pagecount?
+
+line 8844 in xml has pagecount of 0
+
+only found one order with a pagecount of 2 C-0003296426
+and one order with a pagecount of 0   -- C-0003296225
+
+still may or may not be related to 6 missing.
+
+
+LO- ff7 
+and consign and reference_3 and filter
+SUBSTRING(orders_flexfield1,1,2)= 'LO' AND ISNULL(cartontype,'') <> '' 
+AND SUBSTRING(orders_cost_center,1,7) IN ('PAGUS','NATUS','NATUS_c', 'PAGUS_c','TEMP1US', 'TEMP1US_COL') 
+AND orders_flexfield10 <= 1
+
+SUBSTRING(orders_flexfield1,1,3) = 'LN_' AND ISNULL(cartontype,'') <>  '' 
+AND SUBSTRING(orders_cost_center,1,7) IN ('PAGUS','NATUS','NATUS_c', 'PAGUS_c','TEMP1US', 'TEMP1US_COL') 
+AND orders_flexfield10 <= 1
+
+SUBSTRING(orders_flexfield1,1,3)= 'LCO' AND ISNULL(cartontype,'') <> '' 
+AND SUBSTRING(orders_cost_center,1,7) IN ('PAGUS','NATUS','NATUS_c', 'PAGUS_c','TEMP1US', 'TEMP1US_COL') 
+AND orders_flexfield10 <= 1
+
+
+ord ff7 = batch number
+
+scenario = ord ff1    = 'LCO English-US' etc
+
+enterprise DB has all the tables
+
+
+
+
+_________________________________________________________________________________________________________
+/*									ATP-17590
+									manifest needed for orders
+									VAR
+									12/23/19 -  12/23/19
+
+
+
+void previous shipment and new shipment wont dock confirm
+is a bug
+
+archanas script fixes
+
+
+
+
+_________________________________________________________________________________________________________
+/*									ATP-17340
+									remove from inventory
+									AFI
+									12/17/19 -  12/19/19
+
+
+item no longer exists so cant make adjustments
+kelly wants us to completely remove sku D2310687-41 from system?
+
+remove from locations in attachment
+just deleting where sku = D2310687-41
+and loc = x
+
+
+Kelly should be able to finish. only 1 wasnt working and needed fix allocations ran once or twice
+
+
+_________________________________________________________________________________________________________
+/*									ATP-17542
+									sykes order cant print in nav
+									PGK
+									12/23/19 -  12/23/19
+
+
+
+probably based on being multiple pages which i didnt fix yet. very important to get this working
+
+
+tried using a new wave from this morning and i was able to see documents to print
+may need to continue walking through process if he experienced after
+-- wavekey used 
+
+-- 0000357974 not wave key
+
+-- actual 2nd 2145440
+-- 2146042 2nd
+-- 2145744 1st batch
+used my test ben proc for get pagecount proc
+
+then boomi job needs to pick up?
+
+
+starting documentation
+Troubleshooting section 
+
+Boomi subprocess has a post-process that runs dx_sykespagecount and it has been failing recently
+
+Follow these steps to fix using SQL
+
+-- fix wave docs not showing in print wave docs tool for DP department
+
+-- step 1 use wave key or cust ref to get batch ID
+
+-- query 1select ob.batch_id, *
+from mason.dbo.orders ox(nolock)
+INNER JOIN mason.dbo.orders_batch ob with (nolock)ON ox.orders_id = ob.orders_id
+where customer_reference = 'C-0003303625'
+
+-- query 2select ob.batch_id, *
+from mason.dbo.orders ox(nolock)
+INNER JOIN mason.dbo.orders_batch ob with (nolock)ON ox.orders_id = ob.orders_id
+join mason.dbo.wms_orders wo on wo.externorderkey = ox.primary_reference
+left join mason.dbo.wms_wavedetail wd on wd.orderkey = wo.orderkeywhere fulfillment_id = (select fulfillment_id from mason.dbo.fulfillment where short_name = 'PGK')
+and wd.wavekey = '0000358213'order by add_date desc
+
+-- step 2 take batch id and hard code into line 44 of [dbo].[dx_SykesPageCount_BEN] in mas db-- step 3 verify in windows nav using wavekey that the doc counts are now showing
+
+
+
+_________________________________________________________________________________________________________
+/*									ATP-17542
+									Unable to generate a packing slip
+									AERO - LSK RRF LUX
+									12/26/19 -  12/26/19
+
+1)LSK using AOS doc and wont allow to print in nav? from annika
+i believe this is supposed to print using AOS doc?
+0000354845
+
+-- only looks like it may work because shares nav page with lux but not configured for LSK
+
+2) RRF showing unhandled exception error when trying to print
+- may be from not having config in a table to print? or bug
+0000354799
+
+-- this is an extra service and not set up for this fulfillment
+
+3)LUX master packing slip is showing blank but regular packing slips in nav work?
+- also a config issue somewhere?
+0000354771
+
+this is working as intended
+
+_________________________________________________________________________________________________________
+/*									ATP-17624
+									kit build by UOM rid 2433 err msg
+									Creative Teaching
+									12/27/19 -  12/27/19
+
+
+error generating report - fix config or etc
+
+adding new report. leb was trying to use a coremason report for wrong WH. 
+also was using wrong join for last table - cant do prim ref need to use item id
+
+
+
+_________________________________________________________________________________________________________
+/*									ATP-17620
+									edit allotments
+									PGOC
+									12/27/19 -  12//19
+
+step by step instructions on how to edit for erin to accomplish these updates on her own using tool.
+
+or otherwise
+
+tm jfm
+sim con
+psr nam
+dsa jfm
+
+cust jfm - some skus didnt work because they dont exist
+and help this file up
+TSPWR0247 and TSPWR1026
+should just be without TS at the beginning
+also looks like something else may have covered for these
+customer types?
+
+testing making changes in UAT trying to overwrite current allotments using another import
+459 role
+i believe code checks if it already exists though and may just skip?
+
+verified in the code it will say there is an allotment already
+so maybe we have a way to cancel specific active ones and prepare the next import?
+
+remove all allotments except these skus
+There are 2 sku's we would not want to end PAS1011, PAS1016, PWR1039, PWR1012, PWR1108 & PWR1112
+
+
+switch interval with value 
+
+val should be int
+interval should be  M D Y
+
+#pgoc allotments
+1/3/2020
+working with james
+updated end dates to 12-31-2019 for old allotments that i imported over
+ here is validation that an order was made by this cust id for item id on
+ 1/2 for one of the allotments and it counted towards new allotment
+
+orders_id	fulfillment_id	customer_id	order_type	order_status	order_source	order_priority	drop_date	release_date	entered_by	primary_reference	customer_reference	reference_3	reference_4	order_date	consign	ship_address_1	ship_address_2	ship_address_3	ship_attention	ship_city	ship_region	ship_postal_code	ship_country	ship_bmc	email	phone	job_number	customer_account	department	cost_center	comment	notes	ship_method_id	ship_bill_account	ship_date	ship_chg	ship_weight	ship_cartons	order_amt	handling_amt	ship_amt	tax_amt	total_amt	total_lines	approval_reason	edit_date	edit_who	parent_short_name	customer_cost_center	total_weight	add_date	add_who	entered_by_name	add_who_name	edit_who_name	original_orders_id	original_order_reference	billing_date	approved_by	approved_by_name	approved_date	billing_period	billing_status	discount_id	discount_amt	has_pod	culture	tax_exempt	backorder_status	backorder_qty_shipped	est_delivery_date	delivery_date	autowave	lineitem_id	fulfillment_id	orders_id	line_type	line_status	line_number	item_id	item_desc	qty_ordered	qty_shipped	price	cost	tax_amt	notes	approval_reason	lottable	qty_open	qty_backordered	qty_presubmitted	qty_submitted	qty_allocated	uom	qty_uom	edit_date	edit_who	packkey	parent_short_name	order_primary_reference	item_cost_center	weight	allotment_id	add_date	add_who	add_who_name	edit_who_name	item_primary_reference	original_lineitem_id	original_orders_id	original_order_reference	original_line_number	new_backorder_shipmethod	new_backorder_shipaccount	original_packkey	original_uom	approved_by	approved_date	approved_by_name	billing_period	billing_status	kit_parent_line_id	kit_parent_item_id	qty_allotted	tax_code	doc_id	pod_reference	backorder_code	discount_amt	culture	inventory_default_uom	vendor_status	vendor_name	backorder_status	backorder_qty_shipped	po_number	po_qty	po_qty_allocated	po_qty_uom	qty_uom_presubmitted	parent_line_number	kit_item_qty	item_id	fulfillment_id	item_type	item_status	item_prefix	primary_reference	reference_2	reference_3	reference_4	short_desc	long_desc	backorder	unit_wt	reorder_point	comment	cost_center	max_order	expiration_date	price	cost	default_uom	last_received	last_shipped	edit_date	edit_who	packkey	fulfillment_short_name	add_date	add_who	add_who_name	edit_who_name	cycle_count_code	lot_validation	shelf_life	key_words	active_date	tax_code	manufacture_origin	setup_status	has_image	harmonized_code	pod_reference	case_bill	pallet_bill	first_received	role_ids	culture	lead_time	reorder_factor	max_qty_uom	min_qty	vendor_name	vendor_pokey	po_reorder_qty	dynamic_reorder	po_reorder	vendor_type	EA_Length	EA_Width	EA_Height	CS_Length	CS_Width	CS_Height	QC_OVERRIDE	Min_temperature	Max_temperature	Min_humidity	Max_humidity	Inbound_CatchData	Outbound_CatchData	HAZARD_FLAG	HAZARD_SIGNATORY_TITLE	HAZARD_SIGNATORY_NAME	HAZARD_SIGNATORY_PLACE	HAZARD_SIGNATORY_PHONE	HAZARD_EMERGENCY_PHONE	ITEM_HAZARD_ID	ITEM_HAZARD_PACKING	ITEM_HAZARD_QUANTITY	ITEM_HAZARD_QUANTITY_UOM	ITEM_HAZARD_INSTRUCTIONS	ITEM_HAZARD_CARGOAIR_FLAG	ITEM_HAZARD_PACKING_GROUP	ITEM_HAZARD_CLASS	ITEM_HAZARD_SHIPPING_NAME	weight_tolerance	customer_id	fulfillment_id	customer_type	customer_status	primary_reference	reference_2	reference_3	reference_4	full_name	email	password	phone	fax	shipper_no	cost_center	edit_date	edit_who	add_date	add_who	parent_id	allotment_reference	payment_profile_id	login_enabled	login_question	login_answer	last_login	login_attempts	login_total	culture	tax_exempt	allotment_group_id
+41327642	311	746020	STANDARD	SHIPPED	WEB	5	2020-01-02 11:28	2020-01-02 11:28	746020	OC0002261862				2020-01-02 11:34:51.147	DR. RONI ROSATI OFFICE	3110 HIGHLAND ROAD	SUITE 202		HYGIENE TEAM	HERMITAGE	PA	16148	US		office@rosatidental.com	(724) 981-0521							19001		2020-01-03 14:28:01.903	0.0000	6.1050	2	0.00	0.00	0.00	0.00	0.00	2		2020-01-03 14:28:01.903	0	PGOC		5.0400	2020-01-02 11:34:57.570	746020	Jillian Lindberg	Jillian Lindberg	SYSTEM	0	NULL	2020-01-03 14:28:01.903	NULL	NULL	NULL	NULL	0	0	0.00	0	EN-US	0	NULL	NULL	NULL	NULL	NULL	239278119	311	41327642	WEB	SHIPPED	00002	130733	Crest Kids Graphics Cavity Minty Breeze .85oz	72	72	0.0000	0.0000	0.0000				0	0	0	0	0	CS	1	2020-01-02 11:34:57.633	746020	1EA.72CS	PGOC	OC0002261862	CREST PASTE	0.0600	25674	2020-01-02 11:34:57.633	746020	Jillian Lindberg	Jillian Lindberg	PAS1013	NULL	NULL	NULL	NULL	NULL	NULL	NULL	NULL	NULL	NULL	NULL	NULL	0	0	0	864				PY	NULL		CS				NULL	NULL	NULL	NULL	NULL	NULL	NULL	NULL	130733	311	PART	ACTIVE	NULL	PAS1013	1839807	NULL	NULL	Crest Kids Graphics Cavity Minty Breeze .85oz	NULL	PY	0.06	0		CREST PASTE	0	NULL	0.0000	0.0000	CS	2019-11-21 07:08:59.000	2020-01-03 14:28:01.917	2020-01-03 09:44:10.587	1242083	1EA.72CS	PGOC	2006-06-23 13:35:11.793	2	NAVIGATOR	ERIN JONES	D	LT5LT8LT9	183		NULL		US	0	0			1	0	2006-06-30 12:34:08.827	NULL		NULL	NULL	NULL	NULL			NULL	0	0		0.000	0.000	0.000	0.000	0.000	0.000	0	41	86	0	0	NONE	NULL		NULL	NULL	NULL	NULL	NULL	NULL	NULL	NULL	NULL	NULL	NULL	NULL	NULL	NULL	0.00	746020	311	USER	ACTIVE	5114		5502		Jillian Lindberg	lindberg.j@pg.com	Welcome	412-584-9788	N/A			2019-05-13 09:29:05.980	746020	2006-07-31 11:17:14.603	2	745963	5114		1			NULL	0	0	EN-US	0	NULL
+
+--
+-- select * 
+from mason.dbo.Allotments a with (nolock)
+inner join mason.dbo.Allotments b with (nolock)
+    on b.MemberID  = a.MemberID and a.item_id = b.item_id and b.StartDate = '2020-01-01 00:00:00.000'
+where a.StartDate = '2019-07-01 00:00:00.000'
+and a.allocated > 0
+and a.item_id = 130733
+and b.memberid = 746020
+
+--
+select *
+from mason.dbo.orders o(nolock)
+join mason.dbo.Lineitem l (nolock) on l.orders_id = o.orders_id
+join mason.dbo.inventory i (nolock) on i.item_id = l.item_id
+join mason.dbo.customer c (nolock) on c.customer_id = o.customer_id
+where o.fulfillment_id = 311
+and o.customer_id = 746020
+and i.item_id = 130733
+
+
+
+_________________________________________________________________________________________________________
+/*									ATP-17539
+									Fix report 1520 to pull arc data
+									SPL
+									12/26/19 -  12/27/19
+
+
+made a whole new report
+pulled in arc data. running in web nav not working
+
+got a different stor proc from being negligent - i used report_inv adjustment instead of report_lebanon_inv adj
+
+should be able to fix now
+
+still not working
+
+-- asking james to see what he thinks
+he said to verify the view is actually looking at archive data
+
+wms_adjustmentdetail_all
+this wasnt looking at archive only scprd
+use UNION then copy paste same select but from scprdarc.adjustmentdetail_all
+
+tested and def pulling more data. working in prod now 
+
+_________________________________________________________________________________________________________
+/*									ATP-17628
+									move SQL mail processes to boomi
+									AERO
+									12/23/19 -  12//19
+
+move from SQL mail to boomi starting list in excel to see which jobs need to move where.
+also will start tracking effort and plan for each here
+
+
+1) CPG image approval - blanket process includes couple others - non SQL agent jobs
+	- image rejected
+	- image approved
+
+
+	-- find these procs and etc by using mega query on this EXEC msdb.dbo.sp_send_dbmail in like search
+dx_API_AlertMessage
+dx_Mason_check
+dx_WC_check
+pr_DX_ScheduleAlert
+pr_DXOrderBatchCheck
+pr_process_check_Reserve_error
+pr_process_check_Reserve_error_leb
+
+2) to tech admin
+	
+3) below section v-v-v-v-v-v-v-v-v-v-v-v-v-v-v-v-v-v-v
+wiped out rest from before 12/13
+
+most are dblocking related or similar going to kevin at RDX
+
+look at sql agent --> jobs -- to see what is all running and that we need to switch over to boomi
+-- 3pl ltl order limit alert - proc sends mail
+
+-- align fix payment method - no mail
+
+-- archive freight - no mail
+
+-- archive navigator orders - no mail - side note using sql commit tran for arc order status and cleaning?
+
+-- archive storage - no mail
+
+-- batch status check - dx batch alert subject to aero it support - ent
+
+-- cpg order batch check - mail working
+
+-- cpg calcreorderpoint and max order qty - no mail
+
+-- database backup copy - no mail
+
+-- DBA cycle error log - uses subsystem = N'TSQL' - no mail directly that i can see
+
+-- DBA - email blocking queries - uses CDBA db to send sysmail - not working
+
+-- DBA - email long running queries - uses CDBA db to send sysmail - not working
+
+-- DBA - index maintenance - uses CDBA db and does index opt using fragmentation and ind rebuild - no mail
+
+-- DBA - integrity check - checks all dbs for name/status where in online suspect and reports which - no mail
+
+-- DBA backup - monthly uat refresh - backs up to .bak filetype - no mail
+
+-- DBA backup FULL - backup all full? - no mail
+
+-- DBA backup TLOG - log backups? - no mail
+
+-- DBA history cleanup backup - sets backup.disable to false for server - no mail
+
+-- DBA mailshop2ksql use etl mailshop all tables - no mail
+
+-- Discover freight update - no mail
+
+-- DMSServer maintenance update - sets backup.disable to false for server - no mail
+
+-- DMSServer system - deletes from dmsserverlog where entry date <= 2 weeks ago - no mail
+
+-- DS starter kit alert - emails becky and ed gabriel? - not working - changed to me - for new starter kits imported
+						- also sends email to ed if no starterkit orders were rec today?
+
+-- FS Cancel members - no mail
+
+-- lebanon inv history - no mail
+
+-- manifest tuneup - uses update statistics on leb/mas manifest dmsserver pack shipments ship charge ship misc fa_ship
+					- no mail
+
+-- mason inv history - no mail
+
+-- mason web request purge - delete from web_request in mason where status = declined and sub date < 30 - no mail
+
+-- nars push upc altsku - no mail - simple insert
+
+-- OPS daily metrics - no mail - few different procs that update tables about labor metrics
+
+-- OTC allotment create - no mail - big allotment update
+
+-- pgotc catalog group create - align estore item sharing and catalog update? - no mail
+
+-- process - WC customer hierarchy rebuild - no mail
+
+-- proc activate inv - no mail
+
+-- proc AFI create sample catalogs - good proc - no mail
+
+-- proc awi create sample catalogs - no mail
+
+-- proc backorder status - no mail
+
+-- proc billing freight - no mail
+
+-- proc billing receipt/ returns - no mail
+
+-- proc CDI expire certs - no mail - hard update based on table data for certs?
+
+-- proc CPG assembly pricing - no mail - just a couple dif procs to do updates
+
+-- proc CPG catalog items create - adds TCD items first then reg items - no mail
+
+-- proc kind notification dates - just updates fulfill sub next run dates - no mail
+
+-- proc lux putaway notif next run - same as above - no mail
+
+-- proc mark warehousereference - no mail
+
+-- proc PBH subscription item value not shipped - just updates fulfill sub next run dates - no mail
+
+-- proc PDP points apply changes - no mail
+
+-- proc PDP points arch - no mail
+
+-- proc PGAP customer hierarchy rebuild - no mail
+
+-- proc PGOC catalog items create - no mail
+
+-- proc PGOC customer hierarchy rebuild - no mail
+
+-- proc PGRX assign roles - no mail
+
+-- proc PHA catalog group items create - no mail
+
+-- proc PHA PGRX allotment updates - no mail
+
+-- proc PHC customer hierarchy rebuild - no mail
+
+-- proc reset order status - no mail
+
+-- proc SF catalog items create - no mail
+
+-- proc standard allotments - no mail
+
+-- proc SPL catalog group create - no mail - ITSUPPORT
+
+-- purge navigator transactions - no mail - ITSUP
+
+-- purge transmitlog - no mail - EDGAB
+
+-- reserve order error - sends db mail to james and techalerts
+
+-- sf convert price reorder max order to EA - no mail
+
+-- syspolicy purge history - no mail
+
+-- taskdetail update every 15 min - no mail
+
+-- test alert job - no mail - ITSUPP
+
+
+that is all of the active jobs
+now going to notate of which send sys mail
+
+
+
+
+
+
+_________________________________________________________________________________________________________
+/*									ATP-17633
+									fix sykes post process dx_sykespagecount in sub proc to send email on error
+									PGK
+									12/27/19 -  12//19
+Sykes PGK
+
+in order import sub proc theres a post proc that sets order ff10 from null to int
+however this is failing to run frequently lately
+so we need to build in an error email to send when this doesnt run
+
+
+
+
+
+
+_________________________________________________________________________________________________________
+/*									ATP-17542
+									fix error mail for teamson order import
+									TMS
+									12/16/19 -  12//19
+12/16 first change
+been working on this -- looked like i fixed because of simple process property change
+12/18 second change and adding chris
+starting to do lots of testing
+
+still not working after josh also looking at it
+12/21
+opening boomi ticket if possible
+boomi support changed so having trouble opening ticket
+
+emailed support to help open ticket and to help with this boomi job
+
+
+
+1/6
+still need to work with support to follow their troubleshooting steps
+
+
+_________________________________________________________________________________________________________
+/*									ATP-17542
+									pgoc sap to magento migration
+									PGOC
+									12/30/19 -  12//19
+
+-- testing changes simms has been making
+
+testing in canvas
+-- extensions to use
+	-- leave defaults
+	-- should be preset to defaults that point to UAT
+first test made it all the way through
+going to review that it imported correctly
+Dentalcare_US_20191230.csv - first
+order id on file should be customer ref possibly?
+first file actually failed on API portion because of inactive item i believe
+
+grabbed second file named Dentalcare_US_20191229.csv
+just one order or item that is active
+this file passed API and order imported
+
+OC0002255903 -- in UAT 
+
+#boomi #tip
+when going through test in canvas click the different components to view what occurred
+in that part of the process during test -- notably the API order submit
+
+_________________________________________________________________________________________________________
+/*									ci-510
+									teamson child meter
+									TMS
+									12/30/19 -  12//19
+--TM0000001119
+UAT order
+
+does teamson need to be waved?
+according to prod we are waving and most are misc truck with some rushes 
+some fed some ups
+
+orders not on wave - create wave
+-- wavekey 0000350303
+
+release order on wave
+pick via infor or?
+
+go to info ship and type in caseid and try to ship/print?
+#infoship registry
+Computer\HKEY_CURRENT_USER\Software\VB and VBA Program Settings\DMSClient\Config
+
+prod 
+TM0000019133
+
+test appeared to complete - documents to be printed werent set up correctly but still shipped
+with that ship method
+
+
+
+_________________________________________________________________________________________________________
+/*									CI-477
+									Media 360 child meter
+									MTS
+									12/30/19 -  12//19
+
+
+same as above 
+UAT MT0000000008
+MT0000000009
+-- sku '2053-07P-TY20'
+
+testing in prod using 99999 -- wasnt configured with any qty...
+MT0000002695
+wavekey 0000355415
+MT0000002696
+0000355587
+
+
+_________________________________________________________________________________________________________
+/*									ATP-17666
+									vay order needs ASN
+									VAY
+									1/2/20 -  1/2/20
+used #vay query from long time ago to find and validate
+
+updated asn to one given in ticket
+
+also need to update edistatus to 5 to be picked up by ltl 856 proc validation
+
+still may not have sent? although its shipped in nav now
+schedule isnt every 30 mins or hour so i force ran the boomi job
+ran over 2 mins but it worked
+
+
+_________________________________________________________________________________________________________
+/*									ATP-17648
+									top off replen report not working in infor
+									INFOR
+									12/30/19 -  12/30/19
+according to Josh this is just due to the service
+
+-- simply restart the service and it works
+
+
+
+_________________________________________________________________________________________________________
+/*									ATP-17542
+									close out ras order
+									RAS RA0000056026
+									12/30/19 -  12//19
+
+-- arch notes 17542
+add manifest for specific caseid
+processlogs
+
+
+
+
+
+
+
+_________________________________________________________________________________________________________
+/*									ATP-17542
+									close out ras order
+									RAS RA0000056026
+									12/30/19 -  12//19
+
+-- arch notes 17542
+add manifest for specific caseid
+processlogs
+
+
+
+
+
+_________________________________________________________________________________________________________
+/*									ATP-17542
+									close out ras order
+									RAS RA0000056026
+									12/30/19 -  12//19
+
+-- arch notes 17542
+add manifest for specific caseid
+processlogs
+
+
+
+
+
+
+
+_________________________________________________________________________________________________________
+/*									ATP-17542
+									close out ras order
+									RAS RA0000056026
+									12/30/19 -  12//19
+
+-- arch notes 17542
+add manifest for specific caseid
+processlogs
+
+
+
+#query
+
+cool snippet with HAVING 
+in proc scprd.[wmwhse1].[dx_MarkWarehousereference]
+
+--see if everything has been received...
+DECLARE @allreceived TABLE (receiptkey nvarchar(10), qtyexpected int, qtyreceived int, rcvskus int)
+INSERT INTO @allreceived
+SELECT r.receiptkey, qtyexpected=sum(ex.qtyexpected), qtyreceived=sum(rc.qtyreceived),	rcvskus=count(distinct rc.sku)
+FROM @recs r
+INNER JOIN @expected ex
+	ON r.receiptkey=ex.receiptkey
+LEFT JOIN @received rc
+	ON ex.receiptkey=rc.receiptkey and ex.sku=rc.sku
+GROUP BY r.receiptkey		
+--all skus received, and qtyreceived >= qtyexpected
+HAVING count(distinct rc.sku)>=count(distinct ex.sku)
+	AND sum(rc.qtyreceived)>=sum(ex.qtyexpected)
+
+_________________________________________________________________________________________________________
+/*									ATP-17542
+									close out ras order
+									RAS RA0000056026
+									12/30/19 -  12//19
+
+-- arch notes 17542
+add manifest for specific caseid
+processlogs
+
+
+
+
+
+
+
+_________________________________________________________________________________________________________
+/*									ATP-17542
+									close out ras order
+									RAS RA0000056026
+									12/30/19 -  12//19
+
+-- arch notes 17542
+add manifest for specific caseid
+processlogs
+
+
+
+
+
+_________________________________________________________________________________________________________
+/*									ATP-17542
+									close out ras order
+									RAS RA0000056026
+									12/30/19 -  12//19
+
+-- arch notes 17542
+add manifest for specific caseid
+processlogs
+
+
+
+
+
+
+
+_________________________________________________________________________________________________________
+/*									ATP-17542
+									close out ras order
+									RAS RA0000056026
+									12/30/19 -  12//19
+
+-- arch notes 17542
+add manifest for specific caseid
+processlogs
+
+
+_________________________________________________________________________________________________________
+/*									ATP-17542
+									close out ras order
+									RAS RA0000056026
+									12/30/19 -  12//19
+
+-- arch notes 17542
+add manifest for specific caseid
+processlogs
+
+
+
+
+
+
+
+_________________________________________________________________________________________________________
+/*									ATP-17542
+									close out ras order
+									RAS RA0000056026
+									12/30/19 -  12//19
+
+-- arch notes 17542
+add manifest for specific caseid
+processlogs
+
+
+
+
+
+_________________________________________________________________________________________________________
+/*									ATP-17542
+									close out ras order
+									RAS RA0000056026
+									12/30/19 -  12//19
+
+-- arch notes 17542
+add manifest for specific caseid
+processlogs
+
+
+
+
+
+
+
+_________________________________________________________________________________________________________
+/*									ATP-17542
+									close out ras order
+									RAS RA0000056026
+									12/30/19 -  12//19
+
+-- arch notes 17542
+add manifest for specific caseid
+processlogs
+
+

@@ -105,6 +105,9 @@ line_status = 'SHIPPED' and inventory@primary_reference<>'99999' --and (left(isn
  afterwards run tax export calc in boomi afsatom 01 
  once finished run tax export send in afsatom 02
 
+had to DL file from listener and then drop file into SFTP AFI/IN 12/19
+
+
 \\afsatom02\DX\AWI
  then run tax import afsatom01 and run following queries
 
@@ -125,8 +128,16 @@ WHERE add_date > getdate()-5 does this need results?
  subject:AWI EOM 9/25/18
   and doc to kelly
 
+Yes Deb Trimble for AWI
+
+GManganti@armstrongflooring.com for AFI
+Jonathan.Pietrolaj@ahfproducts.com for AFI
+
 ex:
-to:DATrimble@armstrongceilings.com for AWI OR for AFI 'mmoralespagan@armstrongflooring.com' and kelly'mmoralespagan@armstrongflooring.com'
+to:DATrimble@armstrongceilings.com for AWI 
+
+OR for AFI 'GManganti@armstrongflooring.com', 'Jonathan.Pietrolaj@ahfproducts.com' and kelly
+
 subject: 2018-09-25 Ceiling EoM
 
 body: 
@@ -301,3 +312,12 @@ to make sure nothing is set to 0 in units so there are no divide by 0 errors
 
 or may need to change stored proc elsewhere to do more validation across the tables involved
 so nothing has these '' (blank) values for UOM or 0 in units
+
+
+--------delete batch--------------
+DELETE FROM AFI_InvoiceDetail WHERE Invoice_Number IN
+(SELECT Invoice_Number FROM AFI_Invoice where batch_id=2145081)
+
+DELETE FROM AFI_Invoice where batch_id=2145081
+DELETE Batch where batch_id=2145081 
+
