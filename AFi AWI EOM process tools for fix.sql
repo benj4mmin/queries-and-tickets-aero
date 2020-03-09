@@ -1,4 +1,56 @@
 /*                  AFI / AWI EOM process                           */
+
+/* run all validation
+ then run first execution 
+--	EXEC [dx_AWI_CreateReceivables] @mode = 'NEW'
+ and following 2 or 3 queries
+
+ afterwards run tax export calc in boomi afsatom 01 
+ once finished run tax export send in afsatom 02
+
+had to DL file from listener and then drop file into SFTP AFI/IN 12/19
+
+
+\\afsatom02\DX\AWI
+ then run tax import afsatom01 and run following queries
+
+ next run dx create data execution called [dx_AFI_CreateGLData] 
+ follow this with 2 little queries then serious code check query
+SELECT * FROM AFI_GLHeader
+WHERE add_date > getdate()-5 does this need results?
+
+ once all these are completed we run the master ar/gl process in boomi
+ find the email sent in boomi and download and change file type to ZIP
+
+ next run the AR send in afsatom02 
+ once ar send is done run GL send afsatom02 
+
+ after these are all completed send the zip to kelly
+ and then send confirmation of completion to kelly and contact at awi or afi
+ ex:
+
+ subject:AWI EOM 9/25/18
+  and doc to kelly
+
+Yes Deb Trimble for AWI
+
+GManganti@armstrongflooring.com for AFI
+Jonathan.Pietrolaj@ahfproducts.com for AFI
+
+ex:
+to:DATrimble@armstrongceilings.com for AWI 
+
+OR for AFI 'GManganti@armstrongflooring.com', 'Jonathan.Pietrolaj@ahfproducts.com' and kelly
+
+subject: 2018-09-25 Ceiling EoM
+
+body: 
+The EoM files have been submitted for AWI.
+
+Thanks,
+*/
+
+-- ALL BELOW ARE TROUBLESHOOTING QUERIES
 -- using these queries and tools to fix orders during validation
 
 
@@ -10,9 +62,6 @@ SET ANSI_NULLS ON
 GO
 SET QUOTED_IDENTIFIER OFF
 GO
-
-
-
 
 
 
@@ -96,55 +145,6 @@ isnull(vendor_status,'')='' and qty_shipped>0 and
 line_status = 'SHIPPED' and inventory@primary_reference<>'99999' --and (left(isnull(flexfield13,''),4)
 
 
-
-/* run all validation
- then run first execution 
---	EXEC [dx_AWI_CreateReceivables] @mode = 'NEW'
- and following 2 or 3 queries
-
- afterwards run tax export calc in boomi afsatom 01 
- once finished run tax export send in afsatom 02
-
-had to DL file from listener and then drop file into SFTP AFI/IN 12/19
-
-
-\\afsatom02\DX\AWI
- then run tax import afsatom01 and run following queries
-
- next run dx create data execution called [dx_AFI_CreateGLData] 
- follow this with 2 little queries then serious code check query
-SELECT * FROM AFI_GLHeader
-WHERE add_date > getdate()-5 does this need results?
-
- once all these are completed we run the master ar/gl process in boomi
- find the email sent in boomi and download and change file type to ZIP
- next run the AR send in afsatom02 
- once ar send is done run GL send afsatom02 
-
- after these are all completed send the zip to kelly
- and then send confirmation of completion to kelly and contact at awi or afi
- ex:
-
- subject:AWI EOM 9/25/18
-  and doc to kelly
-
-Yes Deb Trimble for AWI
-
-GManganti@armstrongflooring.com for AFI
-Jonathan.Pietrolaj@ahfproducts.com for AFI
-
-ex:
-to:DATrimble@armstrongceilings.com for AWI 
-
-OR for AFI 'GManganti@armstrongflooring.com', 'Jonathan.Pietrolaj@ahfproducts.com' and kelly
-
-subject: 2018-09-25 Ceiling EoM
-
-body: 
-The EoM files have been submitted for AWI.
-
-Thanks,
-*/
 
 -- how james helped validate that AR_awp didnt have data to send or create
 -- for file. meaning nothing was flagged for invoicing for div/ cost center awp

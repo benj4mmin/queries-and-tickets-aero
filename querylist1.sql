@@ -302,7 +302,7 @@ from wms_wavedetail_all wd (nolock)
 join wms_orders o (nolock) on o.orderkey = wd.ORDERKEY
 where wd.wavekey = '0000321592' --add 0's if they only give '123456'
 
--- notes on wave not printing sykes ticket ATP-12689
+----- NOTES ------- on wave not printing sykes ticket ATP-12689
 -- james gave these 2 paths for scripts to run to check where the errors are
 -- and to open the xml
 -- \\afsweb204\Content\Navigator\Templates\XMLPrintDocuments\PGK\
@@ -375,7 +375,7 @@ and trans_submodule = 'released'
 -- 12731 item was entered into coty inventory but not their catalog
 -- so search or order wouldnt find it
 
--- notes on josh helping with vay 856 issue
+----- NOTES ------- on josh helping with vay 856 issue
 -- we had to go to where the orders were being imported
 -- aka vay order import process
 -- look in map to check what flexfields being used and what may
@@ -814,6 +814,7 @@ WHERE o.primary_reference = 'RA0000015714'
 --select * FROM lineitem where orders_id = 27647748
 --select * From ship_method
 
+-- #ucc test
 --In case anyone needs it in the future... heres a stored proc for testing UCC128 crystal reports.
 -- this version of the stored proc hits the archive database, enabling you to test with old orders
 -- that are no longer in Infor and are no longer on a wave (use the wavekey from pickdetail records).
@@ -2271,7 +2272,7 @@ and line item saying 1 line as 0003
 
 needed to find source
 as this is 30 days old cant check boomi or api logs
-
+#api log?
 so james informed me i could use WebSvc_Trans_Log table
 queried this order and copied details into notepad ++
 and confirmed only 1 line sent to us and this became billable
@@ -3480,7 +3481,7 @@ where batch_id = '1854038'
 -- old freight manager works better and james will develop for billing?
 
 
--- notes from james on process of wms
+----- NOTES ------- from james on process of wms
 -- dock confirm will take picked complete to packed complete
 -- once packed complete they can release
 -- once released they can part ship
@@ -5176,7 +5177,7 @@ based on shipmethod
 printing the actual waves comes after and gives pickers the tasks to start
 
 
--- notes 1/15/19 query for jeffnet reports?
+----- NOTES ------- 1/15/19 query for jeffnet reports?
 -- how to create report that says if a wave printed?
 -- on ltl manager dropid / palletkey process
 -- -- the cases must get a sticker that have a palletkey like 00040172 or 00046860 and then scanned
@@ -5333,7 +5334,7 @@ ________________________________________________________________________________
 							1/16/19 - 1/17/19
 shelf life issue holding up 1 line. didnt update looks like ops resolved
 
--- notes for fixing double printing labels from filipe
+----- NOTES ------- for fixing double printing labels from filipe
 -- infoship - admin - docs - package and remove dupe
 
 
@@ -6400,7 +6401,7 @@ and m.manifestkey is null
 -- intl order dig deeper in staging process
 print empty blank label then go back and reprint after staging
 
--- notes from wade 
+----- NOTES ------- from wade 
 how did you do what you need to
 communication biz to IT
 think through whole bigger picture
@@ -6419,11 +6420,11 @@ josh pointed out that can search via documents on key field with numbers provide
 process reporting > documents -- instead of PR > executions
 
 
--- NOTES
+----- NOTES -------
 -- ONN orders pdweb01
 
 
---- NOTES
+------ NOTES -------
 -- allocation trace - for did not allocate or other lot errors
 -- wms > execution > trace options > allocation trace - enter order id
 
@@ -6432,7 +6433,7 @@ process reporting > documents -- instead of PR > executions
 -- stop sched for afsatom01 in boomi ALL JOBS then remote to afsatom01 and start menu search services
 -- stop this service for afsatom then resume it. then resume scheduled boomi jobs
 
--- NOTES FOR CLS STAGING FOR INTL ORDERS - PGOC UPDATE
+----- NOTES ------- FOR CLS STAGING FOR INTL ORDERS - PGOC UPDATE
 -- shipper not configged to do staging. designed around requirements from Aero.
 -- intl shmt should be processed as single trans. need to clear as single expense and expediancy
 -- 5 sep custom clearance fees instead of 1 big one multi piece shipment
@@ -8421,7 +8422,7 @@ ________________________________________________________________________________
 
 
 
--- notes for filipe from mason planning about dottys tickets
+----- NOTES ------- for filipe from mason planning about dottys tickets
 atp-14347
 14632
 14648
@@ -8698,7 +8699,7 @@ ________________________________________________________________________________
 
 _________________________________________________________________________________________________________
 
--- notes 
+----- NOTES ------- 
 -- write design docs - write what you want to are designing
  - effective time less waste
 -- APM wins high apm proves much more work than most else.
@@ -10016,7 +10017,7 @@ continue work on following projects
 	 - showing search results for items filtered near top of screen
 
 -- ASSET MANAGEMENT
-	-- notes from meeting with josh, wade, chris
+	----- NOTES ------- from meeting with josh, wade, chris
 	 - specific new laptops to specific people by dept
 	  - first wave IT/exec/brenda/waving
 		- cascade above groups old laptops to next group after cleaning /reimage
@@ -10286,7 +10287,8 @@ the data forms handle this through 4 different admin scripts for approve and den
 
 so someone drops image into this folder and then itll be viewed for approval
 
-theres also a boomi job for image approvals - Aero Image Approval
+theres also a boomi job for image approvals - Aero Image Approval atom01 server
+\\afsatom01\c$\utils\ImageApproval
 C:\utils\ImageApproval\ImageApprovalConsole.exe
 
 
@@ -12859,7 +12861,7 @@ ________________________________________________________________________________
 
 AERO005040
 
-np4
+old cheese
 
 _________________________________________________________________________________________________________
 /*									ATP-15292
@@ -12991,7 +12993,7 @@ had lpn and loc messed up in pickdetail so it needed allocation fixed.
 
 
 ---- 
--- notes from max could be port blocked from 20 or 21? 
+----- NOTES ------- from max could be port blocked from 20 or 21? 
 -- 22 ssh
 
 -- 80
@@ -13001,7 +13003,7 @@ had lpn and loc messed up in pickdetail so it needed allocation fixed.
 -- using on_change()
 
 6/18/19
--- notes from PGBOSTON
+----- NOTES ------- from PGBOSTON
 -- need to contact becky to give her a test
 -- james said to use devexpress grid? look in SC and nav code for examples
 -- add the page using notes from email and resources in our code
@@ -13508,10 +13510,11 @@ ________________________________________________________________________________
 /*									atp - 15498 invoice # in xml doc to blackbox
 									VAR 
 									8/28/19 -  /19
-
+14470
 
 shipmentservice extension
-
+#VAR
+#SC
 shipments
 get and request?
 
@@ -13519,7 +13522,7 @@ model is SHIP_REQUEST
 navcontroller is holding the functions for below createshipments
 go to blackbox section line 1208
 
-go to imple of function processmanifestshipment(request)
+go to implementation of function processmanifestshipment(request)
 
 create shipment for order
 ship
@@ -15240,10 +15243,10 @@ ________________________________________________________________________________
 									12/4/19 -  12/4/19
 
 waiting on response from cheri
-
+#api
 they just need credentials turns out the recent ones created werent for them but for netsuite
 used stored proc to create new creds
-
+pr_process_create_API_cred
 need to close if this is all thats needed
 
 _________________________________________________________________________________________________________
@@ -15405,6 +15408,28 @@ sent to lincoln
 
 
 _________________________________________________________________________________________________________
+/*									ATP-17240
+									ASN not able to be added in LTL manager for provider WALM001
+									confirm this is walmart in LTL manager
+									VAY
+									11/21/19 -  12//19
+filipe sent out some of the 856s for below i may have sent rest or validated
+order date  PO			ASN			aero order #
+11/7/2019	3058569708	72318794	VA0000094589
+11/7/2019	9113369241	72276730	VA0000094590
+11/12/2019	3408568402	72501119	VA0000095075
+11/12/2019	3408568403	72211319	VA0000095076
+11/12/2019	7267210037	72318241	VA0000095077
+11/12/2019	7267210038	72210604	VA0000095078
+11/18/2019	8AFS8DES	8197671313	VA0000095747
+11/18/2019	4H9HFTYU	8197722533	VA0000095746
+11/18/2019	29XW8OSF	8197603533	VA0000095745
+
+1/8/20 revalidating
+
+
+
+_________________________________________________________________________________________________________
 /*									ATP-17437
 									abby not rec emails for img approval
 									CPG
@@ -15475,9 +15500,16 @@ and evaluate which and how we can convert to boomi
 
 client focus > then aero
 
-
+#LINK
+TIED TO ATP-17628
 
 RDX will handle DBA
+
+#update
+
+finishing replacement boomi job to specifically handle calling the data and sending the email instead
+of the stored proc only trying to have SQL mail send it.
+
 
 
 6*8*10
@@ -15664,6 +15696,31 @@ need to look in to this
 still not sure about multiple page piece. but now inserting or updating new cost center
 to the document categories table
 
+1/13
+copying out PAGUS records into excel and replacing with PGRPUS
+then inserting the data into DB
+working on finishing this so it mirrors PAGUS completely.
+
+not sure if orders will be coming through in a way that require more config but will see during testing
+
+after being able to import everything, aside from about 30 rows that were way too long for import, looks like
+this is mostly set up for new cost center with all database data configured and ready to at least test to see
+what happens.
+
+imported same file with -2 on cust reference
+ran batch pagecount boomi job to fix
+waved
+then checked windows nav print wave docs. shows 2 new doc types in the drop down that used to only show
+1 type for standard letter.
+
+until i get feedback this is in a good spot
+
+-- actually working entirely as intended but it just wasnt crystal clear that
+they only needed letter doc types
+which has been working the whole time
+
+i asked if this was the case where they needed the other docs but it was a miscommunication from her
+thinking that i was asking about other than letter rather than just the current test doc
 
 _________________________________________________________________________________________________________
 /*									ATP-17167
@@ -15775,7 +15832,7 @@ ________________________________________________________________________________
 									
 									
 									12/18/19 -  12/18/19
-
+#PGBOSTON
 -- PGBOSTON NOTES
 
 add employee ID to index/search field 
@@ -15784,7 +15841,7 @@ sortable retiree and require trans - reformat
 
 fix home link in admin page
 
-add contact page and other parts
+add contact page and other parts to admin tools config ie. phone number & message
 
 fix export doc to not export as check marks for retiree and req trans. make sortable?
 
@@ -16190,8 +16247,41 @@ updated end dates to 12-31-2019 for old allotments that i imported over
  here is validation that an order was made by this cust id for item id on
  1/2 for one of the allotments and it counted towards new allotment
 
-orders_id	fulfillment_id	customer_id	order_type	order_status	order_source	order_priority	drop_date	release_date	entered_by	primary_reference	customer_reference	reference_3	reference_4	order_date	consign	ship_address_1	ship_address_2	ship_address_3	ship_attention	ship_city	ship_region	ship_postal_code	ship_country	ship_bmc	email	phone	job_number	customer_account	department	cost_center	comment	notes	ship_method_id	ship_bill_account	ship_date	ship_chg	ship_weight	ship_cartons	order_amt	handling_amt	ship_amt	tax_amt	total_amt	total_lines	approval_reason	edit_date	edit_who	parent_short_name	customer_cost_center	total_weight	add_date	add_who	entered_by_name	add_who_name	edit_who_name	original_orders_id	original_order_reference	billing_date	approved_by	approved_by_name	approved_date	billing_period	billing_status	discount_id	discount_amt	has_pod	culture	tax_exempt	backorder_status	backorder_qty_shipped	est_delivery_date	delivery_date	autowave	lineitem_id	fulfillment_id	orders_id	line_type	line_status	line_number	item_id	item_desc	qty_ordered	qty_shipped	price	cost	tax_amt	notes	approval_reason	lottable	qty_open	qty_backordered	qty_presubmitted	qty_submitted	qty_allocated	uom	qty_uom	edit_date	edit_who	packkey	parent_short_name	order_primary_reference	item_cost_center	weight	allotment_id	add_date	add_who	add_who_name	edit_who_name	item_primary_reference	original_lineitem_id	original_orders_id	original_order_reference	original_line_number	new_backorder_shipmethod	new_backorder_shipaccount	original_packkey	original_uom	approved_by	approved_date	approved_by_name	billing_period	billing_status	kit_parent_line_id	kit_parent_item_id	qty_allotted	tax_code	doc_id	pod_reference	backorder_code	discount_amt	culture	inventory_default_uom	vendor_status	vendor_name	backorder_status	backorder_qty_shipped	po_number	po_qty	po_qty_allocated	po_qty_uom	qty_uom_presubmitted	parent_line_number	kit_item_qty	item_id	fulfillment_id	item_type	item_status	item_prefix	primary_reference	reference_2	reference_3	reference_4	short_desc	long_desc	backorder	unit_wt	reorder_point	comment	cost_center	max_order	expiration_date	price	cost	default_uom	last_received	last_shipped	edit_date	edit_who	packkey	fulfillment_short_name	add_date	add_who	add_who_name	edit_who_name	cycle_count_code	lot_validation	shelf_life	key_words	active_date	tax_code	manufacture_origin	setup_status	has_image	harmonized_code	pod_reference	case_bill	pallet_bill	first_received	role_ids	culture	lead_time	reorder_factor	max_qty_uom	min_qty	vendor_name	vendor_pokey	po_reorder_qty	dynamic_reorder	po_reorder	vendor_type	EA_Length	EA_Width	EA_Height	CS_Length	CS_Width	CS_Height	QC_OVERRIDE	Min_temperature	Max_temperature	Min_humidity	Max_humidity	Inbound_CatchData	Outbound_CatchData	HAZARD_FLAG	HAZARD_SIGNATORY_TITLE	HAZARD_SIGNATORY_NAME	HAZARD_SIGNATORY_PLACE	HAZARD_SIGNATORY_PHONE	HAZARD_EMERGENCY_PHONE	ITEM_HAZARD_ID	ITEM_HAZARD_PACKING	ITEM_HAZARD_QUANTITY	ITEM_HAZARD_QUANTITY_UOM	ITEM_HAZARD_INSTRUCTIONS	ITEM_HAZARD_CARGOAIR_FLAG	ITEM_HAZARD_PACKING_GROUP	ITEM_HAZARD_CLASS	ITEM_HAZARD_SHIPPING_NAME	weight_tolerance	customer_id	fulfillment_id	customer_type	customer_status	primary_reference	reference_2	reference_3	reference_4	full_name	email	password	phone	fax	shipper_no	cost_center	edit_date	edit_who	add_date	add_who	parent_id	allotment_reference	payment_profile_id	login_enabled	login_question	login_answer	last_login	login_attempts	login_total	culture	tax_exempt	allotment_group_id
-41327642	311	746020	STANDARD	SHIPPED	WEB	5	2020-01-02 11:28	2020-01-02 11:28	746020	OC0002261862				2020-01-02 11:34:51.147	DR. RONI ROSATI OFFICE	3110 HIGHLAND ROAD	SUITE 202		HYGIENE TEAM	HERMITAGE	PA	16148	US		office@rosatidental.com	(724) 981-0521							19001		2020-01-03 14:28:01.903	0.0000	6.1050	2	0.00	0.00	0.00	0.00	0.00	2		2020-01-03 14:28:01.903	0	PGOC		5.0400	2020-01-02 11:34:57.570	746020	Jillian Lindberg	Jillian Lindberg	SYSTEM	0	NULL	2020-01-03 14:28:01.903	NULL	NULL	NULL	NULL	0	0	0.00	0	EN-US	0	NULL	NULL	NULL	NULL	NULL	239278119	311	41327642	WEB	SHIPPED	00002	130733	Crest Kids Graphics Cavity Minty Breeze .85oz	72	72	0.0000	0.0000	0.0000				0	0	0	0	0	CS	1	2020-01-02 11:34:57.633	746020	1EA.72CS	PGOC	OC0002261862	CREST PASTE	0.0600	25674	2020-01-02 11:34:57.633	746020	Jillian Lindberg	Jillian Lindberg	PAS1013	NULL	NULL	NULL	NULL	NULL	NULL	NULL	NULL	NULL	NULL	NULL	NULL	0	0	0	864				PY	NULL		CS				NULL	NULL	NULL	NULL	NULL	NULL	NULL	NULL	130733	311	PART	ACTIVE	NULL	PAS1013	1839807	NULL	NULL	Crest Kids Graphics Cavity Minty Breeze .85oz	NULL	PY	0.06	0		CREST PASTE	0	NULL	0.0000	0.0000	CS	2019-11-21 07:08:59.000	2020-01-03 14:28:01.917	2020-01-03 09:44:10.587	1242083	1EA.72CS	PGOC	2006-06-23 13:35:11.793	2	NAVIGATOR	ERIN JONES	D	LT5LT8LT9	183		NULL		US	0	0			1	0	2006-06-30 12:34:08.827	NULL		NULL	NULL	NULL	NULL			NULL	0	0		0.000	0.000	0.000	0.000	0.000	0.000	0	41	86	0	0	NONE	NULL		NULL	NULL	NULL	NULL	NULL	NULL	NULL	NULL	NULL	NULL	NULL	NULL	NULL	NULL	0.00	746020	311	USER	ACTIVE	5114		5502		Jillian Lindberg	lindberg.j@pg.com	Welcome	412-584-9788	N/A			2019-05-13 09:29:05.980	746020	2006-07-31 11:17:14.603	2	745963	5114		1			NULL	0	0	EN-US	0	NULL
+orders_id	fulfillment_id	customer_id	order_type	order_status	order_source	order_priority	drop_date	release_date	entered_by	primary_reference	customer_reference	
+reference_3	reference_4	order_date	consign	ship_address_1	ship_address_2	ship_address_3	ship_attention	ship_city	ship_region	ship_postal_code	ship_country	ship_bmc	
+email	phone	job_number	customer_account	department	cost_center	comment	notes	ship_method_id	ship_bill_account	ship_date	ship_chg			ship_weight	
+ship_cartons	order_amt	handling_amt	ship_amt	tax_amt	total_amt	total_lines	approval_reason	edit_date	edit_who	parent_short_name	customer_cost_center	total_weight	
+add_date	add_who	entered_by_name	add_who_name	edit_who_name	original_orders_id	original_order_reference	billing_date	approved_by	approved_by_name	approved_date	
+billing_period	billing_status	discount_id	discount_amt	has_pod	culture	tax_exempt	backorder_status	backorder_qty_shipped	est_delivery_date	delivery_date	autowave	
+lineitem_id	fulfillment_id	orders_id	line_type	line_status	line_number	item_id	item_desc	qty_ordered	qty_shipped	price	cost	tax_amt	notes	approval_reason	lottable	
+qty_open	qty_backordered	qty_presubmitted	qty_submitted	qty_allocated	uom	qty_uom	edit_date	edit_who	packkey	parent_short_name	order_primary_reference	item_cost_center	
+weight	allotment_id	add_date	add_who	add_who_name	edit_who_name	item_primary_reference	original_lineitem_id	original_orders_id	original_order_reference	original_line_number	
+new_backorder_shipmethod	new_backorder_shipaccount	original_packkey	original_uom	approved_by	approved_date	approved_by_name	billing_period	billing_status	kit_parent_line_id	
+kit_parent_item_id	qty_allotted	tax_code	doc_id	pod_reference	backorder_code	discount_amt	culture	inventory_default_uom	vendor_status	vendor_name	backorder_status	
+backorder_qty_shipped	po_number	po_qty	po_qty_allocated	po_qty_uom	qty_uom_presubmitted	parent_line_number	kit_item_qty	item_id	fulfillment_id	item_type	item_status	
+item_prefix	primary_reference	reference_2	reference_3	reference_4	short_desc	long_desc	backorder	unit_wt	reorder_point	comment	cost_center	max_order	expiration_date	price	
+cost	default_uom	last_received	last_shipped	edit_date	edit_who	packkey	fulfillment_short_name	add_date	add_who	add_who_name	edit_who_name	cycle_count_code	
+lot_validation	shelf_life	key_words	active_date	tax_code	manufacture_origin	setup_status	has_image	harmonized_code	pod_reference	case_bill	pallet_bill	first_received	
+role_ids	culture	lead_time	reorder_factor	max_qty_uom	min_qty	vendor_name	vendor_pokey	po_reorder_qty	dynamic_reorder	po_reorder	vendor_type	EA_Length	EA_Width	
+EA_Height	CS_Length	CS_Width	CS_Height	QC_OVERRIDE	Min_temperature	Max_temperature	Min_humidity	Max_humidity	Inbound_CatchData	Outbound_CatchData	
+HAZARD_FLAG	HAZARD_SIGNATORY_TITLE	HAZARD_SIGNATORY_NAME	HAZARD_SIGNATORY_PLACE	HAZARD_SIGNATORY_PHONE	HAZARD_EMERGENCY_PHONE	ITEM_HAZARD_ID	ITEM_HAZARD_PACKING	ITEM_HAZARD_QUANTITY	
+ITEM_HAZARD_QUANTITY_UOM	ITEM_HAZARD_INSTRUCTIONS	ITEM_HAZARD_CARGOAIR_FLAG	ITEM_HAZARD_PACKING_GROUP	ITEM_HAZARD_CLASS	ITEM_HAZARD_SHIPPING_NAME	weight_tolerance	
+customer_id	fulfillment_id	customer_type	customer_status	primary_reference	reference_2	reference_3	reference_4	full_name	email	password	phone	fax	shipper_no	cost_center	edit_date	
+edit_who	add_date	add_who	parent_id	allotment_reference	payment_profile_id	login_enabled	login_question	login_answer	last_login	login_attempts	login_total	culture	tax_exempt	allotment_group_id
+41327642	311	746020	STANDARD					SHIPPED			WEB				5				2020-01-02 11:28	2020-01-02 11:28	746020	OC0002261862				
+						2020-01-02 11:34:51.147	DR. RONI ROSATI OFFICE	3110 HIGHLAND ROAD	SUITE 202		HYGIENE TEAM	HERMITAGE	PA	16148	US		
+office@rosatidental.com	(724) 981-0521													19001								2020-01-03 14:28:01.903	0.0000	6.1050	
+2				0.00		0.00			0.00		0.00	0.00		2							2020-01-03 14:28:01.903	0	PGOC									5.0400	
+2020-01-02 11:34:57.570	746020	Jillian Lindberg	Jillian Lindberg	SYSTEM	0	NULL							2020-01-03 14:28:01.903	NULL	NULL	NULL	NULL	0	0	0.00	0	
+EN-US	0	NULL	NULL	NULL	NULL	NULL	239278119	311	41327642	WEB	SHIPPED	00002	130733	Crest Kids Graphics Cavity Minty Breeze .85oz	72	72	0.0000	0.0000	0.0000				0	
+0	0	0	0	CS	1	2020-01-02 11:34:57.633	746020	1EA.72CS	PGOC	OC0002261862	CREST PASTE	0.0600	25674	2020-01-02 11:34:57.633	746020	Jillian Lindberg	Jillian Lindberg	
+PAS1013	NULL	NULL	NULL	NULL	NULL	NULL	NULL	NULL	NULL	NULL	NULL	NULL	0	0	0	864				PY	NULL		CS				NULL	NULL	NULL	
+NULL	NULL	NULL	NULL	NULL	130733	311	PART	ACTIVE	NULL	PAS1013	1839807	NULL	NULL	Crest Kids Graphics Cavity Minty Breeze .85oz	NULL	PY	0.06	0		
+CREST PASTE	0	NULL	0.0000	0.0000	CS	2019-11-21 07:08:59.000	2020-01-03 14:28:01.917	2020-01-03 09:44:10.587	1242083	1EA.72CS	PGOC	2006-06-23 13:35:11.793	2	NAVIGATOR	
+ERIN JONES	D	LT5LT8LT9	183		NULL		US	0	0			1	0	2006-06-30 12:34:08.827	NULL		NULL	NULL	NULL	NULL			NULL	0	0		0.000	0.000	
+0.000	0.000	0.000	0.000	0	41	86	0	0	NONE	NULL		NULL	NULL	NULL	NULL	NULL	NULL	NULL	NULL	NULL	NULL	NULL	NULL	NULL	NULL	
+0.00	746020	311	USER	ACTIVE	5114		5502		Jillian Lindberg	lindberg.j@pg.com	Welcome	412-584-9788	N/A			2019-05-13 09:29:05.980	746020	2006-07-31 11:17:14.603	2	
+745963	5114		1			NULL	0	0	EN-US	0	NULL
 
 --
 -- select * 
@@ -16254,8 +16344,34 @@ also will start tracking effort and plan for each here
 	- image rejected
 	- image approved
 
+			-- 1/2 - looking at code in legacy projects
+			need to find out how we can move some of this logic in tables possibly (or 2nd table rather)
+			and comment out send mail logic in app.
+
+
+			-- has lots of readonly properties for approvalpath, approved, and decline. as well as same
+			again but with htmltemplate suffix.
+
+			creating new boomi job mixing concept of Aero img approval with get and mail connectors of OTC
+			email ship confirm
+
+			write select statement to typically choose from different scenarios of approval, approved or declined
+
+			create map and branching based on scenario
+
+			still need to create logic to change status to a string
+			and possibly change the get to batch count of 1
+
+		-- *****CPG image approval***** - most important as its not working but others do
+
+
+#LINK
+TIED TO ATP-17628  AS-65
+-create an epic with each of below being a task
+large tasks can get subtasks if needed
 
 	-- find these procs and etc by using mega query on this EXEC msdb.dbo.sp_send_dbmail in like search
+	ENT
 dx_API_AlertMessage
 dx_Mason_check
 dx_WC_check
@@ -16263,6 +16379,31 @@ pr_DX_ScheduleAlert
 pr_DXOrderBatchCheck
 pr_process_check_Reserve_error
 pr_process_check_Reserve_error_leb
+
+	LEB
+dx_CDL_Kits_InsertUpdate
+dx_PhillipsZeroShipNav
+dx_PPN_ReceiptAlert -- 3rd prio
+mail_SendMsge
+pr_3PL_LTLBatchAlert -- 2nd prio
+pr_Process_ApproveImage
+pr_Process_DeclineImage
+pr_Process_NewImage
+
+	MAS
+dx_KET_FixWarehouseReference -- ?
+dx_KET_FixWarehouseReference_Archive -- ?
+dx_KET_SendInventoryAudit -- ?
+dx_NAR_SendReceiptAdvice -- ?
+dx_NAR_SendReceiptAdvice_HTML -- ?
+pr_ALERT_DS_StarterKits
+pr_CPG_OrderBatchCheck --4th prio
+pr_CPGAmerican_CheckReturn -- 5th prio
+pr_CPGTCD_CheckNewOrder --6th prio
+pr_CPGTCD_UpdateOrder -- 7th prio
+pr_Process_ApproveImage
+pr_Process_DeclineImage
+pr_Process_NewImage
 
 2) to tech admin
 	
@@ -16330,7 +16471,7 @@ look at sql agent --> jobs -- to see what is all running and that we need to swi
 
 -- mason web request purge - delete from web_request in mason where status = declined and sub date < 30 - no mail
 
--- nars push upc altsku - no mail - simple insert
+-- nars push upc altsku - NEON ITSUPPORT - simple insert
 
 -- OPS daily metrics - no mail - few different procs that update tables about labor metrics
 
@@ -16376,7 +16517,7 @@ look at sql agent --> jobs -- to see what is all running and that we need to swi
 
 -- proc PGOC customer hierarchy rebuild - no mail
 
--- proc PGRX assign roles - no mail
+-- proc PGRX assign roles - NEON ITSUPPORT
 
 -- proc PHA catalog group items create - no mail
 
@@ -16410,9 +16551,14 @@ look at sql agent --> jobs -- to see what is all running and that we need to swi
 that is all of the active jobs
 now going to notate of which send sys mail
 
+#update
+move all ACTIVE sql alert jobs into boomi
+issue/task for each and estimated effort
+should only be 2-3 different types of boomi jobs so 3 templates and a fair amount
+of copy paste should make it fairly easy to replicate so most jobs only about 2-3 hours including testing
+and validation
 
-
-
+AS-65
 
 
 _________________________________________________________________________________________________________
@@ -16453,6 +16599,11 @@ emailed support to help open ticket and to help with this boomi job
 1/6
 still need to work with support to follow their troubleshooting steps
 
+1/9
+with boomi supports help (and james)
+go to manage -> atom management -> production ETL (the tab not the cloud atom name under)
+under administration select environment extensions -> search/magnifying glass -> clients -> tms order import
+select process properties on left sidebar and view the email process property was set to UAT
 
 _________________________________________________________________________________________________________
 /*									ATP-17542
@@ -16559,18 +16710,50 @@ according to Josh this is just due to the service
 
 
 _________________________________________________________________________________________________________
-/*									ATP-17542
-									close out ras order
-									RAS RA0000056026
+/*									ATP-
+									send back matts laptop
+									
 									12/30/19 -  12//19
+notes from HP
 
--- arch notes 17542
-add manifest for specific caseid
-processlogs
+#HP SUPPORT 1-866-625-1175
+12:16 PM  	SHAINITHA: 
+There is a procedure while servicing the notebook. I would like to keep you informed:
 
+1. During the repair process the Hard Drive may be re-imaged if it fails the Quality Analysis testing. HP does not backup data from the Hard Drive. Therefore, please ensure that you back-up the data before sending in the notebook for repair or the data will be permanently lost.
 
+2. We would also like to inform you that when the repair facility re-images the Hard Drive, the Operating System installed would be according to the COA sticker that is on the bottom of the notebook. In case you would like to upgrade or downgrade the Operating System, it would be your responsibility to do the same, as the repair facility would be unable to upgrade or downgrade the Operating System.
+3. Please disable all passwords before sending in the notebook for repair; this includes the BIOS and Windows passwords.
 
+If you agree to the above terms, we would be able to ship you a drop box to have the unit picked for service. Hence request you to provide the below information.
 
+Company name (if any):
+Full Name:
+Complete address with zip/postal code (US/Canada):
+Contact Phone:
+Alternate phone (if any):
+Email address:-
+
+NOTE: If the unit is Out Of Warranty / or if the unit has Physical Damage (without Accidental Damage Protection), the service would be on Chargeable Basis, however there is no Evaluation Fee.
+
+12:21 PM  	SHAINITHA: 
+We have dispatched a drop box which you will receive within 2 business days. You would need to peel the label on the box and call the phone number of the courier service, to have the notebook picked.
+The turnaround time for the notebook to be returned after repairs is 7 to 10 business days once it reaches the service center.
+
+To know the repair status you may call 1-888-886-3292, choose the option 2 and quote the Case ID.5042377992
+
+_________________________________________________________________________________________________________
+_________________________________________________________________________________________________________
+
+#boomi
+#connection for prod
+
+AeroSSA
+
+AFSSQL01
+1433
+Enterprise
+add options blank
 
 
 
@@ -16589,32 +16772,70 @@ processlogs
 
 
 _________________________________________________________________________________________________________
-/*									ATP-17542
-									close out ras order
-									RAS RA0000056026
-									12/30/19 -  12//19
+/*									ATP-17730
+									fix charmin spindle link on FR site
+									Charmin	spindle
+									1/9/20 -  1/10/20
 
--- arch notes 17542
-add manifest for specific caseid
-processlogs
-
-
-
+-- its PHP
+just need to change 1 link
+after diving in more i think its ajax related? because im getting an ajax error when trying to load page and
+that evidon link isnt working
 
 
+Refused to load the script 'https://c.evidon.com/pub/third.js' because it violates the following Content Security Policy directive: 
+"script-src 'self' 'unsafe-inline' https://c.betrad.com https://www.google-analytics.com https://optout.betrad.com https://ajax.googleapi.com  https://www.gstatic.com https://www.google.com". 
+Note that 'script-src-elem' was not explicitly set, so 'script-src' is used as a fallback.
+
+need to replace this -> 'https://c.evidon.com/pub/third.js' 
+with this v
+http://www.pg.com/privacy/frenchcanadian/privacy_statement.shtml#iba
+
+however in the layout file you can see that class/tag adchoiceslink = new link
+
+so either the css or js files are overriding somehow?
+
+ATP-5359
+
+IN FOOTER PHP
+  (function() {
+//  var ev = document.createElement('script'); ev.type = 'text/javascript'; ev.async = true; ev.setAttribute('data-ev-tag-pid', <?php echo $evidonPid; ?>); ev.setAttribute('data-ev-tag-ocid', <?php echo $evidonCid;?>);
+//  ev.src = ('https:' == document.location.protocol ? 'https://' : 'http://') + 'c.betrad.com/pub/tag.js';
+  //  var s = document.getElementsByTagName('script')[0]; s.parentNode.insertBefore(ev, s);
+  })();
+
+commented out above 2 lines for evidon
+
+
+dont touch below
+
+links were already updated in line 4+5 of LAYOUT
+
+IN LAYOUT PHP
+ <!-- Custom styles for this template -->
+        <link href="/css/main.css" rel="stylesheet">
+        <meta http-equiv="Content-Security-Policy"  content="img-src https://c.betrad.com https://www.google-analytics.com https://l.betrad.com 'self' 'unsafe-inline'; script-src 'self' 'unsafe-inline' https://c.betrad.com https://optout.betrad.com https://ajax.googleapi.com https://optout.betrad.com https://www.google-analytics.com https://www.gstatic.com https://www.google.com">
+        <!-- validation Js for form -->
+        <script type="text/javascript" src = "/js/validation.js"></script>
+        <script type="text/javascript" src = "/js/custom.js"></script>
+        <script src='https://www.google.com/recaptcha/api.js?hl=<?php echo $language; ?>'></script>
+
+
+\\pdweb01\e$\projects\PG-Charmin-Microsite\module\Application\view\layout
+
+UAT 
+\\uatweb02\e$\projects\charminspindle
+
+make sure footer is updated in prod
 
 
 _________________________________________________________________________________________________________
-/*									ATP-17542
-									close out ras order
-									RAS RA0000056026
+/*									
 									12/30/19 -  12//19
 
 -- arch notes 17542
 add manifest for specific caseid
 processlogs
-
-
 
 #query
 
@@ -16636,116 +16857,2052 @@ HAVING count(distinct rc.sku)>=count(distinct ex.sku)
 	AND sum(rc.qtyreceived)>=sum(ex.qtyexpected)
 
 _________________________________________________________________________________________________________
-/*									ATP-17542
-									close out ras order
-									RAS RA0000056026
-									12/30/19 -  12//19
-
--- arch notes 17542
-add manifest for specific caseid
-processlogs
-
-
-
-
-
-
-
-_________________________________________________________________________________________________________
-/*									ATP-17542
-									close out ras order
-									RAS RA0000056026
-									12/30/19 -  12//19
-
--- arch notes 17542
-add manifest for specific caseid
-processlogs
+/*									ATP-17671
+									CPG parent site wont work when trying to select multiple
+									orders to approve at once
+									CPG
+									1/7/20 -  1/7/20
+didnt do anything and dotty said abby got it working
 
 
 
 
 
 _________________________________________________________________________________________________________
-/*									ATP-17542
-									close out ras order
-									RAS RA0000056026
-									12/30/19 -  12//19
-
--- arch notes 17542
-add manifest for specific caseid
-processlogs
-
-
-
-
-
-
-
-_________________________________________________________________________________________________________
-/*									ATP-17542
-									close out ras order
-									RAS RA0000056026
-									12/30/19 -  12//19
-
--- arch notes 17542
-add manifest for specific caseid
-processlogs
-
-
-_________________________________________________________________________________________________________
-/*									ATP-17542
-									close out ras order
-									RAS RA0000056026
-									12/30/19 -  12//19
-
--- arch notes 17542
-add manifest for specific caseid
-processlogs
-
-
+/*									ATP-17656
+									update NTR map on resources for CPG parent
+									CPG
+									1/9/20 -  1/9/20
+just added img file to cpg image path and changed the current one for ntr coverage to new file name
+and had to add target="_blank" to open in new tab
 
 
 
 
 
 _________________________________________________________________________________________________________
-/*									ATP-17542
-									close out ras order
-									RAS RA0000056026
-									12/30/19 -  12//19
+/*									ATP-17521
+									remove case id barcode from ucc-128 label for RAS retail
+									RAS
+									1/9/20 -  1/9/20
 
--- arch notes 17542
-add manifest for specific caseid
-processlogs
 
+weird #SQL error need to learn what it meants
+Msg 983, Level 14, State 1, Line 419
+Unable to access availability database 'LEBANON' because the database replica is not in the PRIMARY 
+or SECONDARY role. Connections to an availability database is permitted only when the database replica is 
+in the PRIMARY or SECONDARY role. Try the operation again later.
+
+wavekey for ras retail wave
+0000356203
+
+able to test but not sure how to really test proper order or wave?
+queried to get retail cost center on wave but test in crystal still looks weird
+need fonts from afterm
+\\afsterm01\C$\Windows\Fonts
+
+
+#notes
+8 db files have 8 threads
+standard practice
+
+example formula in crystal to alter
+if {UCC128Labels.storerkey} = "LSK" then 
+        "P&G Distributing LLC" & chr(10) & chr(13) &
+        "6023 Union Centre Blvd" & chr(10) & chr(13) &
+        "Suite B" & chr(10) & chr(13) &
+        "Fairfield, OH 45014"
+else
+ "The Art of Shaving" & chr(10) & chr(13) &
+        "6023 Union Centre Blvd" & chr(10) & chr(13) &
+        "Suite B" & chr(10) & chr(13) &
+        "Fairfield, OH 45014"
+
+
+if {UCC}		
+
+just kidding google says to use x2 button to right of suppress field to create logic there
+{cost_center} = "RETAIL"
+need to add cost_center into report
+
+1/13/20
+
+added the caseid text back - kept barcode suppressed
+
+
+_________________________________________________________________________________________________________
+/*									AS-65
+									#link to 17628
+									Clients and Enterprise
+									1//20 -  1//20
+----- OBJECTIVES -------
+move sql emails to boomi and have tasks for each
+
+----- NOTES -------
+
+----- BLOCKERS -------
+
+
+_________________________________________________________________________________________________________
+/*									ATP-17733
+									pgk order import cant print docs
+									PGK
+									1/9/20 -  1/9/20
+----- OBJECTIVES -------
+run query and then proc for batch id from query
+----- NOTES -------
+
+----- BLOCKERS -------
+
+
+
+_________________________________________________________________________________________________________
+/*									ATP-17744
+									bandaid sykes order import 
+									PGK
+									1//20 -  1//20
+----- OBJECTIVES -------
+bandaid with new boomi process sends email and runs proc on batch id
+----- NOTES -------
+(
+	@Bad_batch int
+)
+
+
+SELECT @batchid = batch_id 
+	FROM Batch with (nolock) 
+	WHERE (batch_reference = 'SYKESXML' 
+	   OR external_batch_id like 'PGK-%')
+	AND batch_id = @Bad_batch-- ? fix for boomi job
+
+----- BLOCKERS -------
+
+
+
+_________________________________________________________________________________________________________
+/*									ATP-17774
+									Ship confirm and order confirm not sending notifs to clients
+									RRF
+									1/14/20 -  1/14/20
+----- OBJECTIVES -------
+fix subs/events in nav?
+
+----- NOTES -------
+was set to admin only in nav. changed but need to test?
+
+using dif fulfill for examples on what is pre printed or not by checking dmsserver. supposed to learn
+how to differentiate
+
+
+----- BLOCKERS -------
+
+
+
+_________________________________________________________________________________________________________
+/*									ATP-17797
+									AOS is having expired inventory ship instead of going to hold
+									AOS
+									1/15/20 -  1/15/20
+----- OBJECTIVES -------
+make sure aos sku examples dont have expired product shipping sku 670535400035 is in image
+check to see if its on hold or not. also if its actually expired. and also if it shipped any expired product
+----- NOTES -------
+SKU
+Shelf Life
+Type
+670535400035 TAOS SH/SOAP REFILL SANDALWOOD
+					  	        Expiration	Stop
+Lot		   Mfg. Code  Mfg. Date	Date  		Ship Date	Days Remaining	On Hand Allocated   On Hold Available
+0000200101 6047042231 02/16/2016 		    12/30/2019  -16 			174 	13 			161 	0
+
+
+
+----- BLOCKERS -------
+
+
+_________________________________________________________________________________________________________
+/*									ATP-17813
+									Finish PG BOSTON notes and missing pieces
+									PGB
+									1//20 -  1//20
+----- OBJECTIVES -------
+
+----- NOTES -------
+
+----- BLOCKERS -------
+
+
+_________________________________________________________________________________________________________
+/*									ATP-17779
+									DDH order didnt go to approval
+									DDH
+									1//20 -  1//20
+----- OBJECTIVES -------
+verify why DDH order DH0000004612 didnt go to approval status
+----- NOTES -------
+looks like the original file had either a line deleted when submitting order or they just submitted
+with wrong line value for line 3 it says line 4 incorrectly
+
+dx_DDH_OrderRules 
+
+
+always check line item in fulfill trans
+
+
+changed ddh sql exec in boomi job from stored proc to statement that execs proc. otherwise when db locking occurs
+we can see this job run still and not error
+----- BLOCKERS -------
+
+
+
+_________________________________________________________________________________________________________
+/*									ATP-?
+									Ticket Desc?
+									SYSTEM DOWN INFOR02
+									1//20 -  1//20
+----- OBJECTIVES -------
+
+----- NOTES -------
+UI Server scprd-uiservice2
+
+used keepass for infor.admin prod onto remote server 
+@ero4636#
+
+External Server: ftp5.infor.com
+Account Name: aeroful
+Password: iioop9()
+Sftp Port: 22
+
+use above to send log files to infor
+path from actual server afsinfor01 - 02
+C:\infor\sce\scprd\logs\debug
+
+C:\Windows\System32\shutdown.exe
+
+/r /t 30 /f
+/a -abort
+
+C:\infor\sce\scprd\bin\run-scprd-uiservice2.bat - file that was running in javaservice to break system
+
+C:\infor\sce\scprd\bin\javaservice.exe 
+
+----- BLOCKERS -------
+
+
+
+_________________________________________________________________________________________________________
+/*									ATP-17808
+									RRF stuck cant be picked - massive order
+									RRF
+									1/15/20 -  1//20
+----- OBJECTIVES -------
+palletkey usually = dropid
+----- NOTES -------
+
+from joan this is too large of an order with over 1000 pick detail records. infor handles anything
+less than 1k fine.
+
+add dropids to all lines/pickdetails
+
+create regular manifest for this order
+
+not ltl but use this proc because it includes 15042 cust pickup
+#manifest
+creates a manifest record and shipment
+[pr_Create_LTL_Shipment] 
+----- BLOCKERS -------
+infor support had to help ship because UI wasnt able to handle all the pickdetails way over 1k
+
+
+_________________________________________________________________________________________________________
+/*									ATP-17854
+									Tommy Battles doesnt have nav access
+									Aero
+									1/20/20 -  1/20/20
+----- OBJECTIVES -------
+checked his login and was able to log in
+----- NOTES -------
+used full email and pw in nav
+----- BLOCKERS -------
+
+
+
+_________________________________________________________________________________________________________
+/*									ATP-17798
+									Ship orders complete
+									DF
+									1/20/20 -  1//20
+------ OBJECTIVES -------
+ship all orders on attachment
+------ NOTES -------
+
+------ BLOCKERS -------
+
+
+
+_________________________________________________________________________________________________________
+/*									ATP-17825
+									CR0000002223 processed and shows shipped in aeroboomi however
+									stuck and effecting SLA. need root cause.
+									CTP
+									1/20/20 -  1//20
+----- OBJECTIVES -------
+root cause and make sure SLA doesnt pick
+----- NOTES -------
+manifest data had 8 rows 1 for each caseid. all manually typed into ltl manager. error code 404 on one of the lines
+purely in relation to typo this caseid had one missing zero in order_primary_reference. 0073569289
+----- BLOCKERS -------
+
+
+
+_________________________________________________________________________________________________________
+/*									ATP-17853
+									Allotments by Catalog/Role (New) is not populating information. 
+									Receive error message "There was an error generating the report Please try again."
+									DF 726 Disc financial = disc net
+									1/20/20 -  1//20
+----- OBJECTIVES -------
+fix new report to be able to pull different divisions?
+----- NOTES -------
+this is in a discover mysql database. cant find a password or anything in keepass. not sure where this has
+been successfully changed by us in the past
+
+this is in keepass as peak10 AEROSSA
+both UAT and PROD
+use `discover-pseudo`;
+
+select *
+from allotment al 
+inner join allotment_has_inventory hi
+	on hi.allotment_id = al.id
+inner join catalog_product_entity cp 
+	on cp.entity_id = hi.product_id
+inner join catalog_product_entity_int cpstatus
+	on cpstatus.entity_id = cp.entity_id and cpstatus.attribute_id = 97
+inner join catalog_product_entity_varchar cpindustry
+	on cpindustry.entity_id = cp.entity_id and cpindustry.attribute_id = 158
+where cpindustry.value = 'SIGNAGE'
+group by 1, 2, 3, 4, 5, 6, 7, 8
+order by al.id, cp.sku;    
+
+
+use `discover-pseudo`;
+call getAllotmentsByIndustry('RPM`discover-pseudo`');
+
+seeing error in line 0 in crystal when running the proc? possibly due to backticks but not sure
+how to fix or if that makes sense
+
+also report itself had save report data turned on. i validated that the proc works in mysql
+
+tested saving report with no report data. not working still.
+root123  AEROSQL
+
+worth noting there are many articles about the registry being at fault which we
+tried to investigate a little bit but ultimately different older drivers did most of the work
+
+To create a new SQL Server ODBC data source, press the Add button under the User DSN or 
+System DSN tab. Both of these tabs are used to create a connection to ODBC data source, the 
+difference is that the User DSN tab will show data source only for a currently logged user 
+on this computer. While creating data sources under the System DSN, it will be available to 
+any user that is logged on to this computer.
+
+where [value] = 'DOMESTIC'
+
+-------- BLOCKERS ------- -------
+select  b.name,  case when ag.status = 1 then 'Y' else 'N' end as 'bpa_active', 
+ha.allotment_id as 'allotment', case when al.status = 1 then 'Y' else 'N' end as 'allotment_active', 
+concat(al.unit,' ',al.unit_of_time) as 'reset', cp.sku as 'item', case when cpstatus.value = 1 then 'Y' 
+else 'N' end as 'item_active', hi.quantity as 'qty' from bpa b 
+inner join allotment_group ag  
+on b.allotment_group_id = ag.id 
+inner join allotment_group_has_allotment ha  
+on ha.allotment_group_id = ag.id 
+inner join allotment al   on al.id = ha.allotment_id 
+inner join allotment_has_inventory hi  on hi.allotment_id = al.id 
+inner join catalog_product_entity cp   on cp.entity_id = hi.product_id 
+inner join catalog_product_entity_int cpstatus  on cpstatus.entity_id = cp.entity_id and cpstatus.attribute_id = 97 
+inner join catalog_product_entity_varchar cpindustry  
+on cpindustry.entity_id = cp.entity_id and cpindustry.attribute_id = 158 
+where in_industry = 'all' or cpindustry.value = in_industry group by 1, 2, 3, 4, 5, 6, 7, 8 
+
+use backticks to bracket db name with hyphen use `discover-pseudo`;
+
+despite all our efforts this is not achievable in navigator and even magento redirects to nav to run the
+report. heretofor our best chance at success is a scheduled jeffnet report to send them
+
+update the SQL connection works from mysql
+pulling mysql data into view and then into a proc?
+
+_________________________________________________________________________________________________________
+/*									ATP-17866
+									CTP Cubic ft per location
+									CTP
+									1/21/20 -  1//20
+----- OBJECTIVES -------
+Need to know cubic feet per location for each location of CTP Storage. The goal is to 
+understand how "full" each storage location is against the 64 cubic feet per bulk location.
+
+
+----- NOTES -------
+length x width x height giving the cubic capacity in inches 42x48x52 = 104832
+
+in feet 104832/12 = 8736 not sure if this is the expected result?
+
+took forever to find right table and data use view billing storage locations
+
+
+select bs.*,
+	convert(decimal(10,2),bs.cubeused / l.CUBICCAPACITY * 100) as cubepercentused
+
+from enterprise.dbo.Billing_Storage_Locations (nolock) bs
+join LEBANON.dbo.wms_loc l on l.LOC = bs.Loc
+where StorerKey = 'CTP'
+and l.CUBICCAPACITY > 0
+
+----- BLOCKERS -------
+
+not knowing where new data was in db. seemed like things were pointing to billing storage reports
+and i though the new version also showed this pointing to old bladeprod2 box. wasnt the case obviously
+since it doesnt exist but i wasnt familiar with that.
+finally found good view billing storage locs with james helping me look into process_storageimport
+
+
+_________________________________________________________________________________________________________
+/*									ATP-17687
+									New Nav site
+									LW LC - laundry care
+									1//20 -  1//20
+----- OBJECTIVES -------
+setup new fulfill with these 3 steps
+1.) Learning Works is needing to get a Navigator set up for Laundry Care. They will be branching off currently cost centers from the TLE site to their own. All flexfields would need to be the same as they are in TLE fulfillment today.
+2.) Will need API Keys for Costrategix to connect Big Commerce once we are live.
+3.) They will need to connect inventory feeds to Net Suite via API like we are doing today with Zevo.
+----- NOTES -------
+pr_process_create_API_cred 1184, ''
+username				password
+935E2463D71B477B9BC9	930D4208-1E09-4F1D-B529-9BE936EA8694
+----- BLOCKERS -------
+
+
+
+_________________________________________________________________________________________________________
+/*									ATP-17711
+									Move Convergys users to estore by 2/1
+									ESTORE Call Center 
+									1//20 -  1//20
+----- OBJECTIVES -------
+2 users with dual access Nancy Curry and Courtney Swauger. rest by 2/1 only estore, anyone with convergys
+permissions. items moved with sku perm of Convergys. dont need car stock or returns tab.
+----- NOTES -------
+
+use updates based on this perhaps with one other join?
+
+select *
+from mason.dbo.CustomerEdit c(nolock)
+join mason.dbo.Customer_Address ca (nolock) on ca.customer_id = c.customer_id
+where c.fulfillment_id = 73
+and email like '%craig.a%'
+
+does this mean we need to use catalog insert for all these skus?
+
+
+select top 1000 *
+from mason.dbo.InventoryEdit (nolock)
+where fulfillment_id = 73
+and item_status = 'ACTIVE'
+and flexfield12 like '%,193,%'
+
+talked with josh
+
+just move all convergys users and let them decide who testers are
+also give them a top level catalog convergys with all items in it
+
+
+----- BLOCKERS -------
+
+
+
+_________________________________________________________________________________________________________
+/*									ATP-17809
+									PO numbers on shipping labels
+									CTP 1182
+									1//20 -  1//20
+----- OBJECTIVES -------
+CTP was requesting that the PO Number be added to the shipping labels in reference fields. They would like to include Customer # (CTP's PO number, usually 6 digits starting with an 8), and the Customer_Ref3 which is their customer's PO number (i.e. Lakeshore's PO number).
+
+They want to be able to use these to track the orders
+
+----- NOTES -------
+fulfill cfg shows which ucc used in SC printing?
+pr_Report_UniversalUCC128Label_v1
+
+CR0000003244
+0000358065
+
+need to use SC portal to create shipment
+afterwards need to void
+
+----- BLOCKERS -------
+
+
+
+_________________________________________________________________________________________________________
+/*									ATP-17891
+									aeronav info request - CTP order confirms dont look good
+									CTP
+									1/23/20 -  1//20
+----- OBJECTIVES -------
+its looks just like other fulfillments and no direction on which to change it to
+
+----- NOTES -------
+fixed the code bug by adding function of CStr in crystal formula and also changed to text
+
+however if this still isnt clean enough for customer we would have to rework many other pieces to
+move this to jeffnet and or boomi to make it look really polished
+----- BLOCKERS -------
+
+
+
+_________________________________________________________________________________________________________
+/*									ATP-17864
+									Laptop email nav S drive WMS for cynthia
+									Aero OPS
+									1/23/20 -  1//20
+----- OBJECTIVES -------
+set all these up for new ops leader
+
+----- NOTES -------
+
+----- BLOCKERS -------
+
+
+_________________________________________________________________________________________________________
+/*									ATP-17901
+									site went down restarted by involta after installing antivirus
+									Fulfill? 
+									1/23/20 -  1//20
+----- OBJECTIVES -------
+site down wrong URL?
+----- NOTES -------
+had to ping this url api-uat.aerofulfillment.com which was ip
+192.168.21.210
+which is a different url in load balancer sheet scETL.aerofulfillment.com
+for AFSATOM01 server
+----- BLOCKERS -------
+
+
+
+_________________________________________________________________________________________________________
+/*									ATP-17858
+									Need to add lot control drop down to nav site
+									SPL 685
+									1/27/20 -  1/27/20
+----- OBJECTIVES -------
+Need to add the lot control drop down (i.e. Expiration Date, Manufacture Date, Etc.) 
+as a required field on the inventory edit page on the Navigator website for SPL.
+----- NOTES -------
+copy from CPG and then remove extra fields
+----- BLOCKERS -------
+
+
+
+_________________________________________________________________________________________________________
+/*									ATP-17893
+									laptop for brian welch
+									AERO
+									1//20 -  1//20
+----- OBJECTIVES -------
+setting up laptop for brian
+----- NOTES -------
+fixed excel and vpn permissions on 1/31
+----- BLOCKERS -------
+
+vpn still not working
+
+have to put users that arent IT or management in VPN access folder perhaps?
+simms believes this is the issue
+
+_________________________________________________________________________________________________________
+/*									ATP-17659
+									update wording to enterprise commercial invoice
+									CTP - aero
+									1//20 -  1//20
+----- OBJECTIVES -------
+
+----- NOTES -------
+rep id 3009 or 2870
+no this may be the ship station report docs?
+chuck said we cantchange those
+
+jami coming back saying that might not be what shes talking about?
+"This ATP is in response to our Commercial Invoices that don’t use the words commercial invoice. 
+Can you please confirm this is the route we want to take."
+
+
+circling back i think it was determined its report id 496
+
+
+----- BLOCKERS -------
+no clue what or where this report(s) is.
+update this is CLS invoice and we cant change. just told kim and jami on 1/30 
+need them and filipe to decide where to go from here.
+
+tell josh about this ticket, either shouldnt be on sprint or should be cancelled.
+
+update send jami a heads up that itd be more work to change the one we have since we cant change
+CLS's but our is very different and we would want to move many clients to our version
+
+_________________________________________________________________________________________________________
+/*									ATP-17623
+									Quote ability to approve multiple orders on Estore
+									ESTORE
+									1//20 -  1//20
+----- OBJECTIVES -------
+add data form, JS, and admin script logic to estore for approving multiple orders
+----- NOTES -------
+
+2 field settings on select order - copy paste from cpg
+2 admin scripts at min - approve and approve multiple copy from cpg
+set on data form to show grid footer val = true
+
+test placing orders that will go to approval to use multiple order approval
+
+----- BLOCKERS -------
+
+   at aero.controls.DataFormSetting.get_Value()     at aero.controls.DataForm.get_Title()     at aero.eFulfillment.catalogitems.Page_Load(Object sender, EventArgs e)     at System.Web.UI.Control.OnLoad(EventArgs e)     at System.Web.UI.Control.LoadRecursive()     at System.Web.UI.Control.LoadRecursive()     at System.Web.UI.Control.LoadRecursive()     at System.Web.UI.Control.LoadRecursive()     at System.Web.UI.Control.LoadRecursive()     at System.Web.UI.Control.LoadRecursive()     at System.Web.UI.Control.LoadRecursive()     at System.Web.UI.Control.LoadRecursive()     at System.Web.UI.Control.LoadRecursive()     at System.Web.UI.Control.LoadRecursive()     at System.Web.UI.Control.LoadRecursive()     at System.Web.UI.Control.LoadRecursive()     at System.Web.UI.Page.ProcessRequestMain(Boolean includeStagesBeforeAsyncPoint, Boolean includeStagesAfterAsyncPoint)
+
+      at System.Data.RBTree`1.GetNodeByIndex(Int32 userIndex)     at aero.businessRules.LineitemEditRules.get_InventoryRow(Int32 itemId)     at aero.businessRules.LineitemEditRules.ValidateWeb(RulesCache ruleCache, String RuleType, DataRow row, Int32 Customerid, Int32 role_id)     at aero.eFulfillment.Order.ValidateLine(DataRow& CartLine, String& InvPrimaryReference, Boolean Remove)     at aero.eFulfillment.Order.AddItem(CartLineItem CartLine, Boolean isCopy, Boolean isResubmit)
+
+
+james first helped delete from web_events (this is what i couldnt find last night to delete)
+these were likely only occurring during nightly maintenance because james did same thing i did this morning
+and it worked for him and he tested a couple orders.
+
+_________________________________________________________________________________________________________
+/*									ATP-17958
+									give eshak SC portal access
+									Aero
+									1//20 -  1//20
+----- OBJECTIVES -------
+sent regis link and then fix permissions
+----- NOTES -------
+
+
+select *
+from enterprise.dbo.AspNetRoles r
+where
+-- role id EA32B381-FF44-4D81-9E04-692F81D156BB
+-- user id 7a3b612a-2b1d-4f16-9278-fb04d131f3ba
+select *
+from enterprise.dbo.aspnetusers u(nolock)
+join enterprise.dbo.AspNetUserRoles r (nolock) on r.UserId = u.id
+where u.email like '%ben%'
+
+
+USE [ENTERPRISE]
+GO
+
+INSERT INTO [dbo].[AspNetUserRoles]
+           ([UserId]
+           ,[RoleId]
+           ,[Discriminator])
+     VALUES
+           ('7a3b612a-2b1d-4f16-9278-fb04d131f3ba'
+           ,'F6D49190-506E-4087-A70A-8CC0546EBAF2'
+           ,'IdentityUserRole')
+GO
+----- BLOCKERS -------
+
+
+_________________________________________________________________________________________________________
+/*									ATP-17957
+									resend 945 EDI
+									KET
+									1//20 -  1//20
+----- OBJECTIVES -------
+resend KET 945 for
+KB0000194413 - Customer Order # 210208
+KB0000194363 - Customer Order # 210156
+----- NOTES -------
+check as2 send for the acknowledgement for KET
+----- BLOCKERS -------
+
+
+
+_________________________________________________________________________________________________________
+/*									ATP-17475
+									CLS Infoship - 2020 Carrier Rate Update Information
+									AERO
+									1//20 -  1//20
+----- OBJECTIVES -------
+update CLS to have 2020 rate data for USPS ConnectShip
+----- NOTES -------
+
+
+from simms:
+follow emailed instructions and testing after hours in UAT then Prod
+
+test order for carrier/service with the update applicable
+
+----- BLOCKERS -------
+ finally found in progistics manager a pending update after no one confirmed they got an email
+ Simms found it in prog man on afstms01
+
+
+
+_________________________________________________________________________________________________________
+/*									ATP-17977
+									ship NR0000609648
+									NARS
+									1//20 -  1//20
+----- OBJECTIVES -------
+NR0000609648 get it shipped
+----- NOTES -------
+NR0000609648 didnt have manifest
+ used archanas query
+ HAD DROPIDS
+----- BLOCKERS -------
 
 
 
 
 _________________________________________________________________________________________________________
-/*									ATP-17542
-									close out ras order
-									RAS RA0000056026
-									12/30/19 -  12//19
-
--- arch notes 17542
-add manifest for specific caseid
-processlogs
-
+/*									ATP-RANDOM?
+									Ticket Desc?
+									Fulfill? 
+									1//20 -  1//20
+----- OBJECTIVES -------
+OT order OT0001185344 had wrong item sent when 
+----- NOTES -------
 
 
+found this on fulfill tran on lineitem transkey
 
+trans_date			trans_submodule	trans_event		trans_changes
+2020-01-16 11:11:47	Inventory		Update			00000000000001000000000000000000
+2020-01-16 11:11:47	WMS				Update			NULL
+2020-01-16 11:09:23	WMS				Update			NULL
+2020-01-16 11:09:23	Inventory		Update			00000000000001000000000000000000
+
+0 changes to this sku in 2019 and one change in 2020 so far? caused the issue on above order and
+potentially others?
+
+-- OT0001185346 is other order that has 10 lines last 3 arent align but PHC somehow. curious
+as none of these are part of a kit that i know of and not sure how customer placed the order
+in the first place
+----- BLOCKERS -------
 
 
 
 _________________________________________________________________________________________________________
-/*									ATP-17542
-									close out ras order
-									RAS RA0000056026
-									12/30/19 -  12//19
+/*									ATP-17992
+									NARS tracking range
+									NARS
+									2/3/20 -  1//20
+----- OBJECTIVES -------
+increase/DL more tracking numbers for NARS
+----- NOTES -------
+use james documentation on adding tracking to range
+meter number 528928
+hit start after finding correct meter number in FSMS Demand Download
+----- BLOCKERS -------
 
--- arch notes 17542
-add manifest for specific caseid
-processlogs
+
+
+_________________________________________________________________________________________________________
+/*									ATP-17872
+									RRF 945 stuff
+									RRF
+									1//20 -  1//20
+----- OBJECTIVES -------
+need to figure out how the new api requires the ship method to be mapped because the current setup
+is causing it to think USPS is australian parcel service
+may need to get in contact or do some serious research
+----- NOTES -------
+Shopify has indicated that we can feed over the carrier info with the tracking and it will 
+overwrite the logic in place and display correctly
+
+not sure how relevant this article is
+"I want to be able to update unfulfilled and fulfilled Shopify sales orders with tracking 
+number, carrier name and ship date.  
+This is my json:
+
+{
+  
+    "fulfillment": [
+      {
+         "created_at": "2012-03-13T16:09:54-04:00",
+         "order_id": 1103492775994,
+         "location_id": 11437473850,
+         "tracking_company": "UPS",
+         "tracking_number": "92612999937200573000127766",
+         "updated_at": "2018-12-31T14:22:25-04:00",
+         "tracking_urls": null,
+         "status": success
+      }
+    ]
+    
+}
+
+Once sent with API credentials, I get a 200 response OK.  But when I check the contents 
+of the GET on this order, the fulfillment block is empty.  Not sure what I am doing wrong..."
+response on comm.shopify
+"Hi,
+
+I am going to assume you are doing this on an order endpoint directly trying to write its fulfillment property.
+
+Instead, you need to use the fulfillment API endpoint such as
+
+POST /admin/orders/<ORDER_ID>/fulfillments.json
+Hope this helps!"
+
+Retrieve a list of carrier services
+GET /admin/api/2020-01/carrier_services.json
+
+POST /admin/api/2020-01/orders/#{order_id}/fulfillments.json
+{
+  "fulfillment": {
+    "location_id": 905684977,
+    "tracking_url": "http://www.packagetrackr.com/track/somecarrier/1234567",
+    "tracking_company": "Jack Black's Pack, Stack and Track",
+    "line_items": [
+      {
+        "id": 466157049
+      },
+      {
+        "id": 518995019
+      },
+      {
+        "id": 703073504
+      }
+    ]
+  }
+}
+
+
+we started data validation of what api responses were and how we arent sending them any data or mapping anything
+for a shipping url which is what is displaying the australia post.
+
+we dove into the proc after knowing boomi isnt changing data
+proc has a trim/ substring on carrier_shipment_reference_2 and it gets subtring from 11th digit to 30th
+this is removing 2 extra digits we want to get correct shipping data
+
+we believe it was previously at 9 but may have been causing issues which is why it was at 11
+so not sure what may occur but we already tested the change for what we believe will fix
+for RRF.
+
+This is already in production so we need to watch ship confirms from RRF to see if the shipping URLs
+start displaying differently / correctly
+
+----- BLOCKERS -------
+
+
+_________________________________________________________________________________________________________
+/*									ATP-17946
+									Inventory Put Away Notification
+									SPL 685
+									2/4/20 -  1//20
+----- OBJECTIVES -------
+we need to update the logic for the Inventory Put Away Notification to account for situations when 
+an item is moved from STAGE, to STAGE and then to FP or WH. We need to ensure put away notifications 
+are generated for all put aways from STAGE.
+
+----- NOTES -------
+i see it in events as subscription but not as a report with same name
+
+
+view [dbo].[Event_InventoryPutAway]
+also uses an XSD for Event_InventoryPutAway and im not sure how this will behave
+with using my planned test [dbo].[Event_InventoryPutAway_Test] report
+because i believe the names have to match the xsd file name and we cannot change the xsd file name
+i will try to double check in VS code though
+
+JAMES HAS APP TO RUN LOCALLY
+#xsd notifications
+
+put app and documentation into conf/ sharepoint?
+
+----- BLOCKERS -------
+
+
+
+_________________________________________________________________________________________________________
+/*									ATP-17995
+									customer order 211466 did not import
+									KET
+									2/4/20 -  1//20
+----- OBJECTIVES -------
+211466 no idea what caused this
+----- NOTES -------
+just looks like locking. it sent an email from the process saying it didnt import
+just reran selected after doing some validation
+
+confirmed it imported correctly now
+----- BLOCKERS -------
+
+
+
+_________________________________________________________________________________________________________
+/*									ATP-17999
+									order error
+									SPL 1155
+									2/4/20 -  1//20
+----- OBJECTIVES -------
+customer order 05801918 erroring due to invalid sku 197002
+----- NOTES -------
+SL0000080422
+SL0000080423
+SL0000080561
+all 3 show up for same customer reference
+
+just looks like truly non existant sku unless she can prove we had it before and its gone or deleted
+
+i was incorrect it is ALMOST a real sku. NV197002 exists but gets a post process ran through map in the 
+function that assigns the sku from the item code and cost center coming over in the mapping. this runs
+[dx_SPL_SKULookup]
+which takes both item code as sku then checks to make sure both ref 3 and cost center on inv table 
+match item code and cost center on incoming order
+
+in this case it did not. correct cost center for 197001 was on order 05-C148
+but for line 4 which is 197002 its expecting cost center 05-C263
+
+----- BLOCKERS -------
+
+
+
+_________________________________________________________________________________________________________
+/*									ATP-?
+									Ticket Desc?
+									Fulfill? 
+									1//20 -  1//20
+----- OBJECTIVES -------
+
+----- NOTES -------
+
+----- BLOCKERS -------
+Quantity requested (1) exceeds available inventory (0) of Lot 0000247221 at Location 218045040 in/on LPN
+
+_________________________________________________________________________________________________________
+/*									ATP-18025
+									fedex and LTL files did not download
+									AERO
+									2/6/20 -  1//20
+----- OBJECTIVES -------
+FedEx file Aero2.4.csv and individual invoices 691515218,691502042,691630869,691542229,691599762,691542355 
+did not import into freight manager, no alert was sent and they are no longer in the file for download. 
+Also, LTL files SMARTSHIP LTL 02042020.CSV and SMARTSHIP LTL 02052020.CSV are still in the file 
+waiting to be imported.
+----- NOTES -------
+had to kill boomi process still running from 2 am
+
+checking to see if ANYTHING imported during its runtime this morning
+
+
+select top 10 *
+from ENTERPRISE.dbo.Freight_InvoiceXref (nolock)
+where Add_Date > (GETDATE() - 2)
+
+select *
+from ENTERPRISE.dbo.Freight_Client (nolock)
+where Add_Date > (GETDATE() - 2)
+order by add_date desc
+
+
+select *
+from ENTERPRISE.dbo.Freight_Invoice (nolock)
+where Add_Date > (GETDATE() - 2)
+order by Add_Date desc
+
+invoice table has data from today 2/6
+i either need to delete them from this table or find another way around that wouldnt cause issues with
+this data already present? im thinking ill need to delete it though
+
+path for file pickup from master freight import
+\\afsatom01\DX\FreightImports\
+ or specific paths for DHL and fedex example 
+ \\afsatom01\DX\FreightImports\FEDEX
+
+other options exist in the uat path mirroring this
+refer to boomi process properties on master to view import paths/methods
+ENT
+DHL
+UPS 
+
+the import jobs run procs of
+[pr_Freight_Import]
+[pr_Freight_Import_Xref]
+[pr_Freight_Import_Client]
+
+and utilizes imports to the following tables
+enterprise.dbo.freight_invoiceancillaries 
+ENTERPRISE.dbo.Freight_Invoice 
+ENTERPRISE.dbo.Freight_Invoicedetail
+ENTERPRISE.dbo.Freight_InvoiceXref
+ENTERPRISE.dbo.Freight_Client
+
+do you still see the Smartship LTL files waiting to be picked up?
+
+also is there any way you can request the 2.4 csv file to be resent as our process crashed this 
+morning unexpectedly when trying to run that file through.
+----- BLOCKERS -------
+
+random word of the day philalethist - lover of truth
+
+_________________________________________________________________________________________________________
+/*									ATP-18006
+									Multiline issue on AAS orders
+									AAS
+									2/4/20 -  2/7/20
+----- OBJECTIVES -------
+get multiple lines working
+
+----- NOTES -------
+josh was saying we might not have pieces of the boomi process set up correctly in the process prop shape
+or other components
+i validated this looks the same as all our other order import with xml GETs
+
+basically just tested this with my own version of xml removing the extra products to be shipped tags and
+it worked. informed customer to map their xml this way.
+
+no respnse 2/6
+
+2/7
+order cust ref from customer test after they deployed live change.
+3800080919
+complete at this point
+----- BLOCKERS -------
+
+
+
+_________________________________________________________________________________________________________
+/*									ATP-?
+									Ticket Desc?
+									Fulfill? 
+									1//20 -  1//20
+----- OBJECTIVES -------
+print or get PDF copies of below
+master generic packing slip
+generic pick ticket
+----- NOTES -------
+use aero fulfillment
+
+PL0000026089
+
+----- BLOCKERS -------
+
+
+
+_________________________________________________________________________________________________________
+/*									ATP-18091
+									RRF Orders duplicating
+									RRF
+									2/17/20 -  2/17/20
+----- OBJECTIVES -------
+solve duplicating issue
+
+----- NOTES -------
+investigating and checking if this is our fault or theirs. looks like they sent us 2 
+identical files and 1st imported 2nd failed.
+
+billable
+----- BLOCKERS -------
+
+
+_________________________________________________________________________________________________________
+/*									ATP-17819
+									RRF shopify inventory datafeed
+									RRF
+									2/17/20 -  2//20
+----- OBJECTIVES -------
+copying off pats KNR inventory update process
+
+----- NOTES -------
+not sure if my test correctly passed data to shopify test site at all but the process ran all the way through
+using 99999 in GET
+
+use creds archana gave
+
+custs site
+use api stuff james gave to finish the new boomi process
+this is a get to their API on products to get variant ids
+finish map and process then already made inv update should work
+
+SHOPIFY
+
+API NOTES IN POSTMAN
+
+rely heavily on json data in URL
+https://32beea90cf0c4dcc2436edef43bcabdf:c854be8bbcb9bf8071481a49221f95ee@rothschild.myshopify.com/admin/api/2020-01/products.json?created_at_min=2017-11-01
+
+at end we see products.json?
+this is vital part of boomi and api call
+after ? there is more data API is using
+
+so writing out process for boomi
+set props
+branch
+resource path - admin / url info - multiple props so you can also include conditions
+http client using json to pull in elements of products object for variant id with sku
+	now we have a way to identify the data coming from shopify API
+do we immediately go into the mapping of saying this data from api goes to this field in our table
+and then do we immediately update that in the database?
+is first branch for only new items and 2nd for update?
+
+no need for branching until using master and sub procs
+
+login
+KKoontz@RRFFoods.com
+Rrf123!
+fix the inv update proc path made to use the correct location to update inventory
+
+aero loc id 20045635
+dot foods loc 31153684567
+
+use inv item id and call the GET and the POST
+get for the current qty they have to compare against qty we have and then
+add logic to tell the update how much to increase or decrease in the adjust POST call
+
+for 3/3
+finish above if i can somehow do the quanity logic
+
+3/3 removed extra stuff because james is right
+however i still need to handle errors
+and also handle decremental adjustments
+
+so somehow have to store the amount or get amount? using the get levels?
+or just use last qty and then do change value and prefix with '-' maybe?
+
+#RRF
+errors 
+check for good http response and also a good api call response
+
+----- BLOCKERS -------
+
+
+
+_________________________________________________________________________________________________________
+/*									ATP-16088
+									Digital fedex return labels
+									PGK sykes 131 
+									2/18/20 -  2//20
+----- OBJECTIVES -------
+just do research on this current question they have:
+They are currently receiving a "Stock Item Flag" from P&G and is then sent over to Aero 
+as "Issue Policy" with a value of Y or N
+
+1. What do we use this for?
+2. What should this value be for these items?
+----- NOTES -------
+possibly inv flexfield6?
+
+verified by looking at item inventory process and mapping
+Issue policy gets mapped to custom field 6 = ff6
+
+pr_Batch_Lineitem_Insert2
+dx_Shipping_Optimize
+dx_SykesOrderConfirm
+dx_SykesShipConfirm
+dx_SykesShipConfirm_test
+pr_Batch_Lineitem_Insert_Lot
+pr_Batch_Lineitem_Insert2
+
+appears to have been added in 2008 for a need to see if the customer wants a
+cust ref line ID. Y or N maybe doesnt seem appropriate unless they are doing something on customers
+end that uses this in their system? otherwise we may need to see if our systems were supposed to
+connect this as a number but its been set as a character in boomi forever to my knowledge
+----- BLOCKERS -------
+
+
+
+_________________________________________________________________________________________________________
+/*									MEETING NOTES
+									business update
+									IT AERO
+									2/18/20
+keepass directory 
+
+#keepass
+\\aeroshare03\IT\Data\aero.kdbx
+----- NOTES -------
+
+EBITDA - new metric for business success - essentially the tool to use to see cost against gross module
+for revenue
+EARNINGS BEFORE INTEREST TAXES DEPRECIATION AMORTIZATION
+better than just measuring rev. or net income
+
+strips out cost of capital investments like plant, property and equipment. also excludes expenses related
+to debt by adding back interest expense and taxes to earnings.
+able to show company performance in earnings before influenced by accounting and financial decisions
+
+formula
+EBITDA=Net Income+Interest+Taxes+D+A
+where:
+D=Depreciation
+A=Amortization
+​	 
+EBITDA=Operating Profit+DE+AE
+where:
+DE=Depreciation expense
+AE=Amortization expense
+​	
+ 
+-- IT support cost at 4.1% of rev. standard for our industry is supposed to be 3%
+filipes goal to be down to 3.5% by EOY
+
+bringing down time spent in help desk tickets especially repetitive ones is big. also
+reducing platform and systems costs where we dont need them
+
+- each dept goals to win will be tracked through excel sheets as well as progress on SOWs
+and the like.
+goals across all depts vary and likely cause friction
+first come first serve on who presents projects to get approved
+
+2 new helpdesk emps
+1 scrum master
+
+talked about bringing questions about growth and opportunity to filipe and he will
+try to fund any classes or help guide to what youre trying to accomplish
+
+leaderly
+ENT hours for end of month by client - rather all the hours tied to each client per ticket and billable or not
+IT annual hardware budget plan 4 year cycle - REfresh of all hardware assets and new implementations
+Fill in Scrum master - several occasions holding morning standup meetings, weekly ticket estimate meetings,
+						leading development heirarchy and design discussions for new and existing systems and apps
+
+net statistics server
+see when stats are from is last restart
+
+_________________________________________________________________________________________________________
+/*									ATP-17948
+									
+									Fulfill? 
+									1//20 -  1//20
+----- OBJECTIVES -------
+
+----- NOTES -------
+
+----- BLOCKERS -------
+
+
+_________________________________________________________________________________________________________
+/*									ATP- no ticket?
+									set up 7-8 pcs using the mini pcs for OPS and 1 more for QC
+									using slow desktop?
+									OPS
+									2/19/20 -  2//20
+----- OBJECTIVES -------
+
+
+----- NOTES -------
+use master image not master ship station because its behind 1 major windows update
+
+
+----- BLOCKERS -------
+
+
+
+_________________________________________________________________________________________________________
+/*									ATP-17759 18103
+									KET GUNS - HIGH PRIO
+									KET 
+									2//20 -  2//20
+----- OBJECTIVES -------
+Fix KET guns and then work on pcs for above
+----- NOTES -------
+fix ket
+----- BLOCKERS -------
+
+
+
+_________________________________________________________________________________________________________
+/*									ATP-18139
+									new fulfill oralcareB - M
+									OCBM
+									2/24/20 -  2/24/20
+----- OBJECTIVES -------
+new fulfill in uat and prod and api creds
+----- NOTES -------
+username				password
+B7E2A462B9C44D75B5CA	B22778F6-3C80-4697-A7C9-9608A0D1BA2A
+----- BLOCKERS -------
+
+
+
+_________________________________________________________________________________________________________
+/*									ATP-17948
+									edi onboarding and testing for ras partner marshall retail group
+									RAS
+									2/24/20 -  2//20
+----- OBJECTIVES -------
+test edi for marshall group partner of ras
+----- NOTES -------
+theres 2 orders already imported
+
+RA0000057053
+RA0000057054
+----- BLOCKERS -------
+
+-- error codes check
+select *
+from lebanon.dbo.Orders_ErrorCodes oe (nolock)
+join lebanon.dbo.Orders_IncidentLog oi (nolock) on oi.errorCode = oe.errorCode
+join lebanon.dbo.orders o (nolock) on o.orders_id = oi.orders_id
+where o.primary_reference = 'NR0000609648'
+bug with uat packed validation
+james fixed and it was able to ship
+
+
+
+_________________________________________________________________________________________________________
+/*									ATP-18059
+									Allows estore users to add negative qty to cart so we 'owe' them
+									fix to only allow positives
+									Estore 
+									2/24/20 -  2//20
+----- OBJECTIVES -------
+currently allowing negatives which makes us 'owe' them
+----- NOTES -------
+cant parseint with js
+----- BLOCKERS -------
+cant parseint with js or jQuery
+have to make changes entirely with devexpress
+
+<dx:ASPxSpinEdit ID="qty_order" runat="server" OnValueChanged="qty_order_NumberChanged" AutoPostBack="false" Number="0" NumberType="Integer" Width="100px" MaxValue="999" MinValue="0">
+                                        <ClientSideEvents ValueChanged="function(s, e) {
+
+code to set the static msg is a code change and not done yet
+
+fixed again so backend function sets to 1
+<dx:ASPxSpinEdit ID="qty_order" runat="server" OnValueChanged="qty_order_NumberChanged" AutoPostBack="false" Number="0" NumberType="Integer" Width="100px" MaxValue="999" MinValue="1">
+^ this is display val only
+
+below handles if backend is less than 1 then sets to 1
+ Protected Sub qty_order_NumberChanged(sender As Object, e As EventArgs)
+        Session.Item("qty_ordered") = CType(sender, ASPxSpinEdit).Number
+        If CType(sender, ASPxSpinEdit).Number < 1 Then
+            Session.Item("qty_ordered") = 1
+        End If
+    End Sub
+
+_________________________________________________________________________________________________________
+/*									ATP-18098
+									CPG PO Tool turn off site decommission in a few weeks
+									CPG?
+									2/24/20 -  2//20
+----- OBJECTIVES -------
+turn off on server using apache (iis type thing to change bindings)
+----- NOTES -------
+what server?@dmin3900
+
+use lowercase login
+#linux
+navigate to path with apache file
+from root
+cd etc/apache2/sites-available/
+cp etc/apache2/sites-available/000-default.conf /var/tmp
+sudo nano etc/apache2/sites-available/000-default.conf
+
+sudo means admin in linux
+nano is editor
+
+use ctrl as the ^ icon
+so ctrl + K to cut out lines
+where we removed whole object of
+<virtualhost>
+server
+</virtualhost>
+
+ctrl x to save
+ctrl y
+enter
+
+then either close and reopen connection AND reload service or just reload service with
+sudo service apache2 reload
+
+do above on both servers
+afsmicro1
+afsmicro2
+
+
+----- BLOCKERS -------
+
+
+
+_________________________________________________________________________________________________________
+/*									ATP-18175
+									Ticket Desc?
+									Fulfill? 
+									2/24/20 -  2//20
+----- OBJECTIVES -------
+fix one estore catalog with updated list and also rework catalog structure to accommodate the mixed role
+
+actually this is a rework. they want a catalog structure like the others. need updated file from dotty with
+all 3 levels
+
+delete current items in here then
+need to create the new catalog paths then easy insert
+
+----- NOTES -------
+
+----- BLOCKERS -------
+
+
+
+_________________________________________________________________________________________________________
+/*									ATP-18098
+									end to end testing EDI processes for FEC
+									FEC
+									2/26/20 -  //20
+----- OBJECTIVES -------
+end to end testing using their test cases
+start FEC GET FILES
+943
+944
+940
+945
+follow their lead
+----- NOTES -------
+just do flow of 943 recv then 944 recpt
+then import order 940 then ship and ship confirm 945
+files already given to us jsut need to communicate
+
+remote in to uatatom01
+winscp into fec
+ftp on port 21 rest of info correct in keepass besides port and protocol
+
+make sure locs set up at pick piece and also ITEM CONFIG set up in assign locs as pick piece
+
+can use rev_zeroshipped
+or rev_canceledorder
+to fix bad imports
+944 process then hits outbound router which transmits to ftp on atom server
+packing list?
+-- print using nav somehow? master packing slip or forward pick
+945 orders FE0000000015,FE0000000022 wave 0000358627
+can try using knr master packing slip 2721
+
+generate manifest using archanas query
+
+use select query from 945 get to check in sql beforehand for other things it may pick up
+while testing. had to move orders that would pass validation.
+
+
+make sure you run line item update to get from active to allocated in nav
+then packed val then lineitem again then packed val again
+
+then it should ship
+
+
+update 2/28 and 3/2
+we need to test again by adjusting data and then resending 944 i believe?
+using carton lvl 
+instead of each?
+
+for 3/3
+finish testing - use barcodes to try to scan in with inbound catch data
+then if the data gets into db can easily resend 944 with correct data
+
+not sure if they will make me re do the 940 and 945 but those should be quicker
+Hi Ben,
+
+ 
+
+The 945s look good, thanks!
+Regarding the 944s, SKUs and quantities appear to be summarized and not split across cartons according to the carton labels previously provided by Syd for these POs/MPs/TOs. Using MP339880 as an example, the attached carton label indicates UPC 190449345265 was shipped @ 20EA split evenly across two cartons P0001295158 and P0001295159. Per past discussions, we sent summary-level quantities on the 943 and then expected carton-level scanned information back on the 944s.
+
+EDI 943 (actual):
+W04*20*EA**VN*190449345265~
+
+
+EDI 944 (expected):
+W07*10*EA**MG*190449345265~
+N9*LT*0000288389~
+N9*97*P0001295158~
+W07*10*EA**MG*190449345265~
+N9*LT*0000288389~
+N9*97*P0001295159~
+
+EDI 944 (actual):
+W07*20*EA**MG*190449345265~
+N9*LT*0000288389~
+N9*97*(CartonIDMissing)~
+
+000660118 test rec
+
+0001329999 test rec
+
+SET INBOUND CATCH DATA AND OUTBOUND AT ENT LVL
+
+document process in RF gun menus for OPS
+
+work on getting carton lvl to work in UAT and resend 944 asap
+190449352584
+190449345258
+
+added barcode scan to all skus
+need to get srl data in all POs/ASNs
+to do this do i need 1 record for EACH qty even though its same line? because that may be
+how infor represents the data best
+
+client may be okay with it not like that
+
+sku list
+190449352584
+190449345258
+190449347696
+190449345333
+190449345340
+190449345357
+190449347634
+190449347641
+190449347740
+190449345272
+190449345265
+190449347689
+
+
+recreating on new ASN TO416089
+	190449346521
+	190449346675
+	190449346743
+
+3/5
+
+PUR prod test to replicate
+00254 - sku
+640509020 - loc
+202078120 - other loc to try
+
+ mentionables in infor
+	receipt validation
+	ENT item config
+	ENT tp - owner
+
+1st test 100 eaches	on pur line item so it needed 100 scans for catch data
+was trying to split on 50 pack to get 2 different cases
+
+2nd test was 200 on 1 line with catch data set to case pick level
+forced me to do 2 srl scans for ICD data 2 field then 2 scans for serial screen data
+
+not consistent between the two tests
+
+same issue in test 3
+i dont believe this occurred on test 1 but it could have
+
+test 4 will only be 10 each
+ok so it is consistent that through rf these require the serial serial scans
+that are different from the spcecified icd data2 field which we specifically want to use only
+
+this testing is currently different than UAT because wasnt requiring the extra serials after but i will
+double check
+
+confirmed again - this behavior is different, not sure if its just patches from uat to prod being different
+or if its the way the fulfillments are set up somehow?
+
+
+after talking to marv
+we can recv w/o creating new lines if we set items correctly
+DONT have end to end serial checked, not needed to have ICD and OCD
+make sure to set by case or w/e uoms are set for that item
+PURTEST1
+
+must do by LPN in receipt screen
+option 7 in rec menu
+recvd existing line as 2 cases each case with its own ICD
+
+this is in boomi job GET for Nav to infor SKU insert
+	icdflag =	CASE	--7/02/2013 added/modifed catch data fields...
+						WHEN i.fulfillment_id=826 AND ISNULL(i.Inbound_CatchData,'') IN ('ASSET','COMP') THEN 1 
+						--20160511 - JHickman - I didn't understand what this WHEN was trying to accomplish.
+						--WHEN ISNULL(i.Inbound_CatchData,'')<>'' and ISNULL(i.Inbound_CatchData,'') NOT LIKE 'NONE%' THEN '1' 
+						ELSE '0' 
+					END,
+
+not sure where else might be touching ICD flag and data but we need to make sure
+these are able to be updated via API or through NAV
+
+3/9
+recreating on new ASN TO416089
+	190449346521
+	190449346675
+	190449346743
+
+cannot have same LPN on two receipts
+so this may be out the window
+
+can still recv as case but itll create new lines
+and will have to remove original lines somehow?
+
+this may have to coincide with client sending as cases with appropriate cartons etc
+
+
+
+
+----- BLOCKERS -------
+msgqueue? jms format?
+wrong prot and port info
+wayyy different of a import process than usual boomi jobs
+
+_________________________________________________________________________________________________________
+/*									ATP-18009
+									Five addresses need to always be priority one and misc truck
+									LUX
+									3/2/20 -  3//20
+----- OBJECTIVES -------
+We need to set up something that causes these five addresses to be Priority 1 and Misc Truck Service 
+ship method all the time when they come into the system:
+2465 Joe Field Rd Dallas, Tx 75229
+2150 Bixby Road Lockbourne, OH 43137
+101 Greenwood Industrial Parkway McDonough, GA 30253
+4605 Rusan Street St. Cloud, MN 56303
+651 E. Corporate Dr Lewisville, TX 75057
+
+REASSIGNED TO ARCHANA*******************
+----- NOTES -------
+
+----- BLOCKERS -------
+
+
+
+_________________________________________________________________________________________________________
+/*									ATP-18099
+									Estore create popups to mirror parent site
+									estore 
+									3/2/20 -  3//20
+----- OBJECTIVES -------
+either in admin script or data forms
+----- NOTES -------
+"frm_opencontrol.aspx?cname=ctrl_view&n=WebInventoryMessageSearch&i=" & {InventoryEdit.item_id} & "&pr=" & {InventoryEdit.primary_reference}
+
+this code is in settings for data form field
+special messages -- settings -- navigateurl
+
+select *
+from mason.dbo.inventory_message (nolock)
+where fulfillment_id = 521
+order by start_date desc
+
+move data over?
+----- BLOCKERS -------
+
+
+
+_________________________________________________________________________________________________________
+/*									ATP-GROUPING
+									Ticket Desc?
+									Fulfill? 
+									2//20 -  2//20
+----- OBJECTIVES -------
+close as many help desk tickets as possible
+----- NOTES -------
+ALL ATPS CHECKING STATUS ON
+16554 - chris - not sure why its open - canceled
+16243 - katie - orig ticket 15357 no whole batch failing for one order when matching xml rules - waiting
+16486 - becky - not touched, mainly a research ticket diversey reb claim process
+17030 - erin - superuser allot report
+16639 - chris - scale ticket - canceled
+16144 - jami and archana - rec turn time rep - not complete
+16254 - doug - cycle counts flagged hold locs not okay - old not touched
+16644 - karen - exd intl ship method issue
+16800 - lupe - not touched but may not be an issue and needs examples
+
+3/4
+16845 - dotty - on hold til CPG resumes this work
+16846 - dotty - on hold waiting for 16845
+16671 - christy - archana has but filipe commented already done?
+16977 - doug s - IRE needs full child meter setup to ship on own acc
+16936 - erin - pgoc cannot set new allotment, works in the way we set up but she wants dif solution
+
+
+3/5
+18313 - angela - v drive missing from SSDw upgrade - v drive is aeroshare02 not 03
+18296 - adam - added new user to email groups - 1 may be incorrect
+18286 - christy - removed user from aero wc users group
+
+3/6
+18323 - zwaap - javier cant send mail but can receive - not due to office365 i believe logout/in?
+18283 - chris - db fulfill props for 1 notif jeffnet for other 1 from boomi email process prop
+16486 - becky - trying to find claim / over amount
+18270 - becky - ire asn recpt change line in get of receiptdetail to use lot04 as daterecvd? asked becky
+18302 - jami - access for disc and armstrong emails - no clue
+
+
+
+----- BLOCKERS -------
+
+
+
+_________________________________________________________________________________________________________
+/*									ATP-?
+									Ticket Desc?
+									Fulfill? 
+									1//20 -  1//20
+----- OBJECTIVES -------
+
+----- NOTES -------
+
+----- BLOCKERS -------
+
+
+_________________________________________________________________________________________________________
+/*									ATP-?
+									Ticket Desc?
+									Fulfill? 
+									1//20 -  1//20
+----- OBJECTIVES -------
+
+----- NOTES -------
+
+----- BLOCKERS -------
+
+
+
+_________________________________________________________________________________________________________
+/*									ATP-?
+									Ticket Desc?
+									Fulfill? 
+									1//20 -  1//20
+----- OBJECTIVES -------
+
+----- NOTES -------
+
+----- BLOCKERS -------
+
+
+
+_________________________________________________________________________________________________________
+/*									ATP-?
+									Ticket Desc?
+									Fulfill? 
+									1//20 -  1//20
+----- OBJECTIVES -------
+
+----- NOTES -------
+
+----- BLOCKERS -------
+
+
+
+_________________________________________________________________________________________________________
+/*									ATP-?
+									Ticket Desc?
+									Fulfill? 
+									1//20 -  1//20
+----- OBJECTIVES -------
+
+----- NOTES -------
+
+----- BLOCKERS -------
+
+
+_________________________________________________________________________________________________________
+/*									ATP-?
+									Ticket Desc?
+									Fulfill? 
+									1//20 -  1//20
+----- OBJECTIVES -------
+
+----- NOTES -------
+
+----- BLOCKERS -------
+
+
+
+_________________________________________________________________________________________________________
+/*									ATP-?
+									Ticket Desc?
+									Fulfill? 
+									1//20 -  1//20
+----- OBJECTIVES -------
+
+----- NOTES -------
+
+----- BLOCKERS -------
+
+
+
+_________________________________________________________________________________________________________
+/*									ATP-?
+									Ticket Desc?
+									Fulfill? 
+									1//20 -  1//20
+----- OBJECTIVES -------
+
+----- NOTES -------
+
+----- BLOCKERS -------
+
+
+
+_________________________________________________________________________________________________________
+/*									ATP-?
+									Ticket Desc?
+									Fulfill? 
+									1//20 -  1//20
+----- OBJECTIVES -------
+
+----- NOTES -------
+
+----- BLOCKERS -------
+
+
+_________________________________________________________________________________________________________
+/*									ATP-?
+									Ticket Desc?
+									Fulfill? 
+									1//20 -  1//20
+----- OBJECTIVES -------
+
+----- NOTES -------
+
+----- BLOCKERS -------
+
+
+
+_________________________________________________________________________________________________________
+/*									ATP-?
+									Ticket Desc?
+									Fulfill? 
+									1//20 -  1//20
+----- OBJECTIVES -------
+
+----- NOTES -------
+
+----- BLOCKERS -------
+
+
+
+_________________________________________________________________________________________________________
+/*									ATP-?
+									Ticket Desc?
+									Fulfill? 
+									1//20 -  1//20
+----- OBJECTIVES -------
+
+----- NOTES -------
+
+----- BLOCKERS -------
+
+_________________________________________________________________________________________________________
+/*									ATP-?
+									Ticket Desc?
+									Fulfill? 
+									//20 -  //20
+----- OBJECTIVES -------
+
+----- NOTES -------
+
+----- BLOCKERS -------
+
+
+_________________________________________________________________________________________________________
+/*									ATP-?
+									Ticket Desc?
+									Fulfill? 
+									//20 -  //20
+----- OBJECTIVES -------
+
+----- NOTES -------
+
+----- BLOCKERS -------
+
+
+
+_________________________________________________________________________________________________________
+/*									ATP-?
+									Ticket Desc?
+									Fulfill? 
+									//20 -  //20
+----- OBJECTIVES -------
+
+----- NOTES -------
+
+----- BLOCKERS -------
+
+
+_________________________________________________________________________________________________________
+/*									ATP-?
+									Ticket Desc?
+									Fulfill? 
+									//20 -  //20
+----- OBJECTIVES -------
+
+----- NOTES -------
+
+----- BLOCKERS -------
+
+
+
+_________________________________________________________________________________________________________
+/*									ATP-?
+									Ticket Desc?
+									Fulfill? 
+									//20 -  //20
+----- OBJECTIVES -------
+
+----- NOTES -------
+
+----- BLOCKERS -------
+
+
+_________________________________________________________________________________________________________
+/*									ATP-?
+									Ticket Desc?
+									Fulfill? 
+									//20 -  //20
+----- OBJECTIVES -------
+
+----- NOTES -------
+
+----- BLOCKERS -------
+
+
+_________________________________________________________________________________________________________
+/*									ATP-?
+									Ticket Desc?
+									Fulfill? 
+									//20 -  //20
+----- OBJECTIVES -------
+
+----- NOTES -------
+
+----- BLOCKERS -------
+
+
+_________________________________________________________________________________________________________
+/*									ATP-?
+									Ticket Desc?
+									Fulfill? 
+									//20 -  //20
+----- OBJECTIVES -------
+
+----- NOTES -------
+
+----- BLOCKERS -------
+
+
+
+_________________________________________________________________________________________________________
+/*									ATP-?
+									Ticket Desc?
+									Fulfill? 
+									//20 -  //20
+----- OBJECTIVES -------
+
+----- NOTES -------
+
+----- BLOCKERS -------
+
+
+_________________________________________________________________________________________________________
+/*									ATP-?
+									Ticket Desc?
+									Fulfill? 
+									//20 -  //20
+----- OBJECTIVES -------
+
+----- NOTES -------
+
+----- BLOCKERS -------
+
+
+
+_________________________________________________________________________________________________________
+/*									ATP-?
+									Ticket Desc?
+									Fulfill? 
+									//20 -  //20
+----- OBJECTIVES -------
+
+----- NOTES -------
+
+----- BLOCKERS -------
+
+
+_________________________________________________________________________________________________________
+/*									ATP-?
+									Ticket Desc?
+									Fulfill? 
+									//20 -  //20
+----- OBJECTIVES -------
+
+----- NOTES -------
+
+----- BLOCKERS -------
+
+
+_________________________________________________________________________________________________________
+/*									ATP-?
+									Ticket Desc?
+									Fulfill? 
+									//20 -  //20
+----- OBJECTIVES -------
+
+----- NOTES -------
+
+----- BLOCKERS -------
+
+
+_________________________________________________________________________________________________________
+/*									ATP-?
+									Ticket Desc?
+									Fulfill? 
+									//20 -  //20
+----- OBJECTIVES -------
+
+----- NOTES -------
+
+----- BLOCKERS -------
+
+
+
+_________________________________________________________________________________________________________
+/*									ATP-?
+									Ticket Desc?
+									Fulfill? 
+									//20 -  //20
+----- OBJECTIVES -------
+
+----- NOTES -------
+
+----- BLOCKERS -------
+
+
+_________________________________________________________________________________________________________
+/*									ATP-?
+									Ticket Desc?
+									Fulfill? 
+									//20 -  //20
+----- OBJECTIVES -------
+
+----- NOTES -------
+
+----- BLOCKERS -------
+
+
+
+_________________________________________________________________________________________________________
+/*									ATP-?
+									Ticket Desc?
+									Fulfill? 
+									//20 -  //20
+----- OBJECTIVES -------
+
+----- NOTES -------
+
+----- BLOCKERS -------
+
+
+_________________________________________________________________________________________________________
+/*									ATP-?
+									Ticket Desc?
+									Fulfill? 
+									//20 -  //20
+----- OBJECTIVES -------
+
+----- NOTES -------
+
+----- BLOCKERS -------
+
 
 
