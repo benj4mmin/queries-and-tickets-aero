@@ -18243,6 +18243,16 @@ delete current items in here then
 need to create the new catalog paths then easy insert
 
 ----- NOTES -------
+reworking my create proc to include creating the catalogs if they dont exist in the DB with the specific new role in the string
+
+so i am parameterizing the role id
+and either use same or new temp table to have the 3 levels and determine roles and name etc and query on role with that name etc
+
+will need to select name as name from import as well
+
+can possibly build the import of the file into the proc but may be advanced
+
+
 
 ----- BLOCKERS -------
 
@@ -18525,6 +18535,7 @@ ALL ATPS CHECKING STATUS ON
 16486 - becky - trying to find claim / over amount
 18270 - becky - ire asn recpt change line in get of receiptdetail to use lot04 as daterecvd? asked becky
 18302 - jami - access for disc and armstrong emails - no clue
+18346 - chris - inv set to inactive so they can reimport corrected version of skus
 
 
 
