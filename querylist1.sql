@@ -5939,6 +5939,10 @@ JustinnMcDaniel
 ix8vsz
 
 
+#samba
+samba 01 vs 02 manual change in windows config
+when not able to reach network drives
+
 _________________________________________________________________________________________________________
 /*							ATP-13982
 							Aero SFTP server issues
@@ -14390,7 +14394,7 @@ ________________________________________________________________________________
 									10/29/19 -  /19
 AS0000403292  - shelf life
 
-AS0000404490  -unsure
+AS0000404490  - unsure
 
 select *
 from lebanon.dbo.Orders_ErrorCodes oe (nolock)
@@ -15323,6 +15327,14 @@ cant convert dbnull to BOOL
 
 new ticket entered to totally fix
 
+this could be correct place?
+
+'the(shipping And handling)
+                    If oOrdRow.Item("order_type").ToString.ToLower = "backorder" And Not Me.UseActualShipping Then
+                        Try
+                            'Dim objOrder As New OrderProvider(CInt(oOrdRow.Item("customer_id")), CInt(oOrdRow.Item("fulfillment_id")), 0, False, False)
+                            Dim ordProvider As New OrderProvider(CInt(oOrdRow.Item("customer_id")), CInt(oOrdRow.Item("fulfillment_id")), 1)
+                            If ordProvider.CheckParentOrder(CInt(oOrdRow.Item("original_orders_id"))) Then
 
 workaround is a column was added to hold the value of false instead of a virtual column
 
@@ -15397,6 +15409,8 @@ ________________________________________________________________________________
 fix order provider code
 1974
 function authorize payment
+
+workaround is a column was added to hold the value of false instead of a virtual column
 
 
 _________________________________________________________________________________________________________
@@ -17026,6 +17040,20 @@ ________________________________________________________________________________
 									PGB
 									1//20 -  1//20
 ----- OBJECTIVES -------
+Becky noted several things that are missing and will have notes on current admin tools etc.
+
+**add employee ID to index/search field 3h
+	-- adding logic to userticketform controller and the elements to front end then testing
+**sortable retiree and require trans - reformat - 5h
+	-- devexpress research and testing to get correct config that allows our current form/list to sort
+		by retiree and require transport
+**add contact page and other parts to admin tools config ie. phone number & message 2h
+	-- copy pasting components for editing front end used on other admin parts and testing
+**fix export doc to not export as check marks for retiree and req trans. make sortable? ?h
+	-- it is sortable already. however need to look through devexpress docs and or excel
+		docs to export properly or convert the boolean to a string for yes and no
+**add link to efulfill for reports 1h
+	-- simple html link added to reports page to redirect to efulfill reports for PGBoston
 
 ----- NOTES -------
 
@@ -17548,7 +17576,7 @@ test order for carrier/service with the update applicable
  finally found in progistics manager a pending update after no one confirmed they got an email
  Simms found it in prog man on afstms01
 
-
+login info?
 
 _________________________________________________________________________________________________________
 /*									ATP-17977
@@ -17694,8 +17722,61 @@ for RRF.
 This is already in production so we need to watch ship confirms from RRF to see if the shipping URLs
 start displaying differently / correctly
 
+
+https://rothschild.myshopify.com
+123*(*(*(32beea90cf0c4dcc2436edef43bcabdf*_*_*_
+keyd
+
+new asn IT-TEST1
+10 of sku CL19143
+this qty is available
+get inv should show this having 0 in shopify
+
+then we run update
+this should see it has 0 in shopify and 10 available
+
+if 10 less than 0 then 10 - 0 else 10 - 0 --> 10 - 0 = 10 which means 10 + 10
+if 0 less than 10 then 0 - 10 else 0 - 10 --> 0 - 10 = -10 which means 0 - 10
+
+if 10 gtr than 0 then 10 - 0 else 10 - 0 --> 
+if 0 gtr than 10 then 0 - 10 else 0 - 10 -->
+
+if 10 gtr than 0 then 10 + 0 else 10 + 0 --> 
+if 0 gtr than 10 then 0 + 10 else 0 + 10 -->
+
+ok totally confused myself by thinking i needed to be able to update both depending
+on certain circumstances
+
+simply trying to solve for difference between our value and shopify's value to
+only update SHOPIFY's VALUE
+
+-- note: didnt set all values to properly look at UAT from previously using prod data hardcoded for several
+elements. prod location for items is 20045635
+
+-- uat loc is 40430829708
+this alone and potentially call to shopify url may be wrong
+testing this with uat loc should elucidate the root cause
+
+was using dynam document prop instead of dynam process prop
+also didnt parameterize the api call with resource_path
+
+so now we can successfully make inv lvls call and send to msg queue
+now msg queue isnt pulling how we expect possibly?
+almost every process we use pulling from msg queue is a listener
+
+this is a get currently but not sure if i can get it to work
+
+for msg q make sure to make sure you extend provider URL
+prod http://afsutil01:8161/admin/
+
+uat http://devutil01:8161/admin/
+
+
 ----- BLOCKERS -------
 
+Test execution of RRF Shopify GET Inv Qty completed with errors. Embedded message: Process
+ terminating -- some documents reached an exception which is set to halt all documents: invalid 
+ response {"inventory_levels":[]}
 
 _________________________________________________________________________________________________________
 /*									ATP-17946
@@ -17847,6 +17928,8 @@ morning unexpectedly when trying to run that file through.
 ----- BLOCKERS -------
 
 random word of the day philalethist - lover of truth
+epimyth
+moral of a story or work of literature
 
 _________________________________________________________________________________________________________
 /*									ATP-18006
@@ -17975,6 +18058,71 @@ or just use last qty and then do change value and prefix with '-' maybe?
 #RRF
 errors 
 check for good http response and also a good api call response
+
+
+get inv qty its own process - send to msg queue
+
+listener pulling from msg queue in update process
+message queue for response of inv levels get
+
+and have the update api call based on msg queue
+
+tcp://devutil01:61616
+
+dont have a UAT RRF shopify site
+may have to create to fully test before prod
+
+used 
+
+testing changes
+2 or 3 processes working with rrftestshop api connection for uat testing
+
+changed all the hardcoded values to match uat
+fixed inv qty get and inv update processes to have correct api calls with parameterized
+resource_path
+ID:UATATOM01-49339-1583861772948-25:1:1:1:1
+above is the msg id from the activeMQ trying to get this msg
+for the inv update
+
+this ID doesnt match the msg id with the actual data in it and not just an empty msg
+maybe change the allowed amt of msgs
+
+still getting similar issues, but probably based on empty msg. 
+we need to create a ROUTE which will prevent anything from hitting msg queue without data
+
+ UAT ITEM LOC VALUE 40430829708
+
+ PROD ITEM LOC VALUE ABOVE
+
+LOC ID for UAT different
+var a = available;
+var b = current_qty;
+var available_adjustment = available_adjustment;
+
+if( a > b){
+    available_adjustment = ( b - a );
+}
+else {
+    available_adjustment = ( b - a );
+}
+
+
+
+trying to add another decision and map with fn from inv update to inv lvls before msg queue so we dont
+send msgs to queue unnecessarily
+
+however after api call for diff items
+its showing same inv item id going to msg queueu
+
+19656458960983|^|423673|^|79453|^|2561
+
+"inventory_item_id": 33738499424396,
+      "location_id": 40430829708,
+      "available": 1
+
+josh vetoed
+
+
 
 ----- BLOCKERS -------
 
@@ -18183,6 +18331,41 @@ below handles if backend is less than 1 then sets to 1
             Session.Item("qty_ordered") = 1
         End If
     End Sub
+3/9
+local testing isnt giving expected results will try in uat
+
+3/11
+testing in uat yields an issue as soon as you add to cart
+it gives error screen etc about qty not being expected qty
+cant see what i can do to fix easily
+
+LOCAL TEST - works as intended
+not sure if session data is effecting locally or not
+but this could be part of the issue for UAT
+UAT TEST still failing on add to order button / submit
+this assigns a session value for the cart
+possibly the issue but we can just but the same IF statement logic
+built into the session data storage value and it may be cleaner?
+
+online example of using session if statement
+if ( (!isset($_SESSION['vote'][$id]) OR (time() - $_SESSION['vote'][$id]) > 180) ) 
+
+not using session code change
+going with the html change along with admin script of
+before add to cart
+Dim fulfillment_id As Integer = args(0)
+Dim customer_id As Integer = args(1)
+Dim role_id As Integer = args(2)
+Dim line as DataRow =args(3)
+
+If line.Item("qty_ordered") < 1
+    line.Item("qty_ordered") = 1
+Else
+    line.Item("qty_ordered") = line.Item("qty_ordered")
+End If
+
+had to play around with this and not using a for each statement. not sure its needed.
+
 
 _________________________________________________________________________________________________________
 /*									ATP-18098
@@ -18230,8 +18413,8 @@ afsmicro2
 
 _________________________________________________________________________________________________________
 /*									ATP-18175
-									Ticket Desc?
-									Fulfill? 
+									Estore catalog for convergys users
+									ESTORE
 									2/24/20 -  2//20
 ----- OBJECTIVES -------
 fix one estore catalog with updated list and also rework catalog structure to accommodate the mixed role
@@ -18250,10 +18433,86 @@ and either use same or new temp table to have the 3 levels and determine roles a
 
 will need to select name as name from import as well
 
+
+------------ side bar extra functionality
 can possibly build the import of the file into the proc but may be advanced
 
+add web facing piece using resources saved
+
+make sure you add the SQL refs to piece together update/import query using params
+do we give chris or dotty a tool that is in web nav that can use role id and fulfill and potentially
+sheet name?
+
+then it starts the stored proc and imports the file from the specific location
+very old fashioned method. ideally probably wouldnt use stored proc in the long run
+when you can build this into nav using .NET to actually import
+
+the stored proc itself will be needed for creating the catalogs needed that dont exist
+and then assigning the items to the bottom level
+
+-------------- end side bar ----------------------
+
+adding an if statement to each lvl to create new catalogs per lvl top down
+because this will make it easier for dynamic lvls where skus arent just added at bottom lvl
+
+make sure to join on new catalogs to check them for the existing role ids and names
+which is main where clause
+
+try catch for the insert of each catalog into each lvl?
 
 
+-- 3607 distinct items in 1605 role across all catalogs
+-- 5400 all items in 1605 across all catalogs
+
+this insert works to not add dupes from EC table
+but isnt working to not insert any rows overall based on NC data?
+
+
+begin tran
+select ec.Catalog, nc.id
+from mason.dbo.new_catalogs nc
+left join mason.dbo.estore_catalog_Items ec(nolock) on ec.[Catalog] = nc.[name]
+where nc.role_ids like '%,1605,%'
+and nc.parent_id = 1
+group by ec.Catalog, nc.id
+
+insert into mason.dbo.New_Catalogs
+Select     
+		   '1' as [parent_id]
+           ,521 as [fulfillment_id]
+           ,ec.[Catalog] as [name]
+           ,',590,602,1605,' as [role_ids]  -- ',590,602,@roleId,' as [role_ids]
+           ,1 as [enable]
+           ,getdate() as [add_date]
+           ,'system' as [add_who]
+           ,getdate() as [edit_date]
+           ,'system' as [edit_who]
+           ,null as [activeonlyflag]			
+from mason.dbo.estore_catalog_Items ec
+inner join mason.dbo.new_catalogs nc (nolock) on ec.[Catalog] = nc.[name]
+where nc.parent_id = 1
+and nc.role_ids = ',590,602,1605,'
+group by ec.[Catalog]
+
+WAITFOR DELAY '00:00:05';
+
+select ec.Catalog, nc.id
+from mason.dbo.new_catalogs nc
+left join mason.dbo.estore_catalog_Items ec(nolock) on ec.[Catalog] = nc.[name]
+where nc.role_ids like '%,1605,%'
+and nc.parent_id = 1
+group by ec.Catalog, nc.id
+
+rollback
+
+can i piece this together with a select where on the try or if statement?
+
+
+
+
+-- side note how does sql compile or run fn for caps rules work when using GO or go
+-- or what determines that these are the same or close enough values? the code behind
+-- must reveal something that says these do the exact same thing regardless of being different
 ----- BLOCKERS -------
 
 
@@ -18279,6 +18538,12 @@ files already given to us jsut need to communicate
 remote in to uatatom01
 winscp into fec
 ftp on port 21 rest of info correct in keepass besides port and protocol
+943 comes in on message queue?
+filezilla?
+get file boomi job
+FEC get file /fromFBC/
+
+there will be a get for each client possibly?
 
 make sure locs set up at pick piece and also ITEM CONFIG set up in assign locs as pick piece
 
@@ -18446,7 +18711,35 @@ and will have to remove original lines somehow?
 this may have to coincide with client sending as cases with appropriate cartons etc
 
 
+3/10
+end to end testing ---- official run
 
+943
+looks like 13 dif items
+set up on 2 or 3 different POs
+
+where does inbound file go?
+
+put on TO FEC Folder then run GET Files for FEC
+then listener picks it up which runs the inbound router procs and sub procs
+
+8 missing skus from recent 943
+
+190449367779
+190449367816
+190449367854
+190449367892
+190449369100
+190449369124
+190449369155
+190449369193
+
+fixing addy 235 SHEPHERDSVILLE RD.
+HODGENVILLE 42748
+TO416089 MAYY have missed when we first transmitted but i thought james helped me confirm 
+that all 4 sent
+
+it didnt have correct carriername and address in it
 
 ----- BLOCKERS -------
 msgqueue? jms format?
@@ -18544,176 +18837,713 @@ ALL ATPS CHECKING STATUS ON
 
 
 _________________________________________________________________________________________________________
-/*									ATP-?
+/*									ATP-GROUPING
 									Ticket Desc?
 									Fulfill? 
-									1//20 -  1//20
+									3/16/20 -  3//20
+----- OBJECTIVES -------
+
+----- NOTES -------
+3/16
+18203 - chris - finished my portion of testing
+18059 - dotty - finally deployed 
+18333 - matt - item wont move to qc using infor ui. itrn shows it did just matt got error. not common issue
+18210 - katie - afi eom no response
+18296 - adam s - finally got example and added other email as shared
+18159 - dotty - she deactivated and deleted. cant recover this data i believe
+18078 - erin - pgoc website issue for certain users, need more info/ examples. i tested all browsers
+18085 - letisha - looking through report for field
+18045 - zwaap - need jira for user cynthia sibley
+18174 - kim - need to see all tickets beyond their own. kim and doug s - going to filipe - change req
+
+
+
+3/17
+nav-62 - myself - bug fix for ship method sequence on checkout status page was deployed with other deploys
+18030 - letisha - BPQ1BU0512VP sku coming up in cycle count twice in 3 wks 30903262 - not consistent and no RC
+18045 - zwaap - added cynthias access hopefully
+18193 - christy d - timesheet duping entries from a randolph but christy cant replicate
+18451 - matt - issue from util server restart jacking up print prefs
+18078 - erin - closed - someone fix apparrently
+18085 - letisha - dom sku util report field needed to run?
+18164 - matt m - trying to follow up and see what is going on with this client that they keep getting equilib issue
+
+
+3/18 - must work backward to forward for FIFO
+16800 - lupe - asked once now closing
+16936 - erin - 
+16942 - dotty -
+17081 - filipe - looks like research ticket for him?
+17205 - filipe - perspective of abby possibly? need to look at both reports for inv
+17280 - matt - fix ras wholesale label barcode to 129 font - dl the font from server and then add? test
+17292 - becky - client call skype would work - error said server sec certs troubleshooting 
+
+3/19
+17280 - matt - fix ras wholesale label barcode to 129 font - dl the font from server and then add? test
+17292 - becky - client call skype would work - error said server sec certs troubleshooting 
+17478 - erin - allotment issues on order OC0002259051 and others. not matching and not warning over allotment
+17491 - lupe - add order type dropdown on data for and possibly something for job #
+17497 - jami and josh - linked to 17603 i believe both issue for ordering on disc global
+17610 - jami - varta 'dial outs' not quick enough for orders for call center based on asn? asking about this
+17621 - christy - call canter cant go to wella comp page - will test as call center user
+17642 - kelly - alt email for disc global not being sent to for order - test maybe admin config or code issue
+
+3/20
+18501 - matt - change printer to black and white by opening in SC report des and uncheck boxes of format and deploy to api
+bat call - wave 363498 shipment request was made but print is in submitted
+
+3/24
+18527 - becky - 0000296335 at Location 2023855881 for Lot 211025030
+18500 - chris - vpn access on mac for eliz gimpel
+18499 - chris - MS access for eliz
+
+
+3/25
+18102 - dotty - asn create from solvoyo
+18527 - becky - 0000296335 at Location 2023855881 for Lot 211025030
+18498 - matt - headset beeping slow down picking look through logs
+18470 - cynthia - add javier to atp jira
+18473 - dotty - case sensitive and space sensitive, wrong name/format for file mask
+18114 - kim - incorrect case # on label
+18552 - - tami mailshop access
+
+3/26
+18500 - chris - vpn access on mac for eliz gimpel testing
+
+3/27
+pr_Report_CasePrinting_v2 - ticket for chris for clearing print job
+18500 - chris - vpn access on mac for eliz gimpel - needs cisco license for mac version - test confirmed that
+18497 - dotty - no est, they found workaround
+
+
+
+-- 17994 -- uat test user OPLT1234 login
+
+--------------------------------
+ESCALATIONS
+--------------------------------
+
+4/1
+18610
+18612 ctp orders
+18615 aos orders AS%460423,AS%460478
+
+4/2
+
+
+4/3
+18504 - coty allotments being weird - user deleted incorrectly but our code is just built wrong - desktop mods and code
+	make this pretty messy
+18636 cr0000010004 stuck due to part picked line?
+18637 old stuck orders? TM0000000023
+	TM0000000064
+	TM0000000336
+	TM0000002090
+	TM0000008297
+	TM0000008298
+
+4/6 escalations
+18646 fedex smartpost from mason needs AFS_LEB
+18637 old teamson orders validating shipped in nav
+18651 lsk resend ship confirm
+18645 orders stating removed from portal but not removed
+18643 lux wave consolidation volumes
+18626 need to talk about estimate needs to this with chris
+
+4/7
+18498 Voice Picking Experiencing Delays incident #14543222
+17633 my ticket for fix sykes order import sub prob to send error mail when dx proc doesnt run
+
+4/8
+
+
+4/9
+18664 orders AS%463593 & AS0000464603 & AS0000464367 last 2 different error. first is 1 or more packages not able to void
+18649 mas prod computer and printer no internet
+
+4/10
+18655
+
+4/13
+18655
+18710
+18715 - on 4/10 this is last sku to be recvd 11153 - not sure when this was first set to err though
+18722
+18724
+18647
+18737
+
+4/14
+16987 - per doug close this
+16942 - per dotty close
+18715
+18655
+18459
+18742 data truncation on wave allocation? 
+18498
+
+4/15
+18756
+18655
+18753
+18710
+18759
+
+4/16
+18759
+18664
+18756
+18753
+18763
+
+4/17
+18744 linked to 18447 need list of users for CTP QC
+18781 2 examples are orders AS%468715 case id on label is 0074152890 case id in info is 0074161275
+	AS%468701 case in on label is 0074152870 case id in infor is 0074161254 - orderstatushistory alloc then unalloc
+	re submit 
+18759
+
+
+4/20
+18781
+18785
+
+4/21
+
+4/22
+18813 delete data for order /wave from waveinprocess table
+18811 
+18722 - on pages content show/hide editor and can add html in here for message but need to test in UAT
+
+4/23
+16302
+18811
+18722
+18832 stuck and zero shipping rest of l2 failed because blank pickdetail records for same line
+18785
+18842 barcode font ITF is not able to be scanned for PGOC in mason
+
+4/24
+18852
+18785 tk0001846722 and wave 0000366032
+18847
+18842 response for this is likely the optical scanners we used for KET other guns hardly configurable
+18814
+18815
+
+4/27
+18814 awi eom
+18815 afi eom
+17815 estore
+
+4/28
+18871 erin order missing info maybe
+18868 printer setup
+18881 pgk
+18847
+
+4/29
+18868  0000367577
+18847
+18888
+
+4/30
+18910 infor picking
+-4.50R -3.00L
+
+5/1
+18772 RRF dev ticket
+
+
+----- BLOCKERS -------
+dsMethods.Tables(0).DefaultView.Sort = "description"
+
+crawler of sorts to report response time etc per server?
+some sort of script able to do this?
+18722 - also add to intl home page with msg ID 7
+phc uat
+sandeep.setty@costrategix.com
+password: Testing1
+-- now locked out ....
+
+#DISC login
+prod
+    athapa
+    Welcome1
+
+    uat
+    Aeroadmin
+    a3r03900
+
+#cls support 410.793.0708
+
+_________________________________________________________________________________________________________
+/*									ATP-18193
+									time sheet duping records for a randolph
+									aero
+									3/17/20 -  3//20
+----- OBJECTIVES -------
+see why duping could be occurring
+christy couldnt replicate and this is the only case we have where this is happening
+----- NOTES -------
+could be a bug with web ui or w/e is showing hours to that user
+could be browser
+will check as many areas as possible - so far the code doesnt seem to indicate anything like this
+or we would see this issue more commonly
+
+queried mailshop and didnt find anything
+----- BLOCKERS -------
+
+
+
+_________________________________________________________________________________________________________
+/*									ATP-18451
+									printers wrong settings
+									aero
+									3/17/20 -  3/17/20
+----- OBJECTIVES -------
+
+----- NOTES -------
+this was an issue with util server not retaining print preferences but 
+also had to check locally and on print server
+
+RC is restart from util issues we had earlier
+----- BLOCKERS -------
+
+
+
+_________________________________________________________________________________________________________
+/*									ATP-18501
+									change epson printer to black and white printing only
+									aero
+									3/20/20 -  3/20/20
+----- OBJECTIVES -------
+change epson varta printer to only print black and white
+----- NOTES -------
+
+had to open report in report designer in SC portal to change using the
+formatting already created and just uncheck them and then deploy to API
+james needs to clarify this for me
+
+-- james has a script for this
+update xrv set xrv.content = re.layout
+        --select * 
+        from afssql01.enterprise.dbo.reportentity re 
+        left join XTRAREPORT.dbo.Xtra_Report xr on xr.url = re.url
+        left join XTRAREPORT.dbo.Xtra_Report_Version xrv on xrv.report_id = xr.id
+        where 
+        re.url = 'VAR_Master_Carton_Label_400x650'
+        and
+            xrv.is_deployed_version = 1
+        and xrv.content <> re.layout
+then recycle app pool on afsutil 01
+
+----- BLOCKERS -------
+unable to do this simply through printer preferences or through settings or physically
+
+
+_________________________________________________________________________________________________________
+/*									ATP-18655
+									ship station in mason wont load infoship
+									Fulfill? 
+									4/7/20 -  4//20
 ----- OBJECTIVES -------
 
 ----- NOTES -------
 
+still trying to fix. going through every solution i can think of and testing. 
+testing different versions of infoship and different patches
+testing different com ports and eventually figured out 2 objects were 
+using com4 and switched that which got the scale back to working
+when mostly finished i saw that none of the correct printers were 
+displaying on here so we think its related to being ran in admin otherwise i am unsure.
+
+called chuck for support for an hour + and we uninstalled and 
+reinstalled and disable objects via regedit but this still gave us the com error
+his devs think its related to a permissions based thing but i dont think 
+we wouldve changed anything for a standard mas shipping user in active directory.
+so even if that isnt the issue theres still the confusion around available 
+printers which hasnt shown and promise otherwise we could just keep running 
+as admin. thinking about just replacing entire pc or switching it to ssd
+
 ----- BLOCKERS -------
+port lpt1 for zebra
+
+scanner
+
+scale port on com?
+
+_________________________________________________________________________________________________________
+/*									ATP-18745
+									add cust # to order search in web nav
+									FEC
+									1//20 -  1//20
+----- OBJECTIVES -------
+data form collection settings of searchable fields
+----- NOTES -------
+also helped simms after james helped me
+----- BLOCKERS -------
+
+
+
+_________________________________________________________________________________________________________
+/*									ATP-18772
+									update sc api with lot info for RRF
+									RRF 
+									5/4/20 -  //20
+----- OBJECTIVES -------
+add this to json of sc portal get order
+goes in Product json object
+"LotAttributes": {
+“LotAttibute”: [{
+"LotManufacturerDate": "",
+"LotExpirationDate": "2021-01-11 06:00:00.000",
+"LotCustomerLot1": "",
+"LotCustomerLot2": "",
+"LotQuantity": 15
+},
+“LotAttibute”: {
+" LotManufacturerDate": "",
+"LotExpirationDate": "2019-11-30 00:00:00.000",
+"LotCustomerLot1": "",
+"LotCustomerLot2": "",
+"LotQuantity": 5
+}]
+}
+}]
+----- NOTES -------
+James  4:39 PM
+You have to figure out how to get the lot information
+4:40
+Probably involving lotxlocxid, lotattribute, pickdetail, lineitem, and orders
+4:40
+Wms_orders
+
+James  4:47 PM
+once you figure that out, look under SC.Core/Domain/Navigator folder
+4:47
+you will see all of the models
+4:47
+just look at them and do the same for your new view
+
+
+so we use the vw to combine with rest of api params that exist to pull all normal data
+and now also the lotattribute data.
+
+adding this to sc.data and sc.core libraries to call this model
+
+double check other libraries and model data
+
+find where the json API calls are formed and add there
+make sure this new data is transmitted
+
+5/6 
+finally got sc.rest working just rebuilt and james helped with mapping
+manual mapping through nav controller and pulling view data via service
+in order service 
+use IEnum to create list able to pull view data back into mapping with function
+calling linenumber and aeroorderID
+
+3 levels of foreach inside List<orderformap>
+Feach (ormap o in orderdetailswithproducts)
+	feach (productfororder p in o.productstobeshipped.product)
+		p.lotatt = new list<lotattfororder>
+		list<lot_att> att = _orderservice.Getlotatt(aeroorderid,linenumber);
+		feach (lotatt a in att)
+			lotattfororder la = new lotattfororder()
+			fields;
+			fields;
+
+			p.lotatt.Add(la);
+
+remove lineitem virtual class if not using automapper
+token in db 9320f354-a364-4948-b0b6-ecfda46763eb
+test in swagger
+cust ref 2162324897879
+rd test cust ref 
+JOB 50899 KIT 23715 SAMPLE
+token
+
+
+
+----- BLOCKERS -------
+
+
+
+_________________________________________________________________________________________________________
+/*									ATP-17100
+									TLE mail innovations
+									TLE
+									5/7/20 -  //20
+----- OBJECTIVES -------
+adding mail innov to test archana said this was due to infor patch needed or cls patch
+
+----- NOTES -------
+TL0000739533
+
+2024067274
+
+
+not working likely have to set up entirely new child meter
+
+----- BLOCKERS -------
+
 
 
 _________________________________________________________________________________________________________
 /*									ATP-?
-									Ticket Desc?
-									Fulfill? 
+									Add ship method of best way for all FEC orders coming as ups ground
+									FEC
 									1//20 -  1//20
+----- OBJECTIVES -------
+update all orders importing with ups ground to best way
+
+----- NOTES -------
+james said to put in reserve orders proc
+
+create new proc to look at submitted orders and update ship method
+
+
+basing work off of   StoredProcedure [dbo].[dx_ATK_PostOrderImport] 
+in tms int add to atk section where it sets flag for susr4
+adjust shipper to accept fdxg
+
+routing guide
+ground 0-150 or 71-150?
+home del 0-70 or 0-69?
+
+smartpost just 1 or 2? example for atk has 2
+std 0 - 0.994
+parcel 0.995-70
+
+
+test orders possibly
+FE0000000039
+FE0000000040 - no weight but correct ship method 
+- loads into infoship with best way but not rating due to no valid service available
+
+test 2 - was added before i fixed reserve order to include my proc to change ship method
+FE0000000043 - case id 0073730261
+
+test 3
+FE0000000048 - bad sku
+
+test 4 
+FE0000000048 - INTL caseid no good bad sku
+
+FE0000000050 - INTL caseid 0073730264
+LUKER RD
+SS1 1ND
+SOUTHEND-ON-SEA, GPQ6 4J
+GB
+
+test 5
+FE0000000051 - INTL caseid 0073730265
+62-64 Gower Street
+LONDON
+WC1E 6ED
+UNITED KINGDOM
+
+
+test 6 with and order that actually shipped before to this ON0000005947
+FE0000000052 - INTL caseid 0073730266
+
+address
+Tweede van Swindenstraat 1
+Eastbound Gym
+Amsterdam No
+1093VE NL
+
+test 7 with and order above
+FE0000000053 - INTL caseid 0073730267
+
+using BW this time - works but wont ship
+going back to earlier case it wont rate now potentially because INTL was added?
+making new order for domestic and sku is broken
+
+06:00014:WaveKey : 0000358683 is currently in process by User :
+still released 0073730268
+
+2 example UK postal codes
+CM8 1XW
+PE86PB
+
+PROD TEST DOMESTIC 
+FE0000004442 jk bad order
+caseid
+FE0000004444 caseid 0074315188
+1 error
+no criteria met -- had 0 weight
+
+once i added 1 oz to weight it selected home delivery
+should be good to keep in prod
+but will monitor
+
+FE0000004816
+0074331626
+
+
+FE0000004876
+0074337154
+
+correct hub ID that allows smartpost 5431
+
+----- BLOCKERS -------
+
+
+
+_________________________________________________________________________________________________________
+goal for 5/11 - 5/22 
+ticket count consistently under 15
+next goal hopefully under 11
+
+5/12
+now we have to clean up older tickets
+forced on us
+
+5/14 
+still at 20..
+
+
+_________________________________________________________________________________________________________
+
+_________________________________________________________________________________________________________
+DEPLOYMENT FOR PGB UAT
+
+change project to framework 4.7
+rebuild
+publish
+copy published files from path is in bin in release LOCALLY over to UATWEB02 
+dir E:\Websites\UAT\PGBOSTON on that server
+and should be good to go
+
+deploy for prod change back to 4.7.2 possibly?
+
+_________________________________________________________________________________________________________
+/*									ATP-18876
+									Update aero standard edi to send emails to CX on error
+									Fulfill? 
+									5/18/20 -  5/20/20
+----- OBJECTIVES -------
+I don't think any of them is doing this
+4:26
+but this is for the FEC one
+4:26
+we need to send an email to the CX whenever it failed to import the order or ASN
+----- NOTES -------
+universal one
+
+different jira/atp related boomi jobs
+aero - atp summary report
+aero jira ticket updates /// ticket export /// time import /// worklogs
+
+----- BLOCKERS -------
+
+
+
+_________________________________________________________________________________________________________
+/*									ATP-18558
+									order imported through boomi etl jobs must show in order source API - Boomi
+									Aero
+									5/20/20 -  5//20
 ----- OBJECTIVES -------
 
 ----- NOTES -------
+James (Mewtwo)  6:42 PM
+Why do you have that ticket
+It’s going to be a new field on the order table
+Then you are going to update both v1 and v2 api
+You will add the field to the model under sc.rest and under sc.core
+Try to add it to the automapper under sc.rest
+Add the field in the mapping under sc.data
+You will hard code the new source field in the controller based on the version of the API that you are working with. 
+You will have to do this code change twice
+V1 is pulled from the master branch and v2 is pulled from prod-v2-2
+You will need to ask Josh if he wants this new field to show up on the API response
+If not, you won’t need this on the model under sc.rest
+And you wouldn’t need to add it to the automapper
+
 
 ----- BLOCKERS -------
 
 
 
 _________________________________________________________________________________________________________
-/*									ATP-?
-									Ticket Desc?
-									Fulfill? 
-									1//20 -  1//20
+/*									ATP-19133
+									API implementation and validation
+									RRF
+									5/19/20 -  1//20
 ----- OBJECTIVES -------
 
 ----- NOTES -------
+use this api to test how they are testing
+https://uat.aerofulfillment.com/SC.Apiv2/swagger/ui/index#!/Navigator/Navigator_GetOrderByOrderID
 
------ BLOCKERS -------
+2 orders RR0000010073 and RR0000010021
 
-
-
-_________________________________________________________________________________________________________
-/*									ATP-?
-									Ticket Desc?
-									Fulfill? 
-									1//20 -  1//20
------ OBJECTIVES -------
-
------ NOTES -------
-
------ BLOCKERS -------
-
-
-
-_________________________________________________________________________________________________________
-/*									ATP-?
-									Ticket Desc?
-									Fulfill? 
-									1//20 -  1//20
------ OBJECTIVES -------
-
------ NOTES -------
-
------ BLOCKERS -------
-
-
-_________________________________________________________________________________________________________
-/*									ATP-?
-									Ticket Desc?
-									Fulfill? 
-									1//20 -  1//20
------ OBJECTIVES -------
-
------ NOTES -------
-
------ BLOCKERS -------
-
-
-
-_________________________________________________________________________________________________________
-/*									ATP-?
-									Ticket Desc?
-									Fulfill? 
-									1//20 -  1//20
------ OBJECTIVES -------
-
------ NOTES -------
-
------ BLOCKERS -------
-
-
-
-_________________________________________________________________________________________________________
-/*									ATP-?
-									Ticket Desc?
-									Fulfill? 
-									1//20 -  1//20
------ OBJECTIVES -------
-
------ NOTES -------
-
------ BLOCKERS -------
-
-
-
-_________________________________________________________________________________________________________
-/*									ATP-?
-									Ticket Desc?
-									Fulfill? 
-									1//20 -  1//20
------ OBJECTIVES -------
-
------ NOTES -------
-
------ BLOCKERS -------
-
-
-_________________________________________________________________________________________________________
-/*									ATP-?
-									Ticket Desc?
-									Fulfill? 
-									1//20 -  1//20
------ OBJECTIVES -------
-
------ NOTES -------
-
------ BLOCKERS -------
-
-
-
-_________________________________________________________________________________________________________
-/*									ATP-?
-									Ticket Desc?
-									Fulfill? 
-									1//20 -  1//20
------ OBJECTIVES -------
-
------ NOTES -------
-
------ BLOCKERS -------
-
-
-
-_________________________________________________________________________________________________________
-/*									ATP-?
-									Ticket Desc?
-									Fulfill? 
-									1//20 -  1//20
------ OBJECTIVES -------
-
------ NOTES -------
+line items table items dont match infor
+line 1 in infor on 10021 sku 42253 doesnt match any of the 5 skus in nav 
+53353
+23253
+220153
+20853
+22653
 
 ----- BLOCKERS -------
 
 _________________________________________________________________________________________________________
-/*									ATP-?
-									Ticket Desc?
+/*									ATP-18931
+									Hannah Condon cant access reports in sunny d or Fruit20 CRMS
 									Fulfill? 
 									//20 -  //20
 ----- OBJECTIVES -------
-
+fix for this user
 ----- NOTES -------
+microsoft dynamics CRM?
 
 ----- BLOCKERS -------
 
 
 _________________________________________________________________________________________________________
-/*									ATP-?
-									Ticket Desc?
-									Fulfill? 
-									//20 -  //20
+/*									ATP-18986
+									Carbon Theory - DHL Account and Markup
+									CAT
+									5/21/20 -  //20
 ----- OBJECTIVES -------
+If you need to do something to Carbon Theory account to be able to use DHL Ecommerce Account 
+Number 5120645 as a ship method please do so.
+
+Please create DHL ecommerce Markup of Cost Plus 8% on all DHL services for this account, markup is 
+on ALL DHL cost sent to Aero, setup is similar to how we markup DHL ecommerce for ATK and Vayyar
+
+Shipments being passed to Aero from Carbon Theory Shopify site, please develop process to automatically 
+convert shipments to CANADA to DHL Ecommerce International Parcel Direct, as the ship method with DDP incoterms.
+You may need product value from customer for this and other details as required for international shipments
+
+We only want to convert shipments that are less than 25 lbs to this method.  Shipments over 25 
+pounds should be converted to FedEx Ground. The reason I ask for conversion to DHL Ecommerce or FedEx 
+Ground is Carbon Theory is passing all orders to us via FedEx SmartPost.
+
+If you are developing these conversions and can add logic to convert the ship method to USPS First 
+Class Parcel for orders less than 1 lb and going to domestic zip codes, that would also be wonderful 
+as that is the best ship method for those packages.
+
+Team THE MAIN thing I need to be able to happen right now is to be able to manually convert the 
+Canadian Orders to DHL Ecommerce.  I need to know when that ship method is available for this 
+customer and markups are setup for them.
 
 ----- NOTES -------
+
+CAT order import boomi
+
+select * from ENTERPRISE.dbo.Fulfillment_Freight_Billing
+where fulfillment_id=1172
+
+SELECT *
+FROM ENTERPRISE.dbo.Fulfillment_Freight_Billing_Accounts
+
+1 and 2 are done already i believe
+
 
 ----- BLOCKERS -------
 
