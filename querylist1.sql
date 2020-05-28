@@ -13696,6 +13696,10 @@ order by last_run desc
 
 only kim and vayyar finance getting old shipped conf email event
 
+-- do we test event emails by setting run dates back a day or what?
+update to set the next run date before last run date i believe
+
+
 _________________________________________________________________________________________________________
 /*									atp - 16122 new fully functional search bar for estore
 									estore 
@@ -18272,6 +18276,9 @@ new fulfill in uat and prod and api creds
 ----- NOTES -------
 username				password
 B7E2A462B9C44D75B5CA	B22778F6-3C80-4697-A7C9-9608A0D1BA2A
+
+new site - 1189
+C06E2FCEDA874B47B86C	CC282CC6-5315-48FD-A917-616501489E45
 ----- BLOCKERS -------
 
 
@@ -19273,7 +19280,7 @@ token
 _________________________________________________________________________________________________________
 /*									ATP-17100
 									TLE mail innovations
-									TLE
+									TLE 901 ?
 									5/7/20 -  //20
 ----- OBJECTIVES -------
 adding mail innov to test archana said this was due to infor patch needed or cls patch
@@ -19281,10 +19288,26 @@ adding mail innov to test archana said this was due to infor patch needed or cls
 ----- NOTES -------
 TL0000739533
 
-2024067274
+--2024067274
 
 
 not working likely have to set up entirely new child meter
+
+10007 is not a valid mail innov ship method id i believe
+
+-- new caseid test with correct shipmethodid 14060
+2024065341
+
+mailer id
+account number
+works through connectship
+
+TL0000748470
+
+new order with 14043 ship method id
+hopefully sending to infor will also add the id there since it currently doesnt
+exist in infor
+
 
 ----- BLOCKERS -------
 
@@ -19404,6 +19427,12 @@ forced on us
 5/14 
 still at 20..
 
+5/19
+under 20
+
+5/26
+under 15 but should be under 10
+
 
 _________________________________________________________________________________________________________
 
@@ -19464,6 +19493,30 @@ If not, you won’t need this on the model under sc.rest
 And you wouldn’t need to add it to the automapper
 
 
+SELECT DISTINCT fp.property_value AS email
+    FROM [MailShop2KSQL].[dbo].[tblAtpIssues] ai WITH (NOLOCK)
+        INNER JOIN MailShop2KSQL.dbo.tblCustomers c WITH (NOLOCK)
+            ON c.Company = ai.company
+        INNER JOIN dbo.Fulfillment f WITH (NOLOCK)
+            ON f.mailshop_code = c.CustCode
+		INNER JOIN [Fulfillment_Properties] fp WITH (NOLOCK)
+			ON fp.fulfillment_id = f.fulfillment_id AND fp.property_group = 'CONTACT' AND fp.property_name = 'PRIMARY_CE'
+    WHERE ai.company <> 'AERO CORPORATE' AND ai.status NOT IN  ('Done', 'Cancel') AND fp.property_value <> '' 
+	UNION
+    SELECT
+           e.email AS email
+    FROM [MailShop2KSQL].[dbo].[tblAtpIssues] ai WITH (NOLOCK)
+        INNER JOIN MailShop2KSQL.dbo.tblCustomers c WITH (NOLOCK)
+            ON c.Company = ai.company
+        --INNER JOIN dbo.Fulfillment f WITH (NOLOCK)
+        --    ON f.mailshop_code = c.CustCode
+		INNER JOIN  [AeroEmployees].[dbo].[employees] e WITH (NOLOCK)
+			ON e.jira_username = ai.reporter
+		--INNER JOIN [Fulfillment_Properties] fp WITH (NOLOCK)
+		--	ON fp.fulfillment_id = f.fulfillment_id AND fp.property_group = 'CONTACT' AND fp.property_name = 'PRIMARY_CE'
+    WHERE ai.status NOT IN  ('Done', 'Cancel') AND e.email <> ''
+
+
 ----- BLOCKERS -------
 
 
@@ -19480,7 +19533,7 @@ use this api to test how they are testing
 https://uat.aerofulfillment.com/SC.Apiv2/swagger/ui/index#!/Navigator/Navigator_GetOrderByOrderID
 
 2 orders RR0000010073 and RR0000010021
-
+SO9641 and SO9642
 line items table items dont match infor
 line 1 in infor on 10021 sku 42253 doesnt match any of the 5 skus in nav 
 53353
@@ -19488,6 +19541,23 @@ line 1 in infor on 10021 sku 42253 doesnt match any of the 5 skus in nav
 220153
 20853
 22653
+
+issue was from leb db refresh failed
+
+E:\Websites\UAT\SC.Apiv2\logs
+path to logs in uatweb02
+
+OR \\uatweb02\e$\Websites\UAT\SC.Apiv2\logs
+
+log date 5-15 for 41
+dont think i need to back these out of infor actually because they dont match
+cust ref
+so when we reimport using API
+new order # in nav which can go to infor uneffected
+
+had to create new token creds in UAT since 5/27 9 am their token expired
+since this was from prod where it refreshes often enough to not expire i believe
+
 
 ----- BLOCKERS -------
 
@@ -19500,6 +19570,7 @@ ________________________________________________________________________________
 fix for this user
 ----- NOTES -------
 microsoft dynamics CRM?
+passed to simms
 
 ----- BLOCKERS -------
 
@@ -19534,7 +19605,8 @@ customer and markups are setup for them.
 
 ----- NOTES -------
 
-CAT order import boomi
+CAT order import boomi - do majority of the steps in a post call on boomi job
+
 
 select * from ENTERPRISE.dbo.Fulfillment_Freight_Billing
 where fulfillment_id=1172
@@ -19543,6 +19615,50 @@ SELECT *
 FROM ENTERPRISE.dbo.Fulfillment_Freight_Billing_Accounts
 
 1 and 2 are done already i believe
+#current
+
+----- BLOCKERS -------
+
+
+
+_________________________________________________________________________________________________________
+/*									ATP-18877
+									DISC missing skus and cant enable
+									DISC
+									5/21/20 -  //20
+----- OBJECTIVES -------
+items arent enabled and have 0 qty
+all 6 skus
+
+----- NOTES -------
+from james INTL items dont store qty with us so it doesnt matter what our qty shows
+
+have to check cost center
+
+was missing cost center set in magento admin to INTERNATIONAL
+then will set back to enabled
+----- BLOCKERS -------
+
+
+#inforextreme
+F@ckrules!
+_________________________________________________________________________________________________________
+/*									
+
+
+james ship manager while hes gone --- gotta make sure small issues are handled if possible
+
+
+ops bol only in prod
+ff ltlcnfg tbl
+zip key for ltl order validate
+
+9B93AA78-B666-4490-96A1-16182932029B	Shipping Employees	IdentityRole
+12:12
+you actually should probably give whoever is testing the mason one also since leb doesnt exist in uat atm
+12:12
+3F9E37C5-466A-471D-A844-8BB82FEE3B57 mason ship
+
 
 
 ----- BLOCKERS -------
@@ -19550,51 +19666,77 @@ FROM ENTERPRISE.dbo.Fulfillment_Freight_Billing_Accounts
 
 
 _________________________________________________________________________________________________________
-/*									ATP-?
-									Ticket Desc?
-									Fulfill? 
-									//20 -  //20
------ OBJECTIVES -------
+/*									ATP-ESTIMATES
+----- atp-18711 -------
+make nav report - provide params based on info from user
+billing period based
 
------ NOTES -------
+daily
+qty sku and date
+must req superuser
 
------ BLOCKERS -------
+
+----- atp-18735 -------
+magento? sample express
+1.9
+could be like our change for discover message
+
+----- atp-18754 -------
+trn weights back on?
+
+build view to pull in champs weights - 10 hours?
+champ server champ db to arch db
+cases & weights
+then to tms server - SUID and cls support - table?
+
+edit boomi job to pull in weights - 8 hours for boomi part 5 dev 3 testing and go live
+ref fields for this
+truCom test files from them
+
+----- atp-19140 -------
+jeffnet disc issue?
+win esk et? 5g or more?
+
+storage rep - simms proc 3h
+
+----- atp-19142 -------
+change to report text either in dev express reports or what?
+checking
+
+----- atp-19146 -------
+update db table to fix sla or create?
+help desk
+
+----- atp-19181 -------
+atk ship confirm and sla stuff?
+if it can come from aero email we can build through jeffnet
+otherwise we will probably need to send through their server
+or just have them send the email through 3rd party
+cross domain emails not easy
+
+----- atp-19157 -------
+aafes army label
+may not be billable
+
+----- atp-19192 -------
+ups through cls 3500
+pmo @ cls for quote
+upsready we set up with license
+otherwise thru cls -- 2 opts? - 
 
 
 _________________________________________________________________________________________________________
-/*									ATP-?
-									Ticket Desc?
-									Fulfill? 
+/*									ATP-18944
+									create fulfill SKII DTC
+									DTC / TLE
 									//20 -  //20
 ----- OBJECTIVES -------
-
+model after TLE but for SKII in WH1
+create token creds
 ----- NOTES -------
 
------ BLOCKERS -------
-
-
-
-_________________________________________________________________________________________________________
-/*									ATP-?
-									Ticket Desc?
-									Fulfill? 
-									//20 -  //20
------ OBJECTIVES -------
-
------ NOTES -------
-
------ BLOCKERS -------
-
-
-_________________________________________________________________________________________________________
-/*									ATP-?
-									Ticket Desc?
-									Fulfill? 
-									//20 -  //20
------ OBJECTIVES -------
-
------ NOTES -------
-
+943AE31EEA9542D38754	7BD91C37-5852-42B9-932A-1E3BC7D1F7AD UAT
+ PROD
 ----- BLOCKERS -------
 
 
