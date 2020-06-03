@@ -12865,8 +12865,7 @@ ________________________________________________________________________________
 
 AERO005040
 
-old cheese
-
+F@r
 _________________________________________________________________________________________________________
 /*									ATP-15292
 									Vayyar 2 orders shipped but didnt send 856
@@ -14667,7 +14666,7 @@ DF_AllotmentByCatalog.rpt
 Lebanon_CatalogRoles.rpt
 
 Catalog Roles - Lebanon_CatalogRoles.rpt
-Allotments by Catalog/Role - DF_AllotmentByCatalog.rpt
+Allotments by Catalog/Role - DF_AllotmentByCatalog.rpt or DF_AllotmentPerCatalog proc
 (New 2017) Orders by Role - DF_ordersbyrole.rpt
 (New 2017) Order History by Month - DF_OrderHistoryByMonth2.rpt
 (New 2017) Ship List by Part by Entered By - DF_ShipListByPartByCustomer2.rpt
@@ -14684,6 +14683,19 @@ this role was actually created in magento as well via kelly and matt w
 
 API may not be working because it shouldve created it in nav but didnt.
 
+fgetrolenames fn
+
+select *
+FROM lebanon.dbo.Inventory_AllotmentBuild ia with (nolock)
+where designertype <> '' and fulfillment_id = 726 order by add_date desc
+
+view for allotmentbuildsearch
+appears to look for role in table and call fn. and looks like these roles need to be in nav?
+otherwise the APIs dont make sense and dont look to be used. so not sure how any of the reports
+are working regarding allotments etc
+
+nothing past 2014
+roles in magento but how do they connect with any reports unless also in nav?
 
 
 
@@ -18541,7 +18553,7 @@ follow their lead
 just do flow of 943 recv then 944 recpt
 then import order 940 then ship and ship confirm 945
 files already given to us jsut need to communicate
-
+#FEC TEST
 remote in to uatatom01
 winscp into fec
 ftp on port 21 rest of info correct in keepass besides port and protocol
@@ -18729,6 +18741,12 @@ where does inbound file go?
 
 put on TO FEC Folder then run GET Files for FEC
 then listener picks it up which runs the inbound router procs and sub procs
+
+#UAT
+can test in uat by placing in test folder
+running get files in canvas on UAT atom
+listener picks up
+
 
 8 missing skus from recent 943
 
@@ -19309,7 +19327,7 @@ hopefully sending to infor will also add the id there since it currently doesnt
 exist in infor
 
 
------ BLOCKERS -------
+------ BLOCKERS -------
 
 
 
@@ -19321,7 +19339,7 @@ ________________________________________________________________________________
 ----- OBJECTIVES -------
 update all orders importing with ups ground to best way
 
------ NOTES -------
+------- NOTES --------
 james said to put in reserve orders proc
 
 create new proc to look at submitted orders and update ship method
@@ -19411,6 +19429,24 @@ FE0000004876
 
 correct hub ID that allows smartpost 5431
 
+update o
+	set order_status = 'PENDING',
+		approval_reason = 'Total Weight exceeds 150lbs'	-- needs approval
+-- select *
+FROM LEBANON.dbo.Orders o(nolock)
+	JOIN (SELECT orders_id, [totwt]=sum(isnull([weight],0)*qty_ordered)
+			FROM LEBANON.dbo.Lineitem (nolock)
+			GROUP BY orders_id
+		) l ON o.orders_id = l.orders_id
+	INNER JOIN Fulfillment_Transaction ft WITH (nolock)
+	ON o.orders_id = ft.trans_key01
+	AND ft.trans_module = 'Orders'
+	AND ft.trans_submodule = 'SUBMITTED'
+where o.fulfillment_id = 1177
+	AND l.totwt > 150
+	and ft.trans_status = '0' 
+	AND o.order_status = 'SUBMITTED'
+	 AND o.approved_date IS NULL
 ----- BLOCKERS -------
 
 
@@ -19466,9 +19502,22 @@ different jira/atp related boomi jobs
 aero - atp summary report
 aero jira ticket updates /// ticket export /// time import /// worklogs
 
+
+Process:   encountered an error
+
+Message Details:
+-------------------------------------------------------------------------
+{"error":"Customer Order Reference (1671157-1) is a Duplicate","url":"http://afsutil01.aerofulfillment.com/SC.Api/api/v1/Order","time":1590703529,"version":"1.1","method":"POST","query":null,"ex":null}
+
+_____________________________________________________
+OrderID:
+
+putting the cx email in prod. with what should be sending to all cx that are tied to specific 
+fulfillment effected by error. if there is an issue ill also see the email 
+and i think its easy to understand but im not sure if i can break it down much more without some rework.
 ----- BLOCKERS -------
-
-
+"bonus" check 1936.11
+regular check 1449.47 = 486.64 48925 - 486.64 = 48438.36
 
 _________________________________________________________________________________________________________
 /*									ATP-18558
@@ -19558,6 +19607,31 @@ new order # in nav which can go to infor uneffected
 had to create new token creds in UAT since 5/27 9 am their token expired
 since this was from prod where it refreshes often enough to not expire i believe
 
+wrong token after refresh
+b5b353cb-f903-46c6-9f2f-d5b8a1484bb7 correct UAT - ANOTHER REFRESH
+NEW NEW UAT API TOKEN
+e99da879-7f46-4354-b6e0-b70a9948469d
+
+new orders 
+RR0000011757
+RR0000011755
+JSON was fine just needed to get new token from refresh
+and also have the index issue fixed
+EDI 940 - POST-Order
+
+EDI 945 - GET-Order
+
+EDI 846 - GET-InventoryBalanceAll
+
+shipped in infor but need to add dropIds
+aka MUIDs for all these picks from dock confirm
+dock confirm in uat portal 'worked' but not sure about the dropids
+
+had to recreate ltlshipment but with part of proc - only script
+then set lineitem trans status to 8 on trans submod packed
+
+RR0000011963
+RR0000011964
 
 ----- BLOCKERS -------
 
@@ -19578,30 +19652,34 @@ passed to simms
 _________________________________________________________________________________________________________
 /*									ATP-18986
 									Carbon Theory - DHL Account and Markup
-									CAT
+									CAT - 1172
 									5/21/20 -  //20
 ----- OBJECTIVES -------
-If you need to do something to Carbon Theory account to be able to use DHL Ecommerce Account 
+-- done already prior-- If you need to do something to Carbon Theory account to be able to use DHL Ecommerce Account 
 Number 5120645 as a ship method please do so.
 
-Please create DHL ecommerce Markup of Cost Plus 8% on all DHL services for this account, markup is 
+-- done already prior-- Please create DHL ecommerce Markup of Cost Plus 8% on all DHL services for this account, markup is 
 on ALL DHL cost sent to Aero, setup is similar to how we markup DHL ecommerce for ATK and Vayyar
 
-Shipments being passed to Aero from Carbon Theory Shopify site, please develop process to automatically 
+1. Shipments being passed to Aero from Carbon Theory Shopify site, please develop process to automatically 
 convert shipments to CANADA to DHL Ecommerce International Parcel Direct, as the ship method with DDP incoterms.
 You may need product value from customer for this and other details as required for international shipments
+	- CA country and < 25 lbs = ship method id 14041?
 
-We only want to convert shipments that are less than 25 lbs to this method.  Shipments over 25 
+2. We only want to convert shipments that are less than 25 lbs to this method.  Shipments over 25 
 pounds should be converted to FedEx Ground. The reason I ask for conversion to DHL Ecommerce or FedEx 
 Ground is Carbon Theory is passing all orders to us via FedEx SmartPost.
+	- CA country and > 25 lbs = ship method id 16006 ? fxws ground
 
-If you are developing these conversions and can add logic to convert the ship method to USPS First 
+3. If you are developing these conversions and can add logic to convert the ship method to USPS First 
 Class Parcel for orders less than 1 lb and going to domestic zip codes, that would also be wonderful 
 as that is the best ship method for those packages.
+	- domestic and < 25 lbs = ship method id 19030?
 
 Team THE MAIN thing I need to be able to happen right now is to be able to manually convert the 
 Canadian Orders to DHL Ecommerce.  I need to know when that ship method is available for this 
 customer and markups are setup for them.
+
 
 ----- NOTES -------
 
@@ -19616,6 +19694,32 @@ FROM ENTERPRISE.dbo.Fulfillment_Freight_Billing_Accounts
 
 1 and 2 are done already i believe
 #current
+
+latest from doug
+Domestic (US) shipments less than one pound ship USPS First Class Parcel 19030 or 19033 or?
+Domestic (US) shipments greater than 1 pound to 10 lbs ship FedEx SmartPost 16023
+Domestic (US) shipments 11 lbs or greater ship FedEx Home Delivery 16025
+Canadian Shipments less than 25 lbs ship DHL Ecommerce International Parcel Direct DDP 14041?
+Canadian Shipments over 25 lbs ship FedEx Ground DDP 16006
+All other International Shipments go FedEx International Economy DDP 16015
+
+asking doug if usps domestic is afs_leb
+
+asking if intl are also afs_leb
+
+then can make changes in tms_int and add sql proc to boomi and start testing
+
+-- ATP-18986
+	-- update o
+		set ship_method_id = case 
+								when o.ship_country = 'CA' and l.totwt < 25 then 14041 -- DHL Ecom intl parcel direct DDP
+								when o.ship_country = 'CA' and l.totwt => 25 then 16006-- fedex ground DDP
+								when o.ship_country not in ('CA', 'US') then 16015 -- fedex intl econ DDP
+								when o.ship_country = 'US' and l.totwt < 1 then 19030
+								when o.ship_country = 'US' and (l.totwt between 1 and 10) then 16023 -- Smartpost standard
+								when o.ship_country = 'US' and l.totwt => 11 then 16025 -- fedex Home Del
+-- then probably need to set all intl shipments to DDP in tms int
+
 
 ----- BLOCKERS -------
 
@@ -19659,6 +19763,14 @@ you actually should probably give whoever is testing the mason one also since le
 12:12
 3F9E37C5-466A-471D-A844-8BB82FEE3B57 mason ship
 
+
+SELECT * 
+  FROM [ENTERPRISE].[dbo].[AspNetRoles] ar (nolock)
+join enterprise.dbo.AspNetUserRoles r (nolock) on r.RoleId = ar.id
+join enterprise.dbo.aspnetusers u(nolock) on r.UserId = u.id  
+where u.UserName = '9829'
+
+0000019716
 
 
 ----- BLOCKERS -------
@@ -19737,32 +19849,205 @@ create token creds
 
 943AE31EEA9542D38754	7BD91C37-5852-42B9-932A-1E3BC7D1F7AD UAT
  PROD
+
+ child meter needs to be UPS
+ does this mean we assume UPS ready or something different?
+
+need statement for ups ready 
+UPS Acct# 2F782Y – SKII.
+waiting on cheri
+
+not sure what else there is to do for fulfillment setup
+SLA
+
+1 - new fulfill proc
+2 - SLA
+3 - License / child meter related tasks
+4 - API creds
+5 - 99999 item to test with
+
 ----- BLOCKERS -------
+
+_________________________________________________________________________________________________________
+
+5/28
+sc portal ship manager issues and 15 min meeting
+troubleshooting and then also randomly leb is working a little better
+josh suspects server - most likely not connection string packet size like i found
+
+rrf testing 
+
+mail innov
+
+edi mail
+at 605 no error but got error mail for dup cust ref 1671157-1
+
 
 
 _________________________________________________________________________________________________________
-/*									ATP-?
+/*									ATP-18498
 									Ticket Desc?
 									Fulfill? 
 									//20 -  //20
 ----- OBJECTIVES -------
 
 ----- NOTES -------
+12 May 2020 03:38 PM
+So aside from the logging issue i think we still consistently see voice picking issues 
+where they are slowing down operations. Having to completely restart a service very often 
+isnt entirely desirable. Have we found anything else in the logs that indicate possible 
+hardware issues or anything else? It seems to occur frequently across several pickers.
+
+13 May 2020 08:40 AM
+Hi Josh,
+There was not much to actually review in the logs...since we were unable to capture the the app 
+side logs for the same time that this originally happened.
+I know that there have been some issues with the UI where everything needed 
+a restart...does this issue correspond to that? If not, when this has occurred, what do the 
+resources look like on the servers?
+Had the debugsce been run before restarting?
+How long has this issue been occurring? I know the first report we had was April 29th 
+and that was the last I heard of it.
+Does this occur in certain areas? Does it occur in certain parts of the dialog? Do these
+ users do more assignments at a time?
+Thanks
+
+21 May 2020 03:10 PM
+1 - i dont believe the issues are related as this is pretty intermittent and has been happening for 
+a long time. Since before peak season last year i believe.The resources are usually on the higher 
+end in general but the issues occur even shortly after a restart.
+2 - the debugging has not been ran before hand at least for this issue.
+3 - see 1
+4 - response from my ops manager "it could be a connection issue, but not any specific area other 
+than our main floor where all voice rfs always are. Its either too much data or taking too long. 
+they dont scan more than 8 to 10 orders which is not a lot of data. i believe its either not 
+being sent from the devices themselves well enough or our network isnt transmitting well enough. 
+the beeping indicating 'loading' occurs pretty often and slows pickers down."
+So its likely its connection based, but other than that i was curious if there is any way to 
+track or report the amount of data they are transmitting and if that is substantial or more 
+than average for these devices.
+
+14543222 incident
+Event 13; High impact; Joan Renda, SCM Global Support
+21 May 2020 03:33 PM
+Ok...so just so I understand this correct...
+
+This problem has been ongoing for months, and is just very sporadic? How often is it occurring (1xper day...multiple 
+times per day...once or twice a week)? What is being restarted? Do all devices start having errors at the same 
+time? Is it at specific points in the process where this happens (what are the users actually saying when this
+ happens) Is it when the login, get assignment, actually pick product? Does response speed get better if there
+  are less orders?
+The amount of information that actually gets transmitted back and forth is not huge...something to 
+remember, everything is just text files per se...user gives work ideas and a picklist of just comma 
+delimited text is returned and loaded up for picking.
+There can also be other things affecting response times depending on what is running on the system...
+ie reports...order allocation...connectivity...
+There is so much that can affect this and the logs only gave me a glimse of a small timeframe and only
+ on one side of the picture (within the voice device) I did not get to see what the system looked at at
+  that time due to the logs being turned way up...and do not have any further logs to review since.
+If we can get more examples before restarts are done so we can try to look at what may be occuring, I hope 
+to be able to provide more answers.
+
+
 
 ----- BLOCKERS -------
 
 
 _________________________________________________________________________________________________________
-/*									ATP-?
-									Ticket Desc?
-									Fulfill? 
-									//20 -  //20
------ OBJECTIVES -------
+/*									ATP-ESTIMATES
+----- atp-1 -------
+creating ship method - add in nav and infor or allow auto nav process to create in infor - 3h new boomi job
+not going to ship station
+dhl labels out of DHL Plus portal
 
------ NOTES -------
+nav notification
+triggers alert to cx member - 1h done in cls int 
+ent wide
+-- consistent across board 
+	dont want cx to start using ship method and not understand it
 
------ BLOCKERS -------
+another task - write or right sizing?
 
+edi 940 - adding deliv terms for b2b dont worry about magento feed ddp override for ddu
+	mag feed being converted from xml to aero API
+	SC api updated to capture deliv terms - either update v1 or its using vb.net? or align to v2
+		- batches / batch functionality - 8h
+		- nav - edit order header inf edit both db - 1h
+		- update mapping in boomi and api connector - c# conn str - 5h
+		- sc api - 5h
+		- email alert to cx if this ship method used - 8h?
+	sep from SOW?	
+		2 days to build / integrate maint job for ultipro - 16h
+		2nd part comma delimiter, update blank or empty 5h
+
+
+dhl ecom and dhl express
+	commercial inv - do we need to build report to return this info or not?
+		- possible change of scope
+
+aero tms
+	error msg at ship station - close out manifest thru manifest corr tool
+	- manual but in case it goes to ship station have to look for shipp/track number?
+
+modify freight inv process for new invoice format?
+	update billing elements so new service type has appropriate rates
+	1 import and matching with it
+	2 setting up charges and billable rates - multiplies rates and markups for new service with dhl express
+
+
+----- atp-19034 -------
+cost price removed from invoice except sell price?
+ops should know which packing slips CPG is using
+
+
+----- atp-19142 -------
+in scope or out of scope change for PGK
+james said it could be for old label we have
+	should be in crystal? - 1h dev 2h test
+
+
+----- atp-19 -------
+skii dtc child meter being worked in fulfill setup
+
+
+----- atp-19220 -------
+CI ticket
+
+
+----- atp-19222 -------
+pg hs magento update
+placeholder waiting on more info from alpine
+
+
+----- atp-19245 -------
+atk when file errors incoming
+validate on inc files?
+
+
+----- atp-19258 -------
+manifest check to shipping diverts
+
+ - going to req change in champ logic
+ - re-engage champ to discuss effort of change in logic
+ - should work universally
+ - potentially champ but not certain could require research with both
+
+
+----- atp-19272 -------
+work w/ CO for customer check presenter page in magento
+
+	- order for CCP 
+		build etl job to retreive new order and send flat file thru our sftp to mfg
+		when we send file we need to find appropriate pdf vector img of custom logo
+		and send it as well. so they dl a single file with all orders (with logos)
+		assume have to dl from local drive. specific drive for this on pdweb01
+		saved w/ unique name for cust or order id to be able to pull
+		- testing w/ vulcan feed shipment confirm 
+
+
+----- atp-19273 -------
+VAN integration - waiting on josh til next week
+get others cust integrated to get ASN to report back to vendors
 
 
 _________________________________________________________________________________________________________
