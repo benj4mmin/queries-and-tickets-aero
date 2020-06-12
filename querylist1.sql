@@ -17072,6 +17072,16 @@ Becky noted several things that are missing and will have notes on current admin
 	-- simple html link added to reports page to redirect to efulfill reports for PGBoston
 
 ----- NOTES -------
+lots of version ISSUES
+
+prod .NET 4.6.1
+UAT branch 4.7
+
+josh didnt validate what happens if db data wiped out from table of home and contact info
+
+so it errors
+probably needs a try catch where if no data found it creates a generic msg into db?
+
 
 ----- BLOCKERS -------
 
@@ -18943,6 +18953,27 @@ pr_Report_CasePrinting_v2 - ticket for chris for clearing print job
 
 
 -- 17994 -- uat test user OPLT1234 login
+big ticket issue
+fst opl user supposedly missing skus that are part of fst or opl
+so not all skus inserted where they should have?
+
+trying to write a query to solve for x
+x = skus in y or z that arent in a
+then i can put x into a
+
+could take all skus from y
+and then take all skus from z
+see how many fall into matching catalogs
+so lets say 5/20 of y match 5/25 z
+5 skus and catalogs are already created. but remaing 15 y and 20 z also need to be created
+so instead of 45 new skus for x we only used 40
+
+but when using the proc to add all 40 to the new catalogs only 30 skus made it in
+
+so possibly the prereq catalogs didnt create the bridge properly (meaning those catalogs dont exist)
+or things were named incorrectly or instead of 5 matching there were actually 10 but that still means we
+are missing 5 skus instead of 10
+
 
 --------------------------------
 ESCALATIONS
@@ -19519,6 +19550,26 @@ and i think its easy to understand but im not sure if i can break it down much m
 "bonus" check 1936.11
 regular check 1449.47 = 486.64 48925 - 486.64 = 48438.36
 
+
+aero ship test order - from filipe not deployed but may be useful for test orders
+
+
+ISA*00*          *00*          *12*2015648600     *12*5134593900     
+*200409*1002*:*00401*000000813*0*P*>~GS*OW*2015648600*5134593900*20200409*1002*813
+*X*004010~ST*940*000000001~W05*N*1671111testj*475877~N1*BY*FECHHEIMER BROTHERS CO~N3
+*4545 Malsbary Road~N4*Cincinnati*OH*45242~N1*CN*FECHHEIMER BROTHERS CO~N3
+*4545 Malsbary Road~N4*Cincinnati*OH*45242~N1*PF*FECHHEIMER BROTHERS CO~N3
+*4545 Malsbary Road~N4*Cincinnati*OH*45242~N1*ST*YURTY KOROBKO*92*PA~N3
+*1618  E  AYRE  ST*ID  14277~N4*WILMINGTON*DE*19804~N1
+*WH*Aero Fulfillment - STOCK*92*FG-AERO~N3*6023 Union Center Blvd.~N4*FAIRFIELD*OH*45014~N9
+*FN*15796~N9*ZZ*VTX~G62*10*20200408~W66*CC*M********10006~LX
+*1~W01*1*EA**MG*F1 AG0450*UP*190449347177~G69*ARMY UNIFORM DRESS SOCKS~W76
+*1~SE*26*000000001~GE*1*813~IEA*1*000000813~
+
+6/10
+added profile element of json profile for cust ref to email
+james will test and deploy next week
+
 _________________________________________________________________________________________________________
 /*									ATP-18558
 									order imported through boomi etl jobs must show in order source API - Boomi
@@ -19529,13 +19580,16 @@ ________________________________________________________________________________
 ----- NOTES -------
 James (Mewtwo)  6:42 PM
 Why do you have that ticket
+
 It’s going to be a new field on the order table
-Then you are going to update both v1 and v2 api
-You will add the field to the model under sc.rest and under sc.core
-Try to add it to the automapper under sc.rest
-Add the field in the mapping under sc.data
+	Then you are going to update both v1 and v2 api
+	You will add the field to the model under sc.rest and under sc.core
+	Try to add it to the automapper under sc.rest
+	Add the field in the mapping under sc.data
+
 You will hard code the new source field in the controller based on the version of the API that you are working with. 
-You will have to do this code change twice
+	You will have to do this code change twice
+
 V1 is pulled from the master branch and v2 is pulled from prod-v2-2
 You will need to ask Josh if he wants this new field to show up on the API response
 If not, you won’t need this on the model under sc.rest
@@ -19633,6 +19687,12 @@ then set lineitem trans status to 8 on trans submod packed
 RR0000011963
 RR0000011964
 
+#RRF MEETING 6/12
+NEW NEW UAT API TOKEN
+e99da879-7f46-4354-b6e0-b70a9948469d
+
+aa77
+
 ----- BLOCKERS -------
 
 _________________________________________________________________________________________________________
@@ -19720,10 +19780,14 @@ then can make changes in tms_int and add sql proc to boomi and start testing
 								when o.ship_country = 'US' and l.totwt => 11 then 16025 -- fedex Home Del
 -- then probably need to set all intl shipments to DDP in tms int
 
+CT0000000087
+
+https://8d4cf94bedb814b4371796afde4f6e1c:380dd5614f328ec02a37d167f1421ea4@aero-gentest.myshopify.com/admin/api/2020-04/orders.json
+ci-636 for extra testing
 
 ----- BLOCKERS -------
 
-
+Ticket Ordering Period has ended for the 2019 year. Accounts have been disabled
 
 _________________________________________________________________________________________________________
 /*									ATP-18877
@@ -19774,7 +19838,16 @@ where u.UserName = '9829'
 
 
 ----- BLOCKERS -------
+JUNE 8th 2020
 
+DOWN TO 10 TICKETS
+reassigned voice headset ticket
+have several sprint tickets to close
+pgb
+oralb m
+cat
+dtc
+mail innov tle
 
 
 _________________________________________________________________________________________________________
@@ -19866,7 +19939,19 @@ SLA
 4 - API creds
 5 - 99999 item to test with
 
------ BLOCKERS -------
+
+testing with chris
+
+DT0000000001 & DT0000000005
+
+UAT manifest vs PROD manifest
+
+both same however just add values from proc to the values from generate insert to
+
+DT0000000067
+newest test order
+
+
 
 _________________________________________________________________________________________________________
 
@@ -19886,8 +19971,8 @@ at 605 no error but got error mail for dup cust ref 1671157-1
 
 _________________________________________________________________________________________________________
 /*									ATP-18498
-									Ticket Desc?
-									Fulfill? 
+									voice headset beeping issue
+									OPS
 									//20 -  //20
 ----- OBJECTIVES -------
 
@@ -20049,65 +20134,154 @@ work w/ CO for customer check presenter page in magento
 VAN integration - waiting on josh til next week
 get others cust integrated to get ASN to report back to vendors
 
+aero guest 
+Aeroguest3900
 
 _________________________________________________________________________________________________________
-/*									ATP-?
-									Ticket Desc?
-									Fulfill? 
+/*									ATP-19333
+									fix error orders
+									onnit 1163
+									//20 -  //20
+----- OBJECTIVES -------
+orders from file error orders to push through for onnit
+----- NOTES -------
+use rev orders proc
+----- BLOCKERS -------
+
+
+_________________________________________________________________________________________________________
+/*									ATP-19356
+									same as above
+									onnit 1163
 									//20 -  //20
 ----- OBJECTIVES -------
 
 ----- NOTES -------
+2118 order this time just used proc 20 times by running 100 per
+----- BLOCKERS -------
+
+_________________________________________________________________________________________________________
+/*									ATP-ESTIMATES 6/8/2020
+----- atp-19010 -------
+case packs anything under 6 cases
+and bubble bag inserts? 2 reports? about 5 hr
+
+
+----- atp-19194 -------
+est cost to pull 1 2 3 yr active inv for domtar
+already exists? just add to domtar 
+adjust params to pull based on request time frame - 5h
+making archana look up existing
+
+----- atp-19309 -------
+doc level reprinting in SC
+UI to plugin james created? whole new page - which caseid to print etc or see all docs and choose 1 to reprint
+
+----- atp-19310 -------
+TLE auto inv report 1h --- 5am report choose same report update params?
+
+----- atp-19317 -------
+change SLA to look at touches similar to varta -- DF -- unit count section in final select rather than qty 2h
+
+----- atp-1318 -------
+same as 19317 for RAS, ZEVO AND LUX - 6h
+
+----- atp-19323 -------
+tide auto inv report 1h
+
+----- atp-19324 -------
+lw9 inv report 1h
+
+----- atp-19327 -------
+1 line single wave creation tool - waving tool in general for SC
+
+----- atp-19328 -------
+replen dashboard in SC - believe this is already a project thats on waitlist
+
+----- atp-19329 -------
+same as above?
+
+----- atp-19361 -------
+tool to capture # of retailer specific labels
+
+----- atp-19372 -------
+update boomi job to remove hard code for RRF shopify -2h
+another 4 if we dont use 3rd ship method and alert cx via email
+
+----- atp-19382 -------
+atk report show inv lvl as 12/31/19 - 1h
+
+_________________________________________________________________________________________________________
+/*									ATP-19438
+									report stop ship notification not sending correctly
+									PGK sykes
+									//20 -  //20
+----- OBJECTIVES -------
+
+----- NOTES -------
+
+select *
+from mason.dbo.[Event_Inventory_StopShip]
+where primary_reference = 'PRUSJJ01142001'
+
+select *
+from [Inventory_Stop_Ship]
+where sku = 'PRUSJJ01142001'
+order by adddate desc
+
+select *
+FROM InventoryEdit ie
+INNER JOIN Inventory_Stop_Ship ss
+	ON ie.item_id = ss.item_id
+where ie.primary_reference = 'PRUSJJ01142001'
+order by adddate desc
+
+inv edit view was pulled into event inv stop ship view with all (*) so the tables werent synced correctly
+remade event inv view with specific inv edit fields
+----- BLOCKERS -------
+
+
+_________________________________________________________________________________________________________
+/*									ATP-19451
+									must ship today
+									lux 127
+									//20 -  //20
+----- OBJECTIVES -------
+invalid mfg co or other missing data
+lc0000978459
+lc0000978210
+lc0000976466 - missing desc
+lc0000976423 - missing desc
+lc0000976148 - invalid zip match ^ --- shipped
+
+----- NOTES -------
+fixed zip on 6148 shipped in infor
+
+8459 ? shipped in infor
+
+8120 ? shipped in infor
+
+6466 doesnt exist?
+
+6423 ? shipped in infor
 
 ----- BLOCKERS -------
 
 
 _________________________________________________________________________________________________________
-/*									ATP-?
-									Ticket Desc?
-									Fulfill? 
+/*									ATP-17828
+									bi monthly inv report
+									PHC proforce
 									//20 -  //20
 ----- OBJECTIVES -------
-
+LEB
 ----- NOTES -------
+ben.yurchison@aerofulfillment.com; cuebajones.d@pg.com; hendricks.w@pg.com; 
+jami.chaney@aerofulfillment.com; 
 
------ BLOCKERS -------
+BASED ON JMS INVENTORY ACCURACY3 REPORT 
 
-
-
-_________________________________________________________________________________________________________
-/*									ATP-?
-									Ticket Desc?
-									Fulfill? 
-									//20 -  //20
------ OBJECTIVES -------
-
------ NOTES -------
-
------ BLOCKERS -------
-
-
-_________________________________________________________________________________________________________
-/*									ATP-?
-									Ticket Desc?
-									Fulfill? 
-									//20 -  //20
------ OBJECTIVES -------
-
------ NOTES -------
-
------ BLOCKERS -------
-
-
-_________________________________________________________________________________________________________
-/*									ATP-?
-									Ticket Desc?
-									Fulfill? 
-									//20 -  //20
------ OBJECTIVES -------
-
------ NOTES -------
-
+[dbo].[pr_Report_30Day_InventoryAccuracy] 686, '2020-06-11','2020-06-11'
 ----- BLOCKERS -------
 
 
